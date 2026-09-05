@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<title>Homework</title>
+<meta name="description" content="All your homework in one place." />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Homework" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="theme-color" content="#FBFAF8" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0F0F11" media="(prefers-color-scheme: dark)" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- Icon set. One line weight throughout, so subjects read at a glance. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-math" viewBox="0 0 24 24"><path d="M3.5 13H7l2.6 6L14 4h6.5"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20.2l4.3-1.1L19 8.4a2.3 2.3 0 0 0-3.2-3.2L5.1 15.8 4 20.2z"/><path d="M14.6 6.4l3.2 3.2"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9.5 3v6.3l-5 8.2A2 2 0 0 0 6.2 20.6h11.6a2 2 0 0 0 1.7-3.1l-5-8.2V3"/><path d="M8.2 3h7.6"/><path d="M7.2 15.2h9.6"/></symbol>
+  <symbol id="i-atom" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5"/><ellipse cx="12" cy="12" rx="9.6" ry="3.6"/><ellipse cx="12" cy="12" rx="9.6" ry="3.6" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9.6" ry="3.6" transform="rotate(120 12 12)"/></symbol>
+  <symbol id="i-tube" viewBox="0 0 24 24"><path d="M9.4 3.2v13.4a2.9 2.9 0 0 0 5.8 0V3.2"/><path d="M7.8 3.2h9"/><path d="M9.4 12.4h5.8"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M20.3 3.7C9.4 3.7 4.2 9 4.2 15.9v4.1h3.9c7 0 12.2-5.3 12.2-16.3z"/><path d="M5.2 19 12.6 11.6"/></symbol>
+  <symbol id="i-hourglass" viewBox="0 0 24 24"><path d="M7 3h10"/><path d="M7 21h10"/><path d="M8 3v3.3c0 1.7 4 3.4 4 5.7s-4 4-4 5.7V21"/><path d="M16 3v3.3c0 1.7-4 3.4-4 5.7s4 4 4 5.7V21"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3.2 12h17.6"/><path d="M12 3c3 3.3 3 14.7 0 18M12 3c-3 3.3-3 14.7 0 18"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="M9 7l-5 5 5 5"/><path d="M15 7l5 5-5 5"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6.9v13.3"/><path d="M12 6.9C10.2 5.5 7.6 4.8 4.6 4.8v13c3 0 5.6.7 7.4 2.1"/><path d="M12 6.9c1.8-1.4 4.4-2.1 7.4-2.1v13c-3 0-5.6.7-7.4 2.1"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6.5 3.5h11v17l-5.5-3.8-5.5 3.8z"/></symbol>
+
+  <symbol id="i-tab-home" viewBox="0 0 24 24"><path d="M4 6.8l1.7 1.7L9 5.2"/><path d="M4 15.6l1.7 1.7 3.3-3.3"/><path d="M12.5 7.2H20"/><path d="M12.5 16H20"/></symbol>
+  <symbol id="i-tab-subjects" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2.2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2.2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2.2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2.2"/></symbol>
+  <symbol id="i-tab-profile" viewBox="0 0 24 24"><circle cx="12" cy="8.4" r="3.8"/><path d="M4.8 20.2a7.4 7.4 0 0 1 14.4 0"/></symbol>
+
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M14.5 5.5 8 12l6.5 6.5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.6 9.6 17 19 7"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M9.5 5.5 16 12l-6.5 6.5"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="15" rx="3"/><path d="M3.5 10.2h17M8 3.5v4M16 3.5v4"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 6.5h15"/><path d="M9.5 6.5V4.8A1.3 1.3 0 0 1 10.8 3.5h2.4a1.3 1.3 0 0 1 1.3 1.3v1.7"/><path d="M6.5 6.5 7.4 20a1.3 1.3 0 0 0 1.3 1.2h6.6a1.3 1.3 0 0 0 1.3-1.2l.9-13.5"/></symbol>
+</defs></svg>
+
+
+<!-- First run -->
+<section id="onboarding" class="onboarding" hidden>
+  <div class="onboarding-inner">
+    <header class="onboarding-head">
+      <h1>What subjects<br />do you have?</h1>
+      <p>Pick the ones you actually study.</p>
+    </header>
+    <div id="subject-picker" class="picker"></div>
+  </div>
+  <div class="onboarding-foot">
+    <button id="onboarding-done" class="btn-primary" disabled>Continue</button>
+  </div>
+</section>
+
+
+<!-- Main app -->
+<div id="main" class="app" hidden>
+
+  <section id="view-home" class="view" data-view="home">
+    <header class="head">
+      <h1>Homework</h1>
+      <p id="home-count" class="head-sub"></p>
+    </header>
+    <div id="home-list" class="list"></div>
+  </section>
+
+  <section id="view-subjects" class="view" data-view="subjects" hidden>
+    <header class="head"><h1>Subjects</h1></header>
+    <div id="subject-list" class="list"></div>
+    <button id="edit-subjects" class="link-row">Edit subjects</button>
+  </section>
+
+  <section id="view-profile" class="view" data-view="profile" hidden>
+    <header class="head"><h1>Profile</h1></header>
+    <div id="level-card" class="level-card"></div>
+
+    <h2 class="section-title">Completed</h2>
+    <div id="history-list" class="list"></div>
+
+    <h2 class="section-title">Reminder</h2>
+    <div class="card settings">
+      <label class="setting">
+        <span class="setting-label">
+          Daily reminder
+          <em>A nudge to write down today's homework.</em>
+        </span>
+        <input id="reminder-toggle" type="checkbox" class="switch" />
+      </label>
+      <div id="reminder-time-row" class="setting" hidden>
+        <span class="setting-label">Time</span>
+        <input id="reminder-time" type="time" class="time-input" value="15:00" />
+      </div>
+    </div>
+    <p id="reminder-note" class="foot-note"></p>
+  </section>
+
+  <button id="fab" class="fab" aria-label="Add homework">
+    <svg class="ico" aria-hidden="true"><use href="#i-plus" /></svg>
+  </button>
+
+  <nav class="tabbar" role="tablist">
+    <button class="tab is-active" data-tab="home" role="tab" aria-selected="true">
+      <svg class="ico" aria-hidden="true"><use href="#i-tab-home" /></svg><span>Homework</span>
+    </button>
+    <button class="tab" data-tab="subjects" role="tab" aria-selected="false">
+      <svg class="ico" aria-hidden="true"><use href="#i-tab-subjects" /></svg><span>Subjects</span>
+    </button>
+    <button class="tab" data-tab="profile" role="tab" aria-selected="false">
+      <svg class="ico" aria-hidden="true"><use href="#i-tab-profile" /></svg><span>Profile</span>
+    </button>
+  </nav>
+</div>
+
+
+<!-- Subject detail, pushed over the tabs -->
+<section id="subject-page" class="subject-page" hidden>
+  <button id="subject-back" class="back-btn" aria-label="Back">
+    <svg class="ico" aria-hidden="true"><use href="#i-back" /></svg>
+  </button>
+  <div id="subject-page-body"></div>
+</section>
+
+
+<!-- Sheets -->
+<div id="scrim" class="scrim" hidden></div>
+
+<div id="sheet-hw" class="sheet" hidden role="dialog" aria-modal="true" aria-label="Homework">
+  <div class="sheet-grip"></div>
+  <div class="sheet-body">
+    <div id="hw-subjects" class="chips chips-scroll"></div>
+    <input id="hw-title" class="hw-title" type="text" placeholder="What's the homework?"
+           autocomplete="off" autocapitalize="sentences" enterkeyhint="done" />
+    <div id="hw-due" class="chips chips-scroll"></div>
+    <input id="hw-date" type="date" class="hidden-date" tabindex="-1" aria-hidden="true" />
+    <div class="sheet-actions">
+      <button id="hw-delete" class="btn-ghost btn-danger" hidden aria-label="Delete homework">
+        <svg class="ico" aria-hidden="true"><use href="#i-trash" /></svg>
+      </button>
+      <button id="hw-save" class="btn-primary" disabled>Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="sheet-subjects" class="sheet sheet-tall" hidden role="dialog" aria-modal="true" aria-label="Subjects">
+  <div class="sheet-grip"></div>
+  <div class="sheet-body">
+    <h2 class="sheet-title">Your subjects</h2>
+    <div id="subject-picker-2" class="picker"></div>
+    <div class="sheet-actions">
+      <button id="subjects-done" class="btn-primary">Done</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden>
+  <span id="toast-text"></span>
+  <button id="toast-undo" class="toast-undo">Undo</button>
+</div>
+
+<div id="levelup" class="levelup" hidden>
+  <div class="levelup-card">
+    <div class="levelup-ring"><span id="levelup-num">2</span></div>
+    <h2>Level up</h2>
+    <p id="levelup-sub">Nice work.</p>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
