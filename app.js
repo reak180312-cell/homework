@@ -454,13 +454,18 @@ function drawSheetChips() {
     soon.push({ key: draft.dueDate, label: dueLabel(draft.dueDate) });
   }
 
+  // The date field sits transparently on top of its chip: tapping the chip is a
+  // real tap on a real input, which is the only thing phones reliably open a
+  // picker for.
   $('#hw-due').innerHTML = soon.map(o => `
     <button class="chip chip-due ${o.key === draft.dueDate ? 'is-on' : ''}" data-due="${o.key}">
       ${esc(o.label)}
     </button>`).join('') + `
-    <button class="chip chip-due" data-act="pick-date" aria-label="Pick a date">
+    <label class="chip chip-due chip-date">
       <svg class="ico" aria-hidden="true"><use href="#i-calendar" /></svg>
-    </button>`;
+      <span>Pick a date</span>
+      <input id="hw-date" type="date" value="${draft.dueDate || ''}" aria-label="Pick a date" />
+    </label>`;
 }
 
 function syncSaveButton() {
@@ -888,21 +893,17 @@ function wireApp() {
   });
 
   $('#hw-due').addEventListener('click', (e) => {
-    const pick = e.target.closest('[data-act="pick-date"]');
-    if (pick) {
-      const input = $('#hw-date');
-      input.value = draft.dueDate || dayKey();
-      if (input.showPicker) input.showPicker(); else input.click();
-      return;
-    }
     const chip = e.target.closest('[data-due]');
     if (!chip) return;
     draft.dueDate = draft.dueDate === chip.dataset.due ? null : chip.dataset.due;  // tap again to clear
     drawSheetChips();
   });
 
-  $('#hw-date').addEventListener('change', (e) => {
-    if (e.target.value) { draft.dueDate = e.target.value; drawSheetChips(); }
+  // Delegated: the date input is rebuilt every time the chips redraw.
+  $('#hw-due').addEventListener('change', (e) => {
+    if (e.target.id !== 'hw-date' || !e.target.value) return;
+    draft.dueDate = e.target.value;
+    drawSheetChips();
   });
 
   // Subject editing from the Subjects tab
