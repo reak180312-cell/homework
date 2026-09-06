@@ -155,9 +155,7 @@
   </button>
 
   <!-- Timetable is reachable from every screen, never from first-run setup. -->
-  <button id="tt-btn" class="tt-btn" aria-label="Timetable">
-    <svg class="ico" aria-hidden="true"><use href="#i-table" /></svg>
-  </button>
+  <button id="tt-btn" class="tt-btn" aria-label="Timetable"></button>
 
   <nav class="tabbar" role="tablist">
     <button class="tab is-active" data-tab="home" role="tab" aria-selected="true">
@@ -234,9 +232,13 @@
   <div class="sheet-grip"></div>
   <div class="sheet-body">
     <h2 id="items-title" class="sheet-title">What to bring</h2>
-    <input id="items-input" class="items-input" type="text"
-           placeholder="Notebook, textbook…" autocomplete="off" enterkeyhint="done" />
-    <p class="note-hint">Separate things with commas.</p>
+    <p class="note-hint">Tap what you bring. Already on is already packed.</p>
+    <div id="items-chips" class="item-chips"></div>
+    <div class="items-custom-row">
+      <input id="items-custom" type="text" placeholder="Something else…"
+             autocomplete="off" enterkeyhint="done" />
+      <button id="items-custom-add">Add</button>
+    </div>
     <div class="sheet-actions">
       <button id="items-save" class="btn-primary">Save</button>
     </div>

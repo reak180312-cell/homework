@@ -1,6 +1,8 @@
 /* Offline shell + notification handling. */
 
-const CACHE = 'homework-v1';
+// Bump this whenever the shell changes shape: it drops every older cache on
+// activate, so a page can never be served new markup with stale script.
+const CACHE = 'homework-v3';
 const SHELL = [
   './index.html',
   './styles.css',

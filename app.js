@@ -100,6 +100,59 @@ const DEFAULT_ITEMS = {
 
 const DEFAULT_EVERYDAY = ['Water bottle', 'Pencil case', 'Lunchbox'];
 
+// Short forms so the whole week fits one screen without scrolling sideways.
+const SHORT_NAME = {
+  'אזרחות ודמוקרטיה': 'אזרחות',
+  'העשרה / מדמ״ח': 'מדמ״ח',
+  'כישורי שפה': 'כ. שפה',
+  'כישורי חיים': 'כ. חיים',
+};
+const shortName = (n) => SHORT_NAME[n] || n;
+
+// Tap-to-pick options, so nobody has to type a packing list.
+const ITEM_CATALOG = [
+  { name: 'Notebook',     emoji: '📓' },
+  { name: 'Textbook',     emoji: '📕' },
+  { name: 'Workbook',     emoji: '📗' },
+  { name: 'Folder',       emoji: '🗂️' },
+  { name: 'Calculator',   emoji: '🧮' },
+  { name: 'Ruler',        emoji: '📏' },
+  { name: 'Geometry kit', emoji: '📐' },
+  { name: 'Laptop',       emoji: '💻' },
+  { name: 'Lab coat',     emoji: '🥼' },
+  { name: 'Sports kit',   emoji: '👕' },
+  { name: 'Trainers',     emoji: '👟' },
+  { name: 'Tanach',       emoji: '📜' },
+  { name: 'Book',         emoji: '📖' },
+  { name: 'Dictionary',   emoji: '📔' },
+  { name: 'Headphones',   emoji: '🎧' },
+  { name: 'Charger',      emoji: '🔌' },
+  { name: 'Water bottle', emoji: '💧' },
+  { name: 'Pencil case',  emoji: '✏️' },
+  { name: 'Lunchbox',     emoji: '🍱' },
+  { name: 'Bus card',     emoji: '🎫' },
+];
+
+const EMOJI = Object.fromEntries(ITEM_CATALOG.map(i => [i.name.toLowerCase(), i.emoji]));
+const emojiFor = (item) => EMOJI[String(item).toLowerCase()] || '🎒';
+
+/** One line per thing, not one line per lesson — "Notebook" said once,
+ *  with the lessons that want it. */
+function packListFor(dayIndex) {
+  const map = new Map();
+  for (const it of state.everydayItems) {
+    if (!map.has(it)) map.set(it, { item: it, lessons: [], everyday: true });
+  }
+  for (const l of lessonsFor(dayIndex)) {
+    for (const it of itemsFor(l.name)) {
+      if (!map.has(it)) map.set(it, { item: it, lessons: [], everyday: false });
+      const entry = map.get(it);
+      if (!entry.everyday && !entry.lessons.includes(l.name)) entry.lessons.push(l.name);
+    }
+  }
+  return [...map.values()];
+}
+
 const itemsFor = (lesson) =>
   (state.lessonItems && state.lessonItems[lesson]) || [];
 
@@ -144,6 +197,15 @@ const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/** Bind an event, tolerating a missing element. A browser can serve cached
+ *  markup from one version with script from another; without this, the first
+ *  absent node throws and every listener after it never gets attached. */
+function on(sel, type, fn) {
+  const el = $(sel);
+  if (el) el.addEventListener(type, fn);
+  return el;
+}
 
 
 /* ── Dates ─────────────────────────────────────────────────── */
@@ -388,6 +450,7 @@ const empty = (title, line) => `
 let currentTab = 'home';
 
 function render() {
+  renderTtButton();
   if (currentTab === 'home') renderHome();
   if (currentTab === 'bag') renderBag();
   if (currentTab === 'reminders') renderReminders();
@@ -434,68 +497,85 @@ function renderBag() {
   const dayNotes = state.notes.filter(n => n.day === null || n.day === bagDay);
   const loose = dayNotes.filter(n => !n.lesson);
 
-  const everyday = `
+  if (!lessons.length) {
+    $('#bag-body').innerHTML = `
+      <div class="empty">
+        <span class="empty-mark"><svg class="ico" aria-hidden="true"><use href="#i-check" /></svg></span>
+        <h2>No lessons</h2>
+        <p>Nothing to pack for ${esc(day.en)}.</p>
+      </div>`;
+    return;
+  }
+
+  const pack = packListFor(bagDay);
+
+  const packList = `
     <div class="bag-section">
       <div class="bag-section-head">
-        <h2 class="section-title">Every day</h2>
+        <h2 class="section-title">Pack</h2>
         <button class="edit-btn" data-act="edit-everyday">
-          <svg class="ico" aria-hidden="true"><use href="#i-edit" /></svg>Edit
+          <svg class="ico" aria-hidden="true"><use href="#i-edit" /></svg>Every day
         </button>
       </div>
-      <div class="pack-card">
-        ${state.everydayItems.length
-          ? `<ul class="pack-items">${state.everydayItems.map(i => `<li>${esc(i)}</li>`).join('')}</ul>`
-          : '<p class="pack-none">Nothing set.</p>'}
-      </div>
+      <ul class="pack-list">
+        ${pack.map(p => `
+          <li class="pack-line">
+            <span class="pack-emoji">${p.everyday ? emojiFor(p.item) : emojiFor(p.item)}</span>
+            <span class="pack-item">${esc(p.item)}</span>
+            <span class="pack-for">${p.everyday ? 'Every day' : p.lessons.map(shortName).map(esc).join(' · ')}</span>
+          </li>`).join('')}
+      </ul>
     </div>`;
 
-  const lessonBlocks = lessons.length ? lessons.map(l => {
-    const sub = subjectForLesson(l.name);
-    const items = itemsFor(l.name);
-    const due = sub ? activeHw().filter(h => h.subjectId === sub.id).length : 0;
-    const pinned = dayNotes.filter(n => n.lesson === l.name);
-    const meta = [
-      l.periods.length > 1 ? `${l.periods.length} lessons` : '',
-      due ? `${due} homework` : '',
-    ].filter(Boolean).join(' · ');
-
-    return `
-      <div class="pack-card" style="--sc:${sub ? sub.color : 'var(--ink-3)'}">
-        <button class="pack-head" data-act="edit-lesson" data-lesson="${esc(l.name)}">
-          <span class="bring-dot"></span>
-          <span class="bring-main">
-            <span class="bring-name">${esc(l.name)}</span>
-            ${meta ? `<span class="bring-meta">${esc(meta)}</span>` : ''}
-          </span>
-          <span class="bring-time">${esc(PERIODS[l.periods[0]].split('–')[0])}</span>
-        </button>
-        ${items.length
-          ? `<ul class="pack-items">${items.map(i => `<li>${esc(i)}</li>`).join('')}</ul>`
-          : '<p class="pack-none">Nothing to bring.</p>'}
-        ${pinned.map(n => `<p class="pack-note">${esc(n.text)}</p>`).join('')}
-      </div>`;
-  }).join('') : `
-    <div class="empty">
-      <span class="empty-mark"><svg class="ico" aria-hidden="true"><use href="#i-check" /></svg></span>
-      <h2>No lessons</h2>
-      <p>Nothing to pack for ${esc(day.en)}.</p>
-    </div>`;
-
-  const looseNotes = loose.length ? `
+  const remember = dayNotes.length ? `
     <div class="bag-section">
-      <h2 class="section-title">Also remember</h2>
-      <div class="pack-card">
-        <ul class="pack-items pack-items-note">${loose.map(n => `<li>${esc(n.text)}</li>`).join('')}</ul>
-      </div>
+      <h2 class="section-title">Remember</h2>
+      <ul class="pack-list pack-list-note">
+        ${dayNotes.map(n => `
+          <li class="pack-line">
+            <span class="pack-emoji">📌</span>
+            <span class="pack-item">${esc(n.text)}</span>
+            <span class="pack-for">${n.lesson ? esc(shortName(n.lesson)) : ''}</span>
+          </li>`).join('')}
+      </ul>
     </div>` : '';
 
-  $('#bag-body').innerHTML = `
-    ${everyday}
+  // Kept compact: a line per lesson, its kit shown as emoji, tap to change.
+  const lessonStrip = `
     <div class="bag-section">
-      <h2 class="section-title">${lessons.length ? 'For the lessons' : ''}</h2>
-      <div class="list">${lessonBlocks}</div>
-    </div>
-    ${looseNotes}`;
+      <h2 class="section-title">Lessons</h2>
+      <div class="list">
+        ${lessons.map(l => {
+          const sub = subjectForLesson(l.name);
+          const items = itemsFor(l.name);
+          const due = sub ? activeHw().filter(h => h.subjectId === sub.id).length : 0;
+          return `
+            <button class="lesson-line" data-act="edit-lesson" data-lesson="${esc(l.name)}"
+                    style="--sc:${sub ? sub.color : 'var(--ink-3)'}">
+              <span class="bring-dot"></span>
+              <span class="lesson-name">${esc(shortName(l.name))}</span>
+              <span class="lesson-kit">${items.map(i => emojiFor(i)).join('')}</span>
+              ${due ? `<span class="lesson-due">${due}</span>` : ''}
+              <span class="bring-time">${esc(PERIODS[l.periods[0]].split('–')[0])}</span>
+            </button>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+  $('#bag-body').innerHTML = packList + remember + lessonStrip;
+}
+
+/** The corner button is itself a tiny timetable, not a generic glyph. */
+function renderTtButton() {
+  const btn = $('#tt-btn');
+  if (!btn) return;
+  btn.innerHTML = '<span class="tt-mini">' + SCHOOL_DAYS.map((d, i) =>
+    '<span class="tt-mini-col">' + SCHEDULE[i].slice(0, 6).map(name => {
+      if (!name) return '<span class="tt-mini-cell is-free"></span>';
+      const sub = subjectForLesson(name);
+      return '<span class="tt-mini-cell" style="--sc:' + (sub ? sub.color : 'var(--ink-3)') + '"></span>';
+    }).join('') + '</span>'
+  ).join('') + '</span>';
 }
 
 /** A readable miniature of the week that opens the full thing. */
@@ -624,8 +704,9 @@ function renderTimetable() {
                 const name = SCHEDULE[i][p];
                 if (!name) return `<td class="tt-free ${i === today ? 'is-today' : ''}"></td>`;
                 const sub = subjectForLesson(name);
-                return `<td class="${i === today ? 'is-today' : ''}" style="--sc:${sub ? sub.color : 'var(--ink-2)'}">
-                  <span class="tt-cell">${esc(name)}</span>
+                return `<td class="${i === today ? 'is-today' : ''}" style="--sc:${sub ? sub.color : 'var(--ink-2)'}"
+                            title="${esc(name)}">
+                  <span class="tt-cell">${esc(shortName(name))}</span>
                 </td>`;
               }).join('')}
             </tr>`).join('')}
@@ -637,26 +718,51 @@ function renderTimetable() {
 /* ── Editing what to bring ─────────────────────────────────── */
 
 let itemsTarget = null;   // a lesson name, or 'everyday'
+let itemsDraft = [];
 
 function openItemsSheet(target) {
   itemsTarget = target;
   const everyday = target === 'everyday';
   $('#items-title').textContent = everyday ? 'Every day' : target;
-  const list = everyday ? state.everydayItems : itemsFor(target);
-  const input = $('#items-input');
-  input.value = list.join(', ');
+  itemsDraft = (everyday ? state.everydayItems : itemsFor(target)).slice();
+  drawItemChips();
   showSheet('#sheet-items');
-  input.focus();
+}
+
+/** Everything in the catalogue, plus anything you added yourself, with what
+ *  you already bring switched on. Tap to change; no typing needed. */
+function drawItemChips() {
+  const extras = itemsDraft.filter(i => !ITEM_CATALOG.some(c => c.name === i));
+  const all = ITEM_CATALOG.map(c => c.name).concat(extras);
+  $('#items-chips').innerHTML = all.map(name => `
+    <button class="item-chip ${itemsDraft.includes(name) ? 'is-on' : ''}" data-item="${esc(name)}">
+      <span class="item-emoji">${emojiFor(name)}</span>${esc(name)}
+    </button>`).join('');
+}
+
+function toggleItem(name) {
+  const at = itemsDraft.indexOf(name);
+  if (at >= 0) itemsDraft.splice(at, 1); else itemsDraft.push(name);
+  drawItemChips();
+}
+
+function addCustomItem() {
+  const input = $('#items-custom');
+  const name = input ? input.value.trim() : '';
+  if (!name) return;
+  if (!itemsDraft.includes(name)) itemsDraft.push(name);
+  input.value = '';
+  drawItemChips();
 }
 
 function saveItems() {
   if (!itemsTarget) return;
-  const items = parseItems($('#items-input').value);
-  if (itemsTarget === 'everyday') state.everydayItems = items;
-  else state.lessonItems[itemsTarget] = items;
+  if (itemsTarget === 'everyday') state.everydayItems = itemsDraft.slice();
+  else state.lessonItems[itemsTarget] = itemsDraft.slice();
   save();
   closeSheet();
-  render();
+  if (!$('#onboarding').hidden) renderItemsEditor();   // setup step two
+  else render();
 }
 
 
@@ -1301,12 +1407,12 @@ function wireLists() {
     if (act.dataset.act === 'edit') openHwSheet({ id: row.dataset.id });
   };
 
-  $('#home-list').addEventListener('click', handle);
-  $('#subject-page-body').addEventListener('click', handle);
+  on('#home-list', 'click', handle);
+  on('#subject-page-body', 'click', handle);
   wireSwipe($('#home-list'));
   wireSwipe($('#subject-page-body'));
 
-  $('#subject-list').addEventListener('click', (e) => {
+  on('#subject-list', 'click', (e) => {
     const row = e.target.closest('.subject-row');
     if (row) openSubjectPage(row.dataset.id);
   });
@@ -1315,45 +1421,50 @@ function wireLists() {
 function wireApp() {
   for (const btn of $$('.tab')) btn.addEventListener('click', () => showTab(btn.dataset.tab));
 
-  $('#fab').addEventListener('click', () => openHwSheet());
-  $('#subject-back').addEventListener('click', closeSubjectPage);
-  $('#scrim').addEventListener('click', closeSheet);
+  on('#fab', 'click', () => openHwSheet());
+  on('#subject-back', 'click', closeSubjectPage);
+  on('#scrim', 'click', closeSheet);
 
   // Timetable, reachable from anywhere
-  $('#tt-btn').addEventListener('click', openTimetable);
-  $('#tt-close').addEventListener('click', closeTimetable);
+  on('#tt-btn', 'click', openTimetable);
+  on('#tt-close', 'click', closeTimetable);
 
   // Bag: day switcher, reminders
-  $('#bag-days').addEventListener('click', (e) => {
+  on('#bag-days', 'click', (e) => {
     const chip = e.target.closest('[data-day]');
     if (!chip) return;
     bagDay = Number(chip.dataset.day);
     renderBag();
   });
 
-  $('#bag-body').addEventListener('click', (e) => {
+  on('#bag-body', 'click', (e) => {
     const act = e.target.closest('[data-act]');
     if (!act) return;
     if (act.dataset.act === 'edit-everyday') openItemsSheet('everyday');
     if (act.dataset.act === 'edit-lesson') openItemsSheet(act.dataset.lesson);
   });
 
-  $('#tt-preview').addEventListener('click', openTimetable);
-  $('#items-save').addEventListener('click', saveItems);
-  $('#items-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); saveItems(); }
+  on('#tt-preview', 'click', openTimetable);
+  on('#items-save', 'click', saveItems);
+  on('#items-chips', 'click', (e) => {
+    const chip = e.target.closest('[data-item]');
+    if (chip) toggleItem(chip.dataset.item);
+  });
+  on('#items-custom-add', 'click', addCustomItem);
+  on('#items-custom', 'keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addCustomItem(); }
   });
 
   // Reminders page
-  $('#rem-input').addEventListener('input', (e) => {
+  on('#rem-input', 'input', (e) => {
     $('#rem-add').disabled = !e.target.value.trim();
   });
-  $('#rem-input').addEventListener('keydown', (e) => {
+  on('#rem-input', 'keydown', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); addReminder(); }
   });
-  $('#rem-add').addEventListener('click', addReminder);
+  on('#rem-add', 'click', addReminder);
 
-  $('#rem-days').addEventListener('click', (e) => {
+  on('#rem-days', 'click', (e) => {
     const chip = e.target.closest('[data-remday]');
     if (!chip) return;
     remDay = chip.dataset.remday === 'all' ? null : Number(chip.dataset.remday);
@@ -1361,14 +1472,14 @@ function wireApp() {
     renderReminders();
   });
 
-  $('#rem-lessons').addEventListener('click', (e) => {
+  on('#rem-lessons', 'click', (e) => {
     const chip = e.target.closest('[data-remlesson]');
     if (!chip) return;
     remLesson = chip.dataset.remlesson || null;
     renderReminders();
   });
 
-  $('#rem-list').addEventListener('click', (e) => {
+  on('#rem-list', 'click', (e) => {
     const act = e.target.closest('[data-act=\"del-note\"]');
     if (!act) return;
     const id = act.closest('[data-note]').dataset.note;
@@ -1378,21 +1489,21 @@ function wireApp() {
   });
 
   // Add / edit sheet
-  $('#hw-title').addEventListener('input', syncSaveButton);
-  $('#hw-title').addEventListener('keydown', (e) => {
+  on('#hw-title', 'input', syncSaveButton);
+  on('#hw-title', 'keydown', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); saveHw(); }
   });
-  $('#hw-save').addEventListener('click', saveHw);
-  $('#hw-delete').addEventListener('click', deleteHw);
+  on('#hw-save', 'click', saveHw);
+  on('#hw-delete', 'click', deleteHw);
 
-  $('#hw-subjects').addEventListener('click', (e) => {
+  on('#hw-subjects', 'click', (e) => {
     const chip = e.target.closest('[data-sub]');
     if (!chip) return;
     draft.subjectId = chip.dataset.sub;
     drawSheetChips();
   });
 
-  $('#hw-due').addEventListener('click', (e) => {
+  on('#hw-due', 'click', (e) => {
     const chip = e.target.closest('[data-due]');
     if (!chip) return;
     draft.dueDate = draft.dueDate === chip.dataset.due ? null : chip.dataset.due;  // tap again to clear
@@ -1400,20 +1511,20 @@ function wireApp() {
   });
 
   // Delegated: the date input is rebuilt every time the chips redraw.
-  $('#hw-due').addEventListener('change', (e) => {
+  on('#hw-due', 'change', (e) => {
     if (e.target.id !== 'hw-date' || !e.target.value) return;
     draft.dueDate = e.target.value;
     drawSheetChips();
   });
 
   // Subject editing from the Subjects tab
-  $('#edit-subjects').addEventListener('click', () => {
+  on('#edit-subjects', 'click', () => {
     picked = state.subjects.map(s => ({ ...s }));
     showingNewInput = false;
     renderPicker($('#subject-picker-2'));
     showSheet('#sheet-subjects');
   });
-  $('#subjects-done').addEventListener('click', () => {
+  on('#subjects-done', 'click', () => {
     if (!picked.length) return;
     commitSubjects();
     closeSheet();
@@ -1424,15 +1535,15 @@ function wireApp() {
   });
 
   // Settings
-  $('#reminder-toggle').addEventListener('change', (e) => toggleReminder('dailyReminderEnabled', e.target.checked));
-  $('#bag-toggle').addEventListener('change', (e) => toggleReminder('bagReminderEnabled', e.target.checked));
+  on('#reminder-toggle', 'change', (e) => toggleReminder('dailyReminderEnabled', e.target.checked));
+  on('#bag-toggle', 'change', (e) => toggleReminder('bagReminderEnabled', e.target.checked));
 
-  $('#reminder-time').addEventListener('change', (e) => {
+  on('#reminder-time', 'change', (e) => {
     state.settings.dailyReminderTime = e.target.value || '15:00';
     save();
     scheduleReminder();
   });
-  $('#bag-time').addEventListener('change', (e) => {
+  on('#bag-time', 'change', (e) => {
     state.settings.bagReminderTime = e.target.value || '20:00';
     save();
     scheduleReminder();
@@ -1453,38 +1564,40 @@ function wireApp() {
 
 let obStep = 1;
 
+/* Already answered for you — tap a row only if something is wrong. */
 function itemsRow(key, label, list, color) {
   return `
-    <label class="items-row" style="--sc:${color}">
+    <button class="items-row" data-items="${esc(key)}" style="--sc:${color}">
       <span class="items-label"><span class="chip-dot"></span>${esc(label)}</span>
-      <input type="text" data-items="${esc(key)}" value="${esc(list.join(', '))}"
-             placeholder="Notebook, textbook…" autocomplete="off" />
-    </label>`;
+      <span class="items-preview">
+        ${list.length
+          ? list.map(i => `<span class="items-pill">${emojiFor(i)} ${esc(i)}</span>`).join('')
+          : '<span class="items-none">Nothing</span>'}
+      </span>
+    </button>`;
 }
 
 function renderItemsEditor() {
-  $('#items-editor').innerHTML =
+  const box = $('#items-editor');
+  if (!box) return;
+  box.innerHTML =
     itemsRow('everyday', 'Every day', state.everydayItems, 'var(--ink-2)') +
     LESSONS.map(l => {
       const sub = subjectForLesson(l);
-      return itemsRow(l, l, itemsFor(l), sub ? sub.color : 'var(--ink-3)');
+      return itemsRow(l, shortName(l), itemsFor(l), sub ? sub.color : 'var(--ink-3)');
     }).join('');
 }
 
-function readItemsEditor() {
-  for (const input of $$('#items-editor [data-items]')) {
-    const key = input.dataset.items;
-    const items = parseItems(input.value);
-    if (key === 'everyday') state.everydayItems = items;
-    else state.lessonItems[key] = items;
-  }
-}
-
 function wireOnboarding() {
+  on('#items-editor', 'click', (e) => {
+    const row = e.target.closest('[data-items]');
+    if (row) openItemsSheet(row.dataset.items === 'everyday' ? 'everyday' : row.dataset.items);
+  });
+
   wirePicker($('#subject-picker'), () => {
     $('#onboarding-done').disabled = !picked.length;
   });
-  $('#onboarding-done').addEventListener('click', () => {
+  on('#onboarding-done', 'click', () => {
     if (obStep === 1) {
       if (!picked.length) return;
       commitSubjects();
@@ -1496,7 +1609,6 @@ function wireOnboarding() {
       window.scrollTo(0, 0);
       return;
     }
-    readItemsEditor();
     state.onboarded = true;
     save();
     $('#onboarding').hidden = true;
