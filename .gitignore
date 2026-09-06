@@ -4,3 +4,10 @@ node_modules/
 # Personal school documents - never publish these
 *.pdf
 timetable-private/
+
+# Screenshots and photos dropped in the folder - never publish these
+*.jpg
+*.jpeg
+*.webp
+ChatGPT Image*.png
+WhatsApp Image*

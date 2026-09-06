@@ -35,10 +35,11 @@ Choose subjects → Add homework → See it all together → Finish it → Earn 
   right) to finish it. Tap the card to edit or delete it.
 - **Bag** — what to bring each school day: your every-day things, then each lesson with its
   own kit, and any reminder pinned to that lesson.
-- **Reminders** — things to remember, each set for a day and optionally a single lesson
-  ("bring the geometry notebook, not the maths one" on Tuesday maths).
+- **Reminders** — things to remember, each set for a day and optionally a single lesson.
+  Opens on today; tap **All** to see the rest.
 - **Subjects** — one page per subject: what's open, and what you've already handed in.
-- **Profile** — level, XP, when you finished things, and the daily reminder.
+- **Profile** — level, XP, the desk you furnish as you level up, when you finished things,
+  and the reminders.
 
 Adding is the fast path: press **+**, type, press Enter. The subject you used last is already
 selected and the due date is optional, so the shortest add is two actions.
@@ -75,8 +76,9 @@ Stored under the `homework.v1` key in local storage:
 ```js
 Subject      { id, name, icon, glyph, color }
 Homework     { id, subjectId, title, dueDate, createdAt, completed, completedAt }
-Note         { id, text, day, createdAt }   // day 0-4 = Sun-Thu, null = every day
+Note         { id, text, day, lesson, createdAt }  // day 0-4 = Sun-Thu, null = every day
 UserProgress { xp, level }              // +10 XP per homework, 100 XP per level
+                                        // each level earns one thing for your desk (DESK in app.js)
 Settings     { dailyReminderEnabled, dailyReminderTime,
                bagReminderEnabled, bagReminderTime }
 ```
@@ -95,7 +97,7 @@ styles.css    the whole visual system
 app.js        all behaviour, one file, sectioned
 sw.js         offline cache + notification clicks
 server.js     dependency-free static server
-tools/        regenerates the app icons (npm run icons)
+icons/        app icons, generated from the supplied logo
 ```
 
 ## Design rules

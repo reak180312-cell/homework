@@ -4,7 +4,6 @@
   "private": true,
   "description": "All your homework in one place.",
   "scripts": {
-    "start": "node server.js",
-    "icons": "node tools/make-icons.js"
+    "start": "node server.js"
   }
 }

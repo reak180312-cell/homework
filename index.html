@@ -100,12 +100,13 @@
       <p id="rem-sub" class="head-sub"></p>
     </header>
     <div class="rem-compose">
-      <input id="rem-input" type="text" placeholder="Bring the geometry notebook…"
+      <input id="rem-input" type="text" placeholder="What do you need to remember?"
              autocomplete="off" enterkeyhint="done" />
       <div id="rem-days" class="chips chips-scroll"></div>
       <div id="rem-lessons" class="chips chips-scroll"></div>
-      <button id="rem-add" class="btn-primary" disabled>Add reminder</button>
+      <button id="rem-add" class="btn-primary">Add reminder</button>
     </div>
+    <div id="rem-scope" class="segmented"></div>
     <div id="rem-list"></div>
   </section>
 
@@ -118,6 +119,9 @@
   <section id="view-profile" class="view" data-view="profile" hidden>
     <header class="head"><h1>Profile</h1></header>
     <div id="level-card" class="level-card"></div>
+
+    <h2 class="section-title">Your desk</h2>
+    <div id="desk-card" class="desk-card"></div>
 
     <h2 class="section-title">Completed</h2>
     <div id="history-list" class="list"></div>

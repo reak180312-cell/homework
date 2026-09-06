@@ -1788,3 +1788,161 @@ input.hw-title::placeholder { color: var(--ink-3); }
   font-weight: 600;
   letter-spacing: -.02em;
 }
+
+
+/* ── Today / All switch ──────────────────────────────────── */
+
+.segmented {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 14px;
+  border-radius: var(--r-pill);
+  background: var(--line-soft);
+}
+
+.seg {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: var(--r-pill);
+  font-size: 14.5px;
+  font-weight: 550;
+  letter-spacing: -.01em;
+  color: var(--ink-2);
+  transition: background-color .22s var(--ease), color .22s var(--ease);
+}
+.seg.is-on { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
+
+.seg-count {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  opacity: .55;
+}
+
+
+/* Empty field, tapped Add: say so instead of sitting there greyed out. */
+.rem-compose.is-nudged { animation: nudge .42s var(--ease); }
+@keyframes nudge {
+  0%, 100% { transform: translateX(0); }
+  22% { transform: translateX(-5px); }
+  46% { transform: translateX(4px); }
+  70% { transform: translateX(-2px); }
+}
+
+
+/* ── The desk you build ──────────────────────────────────── */
+
+.desk-card {
+  padding: 20px 18px 16px;
+  background: var(--card);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+}
+
+.desk-scene {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 9px 11px;
+  min-height: 54px;
+  padding-bottom: 8px;
+}
+
+.desk-thing {
+  font-size: 28px;
+  line-height: 1;
+  animation: desk-in .5s var(--spring) backwards;
+}
+
+/* A slow, barely-there sway, so the desk feels alive but never busy. */
+.desk-thing:nth-child(odd)  { animation: desk-in .5s var(--spring) backwards, sway 6s ease-in-out infinite 1s; }
+.desk-thing:nth-child(even) { animation: desk-in .5s var(--spring) backwards, sway 7.5s ease-in-out infinite 1.6s; }
+
+@keyframes desk-in { from { opacity: 0; transform: translateY(10px) scale(.7); } }
+@keyframes sway {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(-2deg); }
+}
+
+.desk-locked {
+  font-size: 19px;
+  width: 34px; height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--ink-3);
+  background: var(--line-soft);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+  animation: none;
+}
+
+.desk-empty {
+  font-size: 14.5px;
+  color: var(--ink-3);
+  text-align: center;
+  padding: 10px 4px;
+}
+
+.desk-surface {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right,
+    transparent, color-mix(in srgb, var(--ink-3) 34%, transparent) 12%,
+    color-mix(in srgb, var(--ink-3) 34%, transparent) 88%, transparent);
+}
+
+.desk-card .level-note { text-align: center; }
+
+
+/* ── Quiet life in the empty places ──────────────────────── */
+
+.empty-mark {
+  animation: float 5.5s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* The ring breathes once the mark has settled. */
+.empty-mark::after {
+  content: "";
+  position: absolute;
+  width: 62px; height: 62px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--done) 30%, transparent);
+  animation: pulse-ring 4s ease-out infinite;
+  pointer-events: none;
+}
+.empty-mark { position: relative; }
+
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--done) 26%, transparent); }
+  60%  { box-shadow: 0 0 0 14px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.empty h2 { animation: rise .45s var(--ease) .06s backwards; }
+.empty p  { animation: rise .45s var(--ease) .13s backwards; }
+@keyframes rise { from { opacity: 0; transform: translateY(7px); } }
+
+/* Lists arrive one after another rather than all at once. */
+.list > * { animation: rise .38s var(--ease) backwards; }
+.list > *:nth-child(1) { animation-delay: 0ms; }
+.list > *:nth-child(2) { animation-delay: 40ms; }
+.list > *:nth-child(3) { animation-delay: 80ms; }
+.list > *:nth-child(4) { animation-delay: 120ms; }
+.list > *:nth-child(5) { animation-delay: 160ms; }
+.list > *:nth-child(n+6) { animation-delay: 200ms; }
+
+.pack-line { animation: rise .38s var(--ease) backwards; }
+.pack-line:nth-child(1) { animation-delay: 0ms; }
+.pack-line:nth-child(2) { animation-delay: 35ms; }
+.pack-line:nth-child(3) { animation-delay: 70ms; }
+.pack-line:nth-child(4) { animation-delay: 105ms; }
+.pack-line:nth-child(5) { animation-delay: 140ms; }
+.pack-line:nth-child(n+6) { animation-delay: 175ms; }
+
+/* A row leaving must not re-run the entry animation. */
+.hw-slot.is-leaving { animation: none !important; }

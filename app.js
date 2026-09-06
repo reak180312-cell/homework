@@ -100,6 +100,26 @@ const DEFAULT_ITEMS = {
 
 const DEFAULT_EVERYDAY = ['Water bottle', 'Pencil case', 'Lunchbox'];
 
+/* Levels earn one thing for your desk. Small, finite, and it never asks you
+   to spend anything — the homework is still the point. */
+const DESK = [
+  { level: 2,  emoji: '🪴', name: 'Plant' },
+  { level: 3,  emoji: '💡', name: 'Lamp' },
+  { level: 4,  emoji: '☕', name: 'Mug' },
+  { level: 5,  emoji: '🎧', name: 'Headphones' },
+  { level: 6,  emoji: '🖼️', name: 'Poster' },
+  { level: 7,  emoji: '🧸', name: 'Mascot' },
+  { level: 8,  emoji: '📚', name: 'Bookshelf' },
+  { level: 9,  emoji: '🕰️', name: 'Clock' },
+  { level: 10, emoji: '🐠', name: 'Fish tank' },
+  { level: 12, emoji: '🎸', name: 'Guitar' },
+  { level: 14, emoji: '🪟', name: 'Window' },
+  { level: 16, emoji: '🏆', name: 'Trophy' },
+];
+
+const deskEarned = (level) => DESK.filter(d => d.level <= level);
+const deskNext = (level) => DESK.find(d => d.level > level) || null;
+
 // Short forms so the whole week fits one screen without scrolling sideways.
 const SHORT_NAME = {
   'אזרחות ודמוקרטיה': 'אזרחות',
@@ -599,8 +619,25 @@ function renderTimetablePreview() {
 
 /* ── Reminders, on their own page ──────────────────────────── */
 
-let remDay = null;       // null = every day
+let remDay = null;         // null = every day
 let remLesson = null;
+let remScope = 'today';    // the list below starts on today, "All" shows the rest
+
+/** One reminder, shared by the Today and All views. */
+function reminderRow(x) {
+  const sub = x.lesson ? subjectForLesson(x.lesson) : null;
+  return `
+    <div class="note-row" data-note="${x.id}" style="--sc:${sub ? sub.color : 'var(--ink-3)'}">
+      <span class="note-main">
+        <span class="note-text">${esc(x.text)}</span>
+        ${x.lesson ? `<span class="note-lesson"><span class="chip-dot"></span>${esc(shortName(x.lesson))}</span>`
+                   : (x.day === null ? '<span class="note-tag">Every day</span>' : '')}
+      </span>
+      <button class="note-del" data-act="del-note" aria-label="Delete reminder">
+        <svg class="ico" aria-hidden="true"><use href="#i-close" /></svg>
+      </button>
+    </div>`;
+}
 
 function renderReminders() {
   const n = state.notes.length;
@@ -623,13 +660,31 @@ function renderReminders() {
         <span class="chip-dot"></span>${esc(l.name)}</button>`;
     }).join('')}` : '';
 
+  const today = schoolDayIndex();
+  const todayCount = state.notes.filter(x => x.day === null || x.day === today).length;
+
+  $('#rem-scope').innerHTML = `
+    <button class="seg ${remScope === 'today' ? 'is-on' : ''}" data-scope="today">
+      Today${todayCount ? ` <span class="seg-count">${todayCount}</span>` : ''}
+    </button>
+    <button class="seg ${remScope === 'all' ? 'is-on' : ''}" data-scope="all">
+      All${n ? ` <span class="seg-count">${n}</span>` : ''}
+    </button>`;
+  $('#rem-scope').hidden = !n;
+
   if (!n) {
-    $('#rem-list').innerHTML = `
-      <div class="empty">
-        <span class="empty-mark"><svg class="ico" aria-hidden="true"><use href="#i-check" /></svg></span>
-        <h2>Nothing to remember</h2>
-        <p>Anything you add shows up in your bag on the right day.</p>
-      </div>`;
+    $('#rem-list').innerHTML = empty('Nothing to remember',
+      'Anything you add shows up in your bag on the right day.');
+    return;
+  }
+
+  // Today means: pinned to today, or set for every day.
+  if (remScope === 'today') {
+    const mine = state.notes.filter(x => x.day === null || x.day === today);
+    $('#rem-list').innerHTML = mine.length
+      ? `<h3 class="day-title">${today >= 0 ? esc(SCHOOL_DAYS[today].en) : 'Today'}</h3>
+         <div class="list">${mine.map(reminderRow).join('')}</div>`
+      : empty('Nothing for today', 'Tap All to see the rest.');
     return;
   }
 
@@ -642,35 +697,34 @@ function renderReminders() {
     if (!mine.length) return '';
     return `
       <h3 class="day-title">${esc(g.label)}</h3>
-      <div class="list">
-        ${mine.map(x => {
-          const sub = x.lesson ? subjectForLesson(x.lesson) : null;
-          return `
-            <div class="note-row" data-note="${x.id}" style="--sc:${sub ? sub.color : 'var(--ink-3)'}">
-              <span class="note-main">
-                <span class="note-text">${esc(x.text)}</span>
-                ${x.lesson ? `<span class="note-lesson"><span class="chip-dot"></span>${esc(x.lesson)}</span>` : ''}
-              </span>
-              <button class="note-del" data-act="del-note" aria-label="Delete reminder">
-                <svg class="ico" aria-hidden="true"><use href="#i-close" /></svg>
-              </button>
-            </div>`;
-        }).join('')}
-      </div>`;
+      <div class="list">${mine.map(reminderRow).join('')}</div>`;
   }).join('');
 }
 
 function addReminder() {
   const input = $('#rem-input');
   const text = input ? input.value.trim() : '';
-  if (!text) return;
+
+  // Nothing typed yet: say so and put the cursor where it needs to go, rather
+  // than sitting there greyed out doing nothing when tapped.
+  if (!text) {
+    if (!input) return;
+    const box = $('.rem-compose');
+    if (box) {
+      box.classList.remove('is-nudged');
+      void box.offsetWidth;
+      box.classList.add('is-nudged');
+    }
+    input.focus();
+    return;
+  }
+
   state.notes.push({ id: uid(), text, day: remDay, lesson: remLesson, createdAt: Date.now() });
   save();
   input.value = '';
   remLesson = null;
   renderReminders();
-  $('#rem-add').disabled = true;
-  $('#rem-input').focus();
+  input.focus();
 }
 
 
@@ -846,6 +900,8 @@ function renderProfile() {
       ? `${doneCount} finished so far. ${XP_PER_LEVEL - into} XP to level ${level + 1}.`
       : 'Finish some homework to earn XP.'}</p>`;
 
+  renderDesk(level);
+
   // History, newest first, grouped by the day it was finished.
   const done = state.homework
     .filter(h => h.completed && h.completedAt)
@@ -876,6 +932,28 @@ function renderProfile() {
   $('#bag-time').value = state.settings.bagReminderTime;
   $('#bag-time-row').hidden = !state.settings.bagReminderEnabled;
   $('#reminder-note').textContent = reminderNote();
+}
+
+
+/** The desk fills up one piece at a time as levels come in. */
+function renderDesk(level) {
+  const box = $('#desk-card');
+  if (!box) return;
+  const earned = deskEarned(level);
+  const next = deskNext(level);
+
+  box.innerHTML = `
+    <div class="desk-scene">
+      ${earned.length
+        ? earned.map((d, i) => `
+            <span class="desk-thing" style="animation-delay:${i * 55}ms" title="${esc(d.name)}">${d.emoji}</span>`).join('')
+        : '<span class="desk-empty">Your desk is bare. Finish homework to furnish it.</span>'}
+      ${next ? '<span class="desk-thing desk-locked" aria-hidden="true">?</span>' : ''}
+    </div>
+    <div class="desk-surface"></div>
+    <p class="level-note">${next
+      ? `${earned.length} of ${DESK.length}. ${next.emoji} ${esc(next.name)} at level ${next.level}.`
+      : `All ${DESK.length} collected. The desk is complete.`}</p>`;
 }
 
 
@@ -1114,7 +1192,8 @@ function hideToast() {
 function showLevelUp(level) {
   const box = $('#levelup');
   $('#levelup-num').textContent = level;
-  $('#levelup-sub').textContent = 'Keep it going.';
+  const got = DESK.find(d => d.level === level);
+  $('#levelup-sub').textContent = got ? `${got.emoji} ${got.name} for your desk` : 'Keep it going.';
   box.hidden = false;
   box.classList.remove('is-leaving');
   sparks();
@@ -1456,13 +1535,17 @@ function wireApp() {
   });
 
   // Reminders page
-  on('#rem-input', 'input', (e) => {
-    $('#rem-add').disabled = !e.target.value.trim();
-  });
   on('#rem-input', 'keydown', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); addReminder(); }
   });
   on('#rem-add', 'click', addReminder);
+
+  on('#rem-scope', 'click', (e) => {
+    const seg = e.target.closest('[data-scope]');
+    if (!seg) return;
+    remScope = seg.dataset.scope;
+    renderReminders();
+  });
 
   on('#rem-days', 'click', (e) => {
     const chip = e.target.closest('[data-remday]');
