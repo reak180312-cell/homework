@@ -1,2 +1,6 @@
 node_modules/
 .DS_Store
+
+# Personal school documents - never publish these
+*.pdf
+timetable-private/

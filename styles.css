@@ -1068,3 +1068,266 @@ input.hw-title::placeholder { color: var(--ink-3); }
 /* Homework lists collapse their own spacing when a row leaves. */
 .list-hw { gap: 0; }
 .list-hw .hw-slot { box-sizing: border-box; padding-bottom: 8px; }
+
+
+/* ── Bag: what to bring, and your own reminders ──────────── */
+
+.chip-day { position: relative; min-width: 62px; justify-content: center; }
+.chip-day.is-on { background: var(--ink); color: var(--on-ink); box-shadow: none; }
+
+.today-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--done);
+  margin-left: 2px;
+}
+
+.bring-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--card);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow);
+}
+
+.bring-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--sc);
+  flex: none;
+}
+
+.bring-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+
+.bring-name {
+  font-size: 16.5px;
+  font-weight: 500;
+  letter-spacing: -.015em;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.bring-meta { font-size: 13px; color: var(--ink-3); line-height: 1.25; }
+
+.bring-time {
+  font-size: 14px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+
+.note-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 8px 13px 16px;
+  background: var(--card);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow);
+}
+
+.note-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 15.5px;
+  line-height: 1.35;
+  letter-spacing: -.01em;
+  overflow-wrap: anywhere;
+}
+
+.note-tag {
+  flex: none;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.note-del {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  color: var(--ink-3);
+}
+.note-del .ico { width: 15px; height: 15px; stroke-width: 2; }
+.note-del:active { background: var(--line-soft); color: var(--ink); }
+
+.note-add { display: flex; gap: 8px; margin-top: 2px; }
+
+.note-add input {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+  font-size: 15.5px;
+  letter-spacing: -.01em;
+}
+.note-add input:focus { outline: none; box-shadow: inset 0 0 0 1.8px var(--ink); }
+
+.note-add button {
+  flex: none;
+  padding: 0 20px;
+  border-radius: var(--r-card);
+  background: var(--ink);
+  color: var(--on-ink);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.note-hint {
+  margin-top: 4px;
+  padding: 0 4px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+
+/* ── Timetable ───────────────────────────────────────────── */
+
+.tt-btn {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 20px);
+  right: max(calc((100% - 540px) / 2 + var(--gutter)), var(--gutter));
+  z-index: 22;
+  display: grid;
+  place-items: center;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--card) 78%, transparent);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  box-shadow: var(--shadow);
+  transition: transform .2s var(--spring);
+}
+.tt-btn .ico { width: 20px; height: 20px; }
+.tt-btn:active { transform: scale(.9); }
+
+.timetable {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  animation: tt-in .3s var(--ease);
+}
+.timetable.is-leaving { animation: tt-out .22s var(--ease) forwards; }
+@keyframes tt-in  { from { opacity: 0; transform: scale(.98); } }
+@keyframes tt-out { to   { opacity: 0; transform: scale(.98); } }
+
+.tt-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: calc(env(safe-area-inset-top) + 18px) var(--gutter) 14px;
+  max-width: 900px;
+  width: 100%;
+  margin-inline: auto;
+}
+
+.tt-head h2 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -.028em;
+}
+
+.tt-close {
+  display: grid;
+  place-items: center;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  color: var(--ink);
+  background: var(--line-soft);
+}
+.tt-close .ico { width: 18px; height: 18px; stroke-width: 2; }
+
+.tt-body {
+  flex: 1;
+  overflow: auto;
+  padding: 0 var(--gutter) calc(env(safe-area-inset-bottom) + 28px);
+  max-width: 900px;
+  width: 100%;
+  margin-inline: auto;
+}
+
+.tt-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+.tt-grid {
+  border-collapse: separate;
+  border-spacing: 4px;
+  min-width: 560px;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.tt-grid th, .tt-grid td { padding: 0; }
+
+.tt-grid thead th {
+  padding: 6px 4px 8px;
+  font-size: 12.5px;
+  font-weight: 650;
+  letter-spacing: -.005em;
+  color: var(--ink-2);
+  text-align: center;
+}
+.tt-grid thead th.is-today { color: var(--ink); }
+
+.tt-day { display: block; }
+.tt-day-he { display: block; font-size: 10.5px; font-weight: 500; color: var(--ink-3); }
+
+.tt-corner { width: 74px; }
+
+.tt-time {
+  width: 74px;
+  text-align: right;
+  padding-right: 8px !important;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+}
+.tt-num {
+  display: block;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ink-2);
+}
+
+.tt-grid tbody td {
+  height: 52px;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--sc) var(--tint), var(--card));
+  vertical-align: middle;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.tt-cell {
+  display: block;
+  padding: 4px 6px;
+  font-size: 12.5px;
+  font-weight: 550;
+  line-height: 1.25;
+  letter-spacing: -.01em;
+  color: color-mix(in srgb, var(--sc) 78%, var(--ink));
+  overflow-wrap: anywhere;
+}
+
+.tt-grid tbody td.tt-free {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--line-soft);
+}
+
+.tt-grid tbody td.is-today { box-shadow: var(--shadow), inset 0 0 0 1.8px color-mix(in srgb, var(--ink) 26%, transparent); }
+.tt-grid tbody td.tt-free.is-today { box-shadow: inset 0 0 0 1.8px color-mix(in srgb, var(--ink) 16%, transparent); }

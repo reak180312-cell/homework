@@ -24,6 +24,80 @@ const PRESETS = [
   { name: 'Other',            icon: 'i-bookmark',  color: '#7C7A76' },
 ];
 
+/* ── Timetable ─────────────────────────────────────────────
+   The weekly schedule, taken from the printed timetable. Lesson names are
+   kept as the school writes them. Teacher names, room numbers and the
+   school's own name are deliberately left out — this file is published,
+   and none of that is needed to pack a bag. */
+
+const SCHOOL_DAYS = [
+  { js: 0, he: 'ראשון',  en: 'Sunday',    short: 'Sun' },
+  { js: 1, he: 'שני',    en: 'Monday',    short: 'Mon' },
+  { js: 2, he: 'שלישי',  en: 'Tuesday',   short: 'Tue' },
+  { js: 3, he: 'רביעי',  en: 'Wednesday', short: 'Wed' },
+  { js: 4, he: 'חמישי',  en: 'Thursday',  short: 'Thu' },
+];
+
+const PERIODS = [
+  '8:20–9:00', '9:10–9:50', '10:00–10:40', '10:50–11:30',
+  '11:55–12:35', '12:45–13:25', '13:35–14:15', '14:20–15:00',
+];
+
+// [day index][period index] — null is a free period.
+const SCHEDULE = [
+  ['מתמטיקה', 'מתמטיקה', 'אזרחות ודמוקרטיה', 'כישורי חיים', 'כישורי שפה', 'כישורי שפה', 'מעבדה', 'מעבדה'],
+  ['ביולוגיה', 'חנ״ג', 'ערבית', 'ערבית', 'אנגלית', 'אנגלית', null, null],
+  ['תנ״ך', 'תנ״ך', 'מתמטיקה', 'מתמטיקה', 'פיסיקה', 'הסטוריה', null, null],
+  ['העשרה / מדמ״ח', 'העשרה / מדמ״ח', 'אזרחות ודמוקרטיה', 'פיסיקה', 'הסטוריה', 'ערבית', 'מתמטיקה', null],
+  ['חינוך', 'ביולוגיה', 'חנ״ג', 'ספרות', 'ספרות', 'אנגלית', 'אנגלית', null],
+];
+
+// Ties a lesson to a subject you picked at setup, so the bag list can show
+// its colour and any homework riding on it. Matched loosely, both languages.
+const LESSON_ALIASES = {
+  'מתמטיקה':           ['math', 'מתמטיקה'],
+  'ביולוגיה':          ['biology', 'ביולוגיה', 'bio'],
+  'פיסיקה':            ['physics', 'פיסיקה', 'פיזיקה'],
+  'אנגלית':            ['english', 'אנגלית'],
+  'הסטוריה':           ['history', 'הסטוריה', 'היסטוריה'],
+  'ספרות':             ['literature', 'ספרות'],
+  'תנ״ך':              ['tanach', 'bible', 'תנך', 'תנ״ך'],
+  'ערבית':             ['arabic', 'ערבית'],
+  'אזרחות ודמוקרטיה':  ['civics', 'אזרחות'],
+  'חנ״ג':              ['pe', 'sport', 'חנג', 'חנ״ג'],
+  'כישורי שפה':        ['hebrew', 'לשון', 'כישורי שפה'],
+  'כישורי חיים':       ['כישורי חיים', 'life skills'],
+  'חינוך':             ['חינוך', 'homeroom'],
+  'העשרה / מדמ״ח':     ['computer', 'מדמ״ח', 'מדמח', 'העשרה'],
+  'מעבדה':             ['lab', 'מעבדה', 'science'],
+};
+
+/** Lessons that day, in order, collapsed to one entry per subject. */
+function lessonsFor(dayIndex) {
+  const row = SCHEDULE[dayIndex] || [];
+  const seen = new Map();
+  row.forEach((name, period) => {
+    if (!name) return;
+    if (!seen.has(name)) seen.set(name, { name, periods: [] });
+    seen.get(name).periods.push(period);
+  });
+  return [...seen.values()];
+}
+
+/** The subject you picked that this lesson belongs to, if any. */
+function subjectForLesson(name) {
+  const aliases = LESSON_ALIASES[name] || [name];
+  return state.subjects.find(s => {
+    const n = s.name.toLowerCase();
+    return aliases.some(a => n.includes(a.toLowerCase()) || a.toLowerCase().includes(n));
+  }) || null;
+}
+
+/** Weekday index into SCHOOL_DAYS, or -1 at the weekend. */
+function schoolDayIndex(d = new Date()) {
+  return SCHOOL_DAYS.findIndex(x => x.js === d.getDay());
+}
+
 const PALETTE = PRESETS.map(p => p.color);
 const XP_PER_HOMEWORK = 10;
 const XP_PER_LEVEL = 100;
@@ -95,17 +169,31 @@ const blank = () => ({
   onboarded: false,
   subjects: [],
   homework: [],
+  notes: [],
   progress: { xp: 0, level: 1 },
-  settings: { dailyReminderEnabled: false, dailyReminderTime: '15:00' },
+  settings: {
+    dailyReminderEnabled: false, dailyReminderTime: '15:00',
+    bagReminderEnabled: false, bagReminderTime: '20:00',
+  },
   lastSubjectId: null,
 });
 
 let state = blank();
 
+/** Fold saved data onto current defaults, so data written by an older
+ *  version still picks up settings added since. */
+function hydrate(saved) {
+  const base = blank();
+  const next = Object.assign(base, saved);
+  next.settings = Object.assign(blank().settings, (saved && saved.settings) || {});
+  next.notes = Array.isArray(next.notes) ? next.notes : [];
+  return next;
+}
+
 function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) state = Object.assign(blank(), JSON.parse(raw));
+    if (raw) state = hydrate(JSON.parse(raw));
   } catch {
     /* Corrupt or unavailable storage: start clean rather than break. */
   }
@@ -165,7 +253,7 @@ async function connectSync() {
       try { incoming = JSON.parse(data.payload); }
       catch { return; }                   // keep local work rather than trust a bad copy
 
-      state = Object.assign(blank(), incoming);
+      state = hydrate(incoming);
       saveLocal();                        // not save(): don't bump the clock and echo back
       adoptRemoteState();
     },
@@ -259,6 +347,7 @@ let currentTab = 'home';
 
 function render() {
   if (currentTab === 'home') renderHome();
+  if (currentTab === 'bag') renderBag();
   if (currentTab === 'subjects') renderSubjects();
   if (currentTab === 'profile') renderProfile();
   if (!$('#subject-page').hidden) renderSubjectPage(openSubjectId);
@@ -276,6 +365,144 @@ function renderHome() {
         ? empty('All done', 'No homework left.')
         : empty('Nothing here yet', 'Tap + to add your first homework.'));
 }
+
+/* ── Bag: what to bring, and your own reminders ───────────── */
+
+let bagDay = -1;   // which weekday the Bag tab is showing
+
+function renderBag() {
+  if (bagDay < 0) {
+    const today = schoolDayIndex();
+    bagDay = today >= 0 ? today : 0;      // weekend: start the week on Sunday
+  }
+  const today = schoolDayIndex();
+  const day = SCHOOL_DAYS[bagDay];
+
+  $('#bag-sub').textContent = bagDay === today ? `${day.en} · today` : day.en;
+
+  $('#bag-days').innerHTML = SCHOOL_DAYS.map((d, i) => `
+    <button class="chip chip-day ${i === bagDay ? 'is-on' : ''}" data-day="${i}">
+      ${esc(d.short)}${i === today ? '<span class="today-dot"></span>' : ''}
+    </button>`).join('');
+
+  const lessons = lessonsFor(bagDay);
+  const notes = state.notes.filter(n => n.day === null || n.day === bagDay);
+
+  const bring = lessons.length ? `
+    <h2 class="section-title">Bring</h2>
+    <div class="list">
+      ${lessons.map(l => {
+        const sub = subjectForLesson(l.name);
+        const due = sub ? activeHw().filter(h => h.subjectId === sub.id).length : 0;
+        const meta = [
+          l.periods.length > 1 ? `${l.periods.length} lessons` : '',
+          due ? `${due} homework` : '',
+        ].filter(Boolean).join(' · ');
+        return `
+          <div class="bring-row" style="--sc:${sub ? sub.color : 'var(--ink-3)'}">
+            <span class="bring-dot"></span>
+            <span class="bring-main">
+              <span class="bring-name">${esc(l.name)}</span>
+              ${meta ? `<span class="bring-meta">${esc(meta)}</span>` : ''}
+            </span>
+            <span class="bring-time">${esc(PERIODS[l.periods[0]].split('–')[0])}</span>
+          </div>`;
+      }).join('')}
+    </div>` : `
+    <div class="empty">
+      <span class="empty-mark"><svg class="ico" aria-hidden="true"><use href="#i-check" /></svg></span>
+      <h2>No lessons</h2>
+      <p>Nothing to pack for ${esc(day.en)}.</p>
+    </div>`;
+
+  const reminders = `
+    <h2 class="section-title">Reminders</h2>
+    <div class="list">
+      ${notes.map(n => `
+        <div class="note-row" data-note="${n.id}">
+          <span class="note-text">${esc(n.text)}</span>
+          ${n.day === null ? '<span class="note-tag">Every day</span>' : ''}
+          <button class="note-del" data-act="del-note" aria-label="Delete reminder">
+            <svg class="ico" aria-hidden="true"><use href="#i-close" /></svg>
+          </button>
+        </div>`).join('')}
+      <div class="note-add">
+        <input id="note-input" type="text" placeholder="Add a reminder…"
+               autocomplete="off" enterkeyhint="done" />
+        <button id="note-save" data-act="add-note">Add</button>
+      </div>
+      <p class="note-hint">Saved for ${esc(day.en)}. Reminders stay until you remove them.</p>
+    </div>`;
+
+  $('#bag-body').innerHTML = bring + reminders;
+}
+
+function addNote() {
+  const input = $('#note-input');
+  const text = input ? input.value.trim() : '';
+  if (!text) return;
+  state.notes.push({ id: uid(), text, day: bagDay, createdAt: Date.now() });
+  save();
+  renderBag();
+  const again = $('#note-input');
+  if (again) again.focus();
+}
+
+
+/* ── Timetable ─────────────────────────────────────────────── */
+
+function renderTimetable() {
+  const today = schoolDayIndex();
+  const lastUsed = SCHEDULE.reduce((m, row) => {
+    for (let i = row.length - 1; i >= 0; i--) if (row[i]) return Math.max(m, i);
+    return m;
+  }, 0);
+
+  $('#tt-body').innerHTML = `
+    <div class="tt-scroll">
+      <table class="tt-grid">
+        <thead>
+          <tr>
+            <th class="tt-corner"></th>
+            ${SCHOOL_DAYS.map((d, i) => `
+              <th class="${i === today ? 'is-today' : ''}">
+                <span class="tt-day">${esc(d.short)}</span>
+                <span class="tt-day-he">${esc(d.he)}</span>
+              </th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${PERIODS.slice(0, lastUsed + 1).map((time, p) => `
+            <tr>
+              <th class="tt-time"><span class="tt-num">${p + 1}</span><span>${esc(time)}</span></th>
+              ${SCHOOL_DAYS.map((d, i) => {
+                const name = SCHEDULE[i][p];
+                if (!name) return `<td class="tt-free ${i === today ? 'is-today' : ''}"></td>`;
+                const sub = subjectForLesson(name);
+                return `<td class="${i === today ? 'is-today' : ''}" style="--sc:${sub ? sub.color : 'var(--ink-2)'}">
+                  <span class="tt-cell">${esc(name)}</span>
+                </td>`;
+              }).join('')}
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function openTimetable() {
+  renderTimetable();
+  const box = $('#timetable');
+  box.hidden = false;
+  box.classList.remove('is-leaving');
+}
+
+function closeTimetable() {
+  const box = $('#timetable');
+  if (box.hidden) return;
+  box.classList.add('is-leaving');
+  setTimeout(() => { box.hidden = true; box.classList.remove('is-leaving'); }, 240);
+}
+
 
 function renderSubjects() {
   const box = $('#subject-list');
@@ -368,6 +595,9 @@ function renderProfile() {
   $('#reminder-toggle').checked = state.settings.dailyReminderEnabled;
   $('#reminder-time').value = state.settings.dailyReminderTime;
   $('#reminder-time-row').hidden = !state.settings.dailyReminderEnabled;
+  $('#bag-toggle').checked = state.settings.bagReminderEnabled;
+  $('#bag-time').value = state.settings.bagReminderTime;
+  $('#bag-time-row').hidden = !state.settings.bagReminderEnabled;
   $('#reminder-note').textContent = reminderNote();
 }
 
@@ -382,6 +612,9 @@ function showTab(tab) {
     btn.classList.toggle('is-active', on);
     btn.setAttribute('aria-selected', String(on));
   }
+  // The + adds homework, so it only belongs on the homework screens — and on
+  // Bag it would sit on top of the reminder's own Add button.
+  $('#fab').hidden = tab === 'bag' || tab === 'profile';
   render();
   window.scrollTo(0, 0);
 }
@@ -786,7 +1019,7 @@ function commitSubjects() {
 
 /* ── Daily reminder ────────────────────────────────────────── */
 
-let reminderTimer = null;
+const timers = { daily: null, bag: null };
 
 const notifySupported = () => 'Notification' in window;
 
@@ -795,49 +1028,87 @@ function reminderNote() {
   if (Notification.permission === 'denied') {
     return 'Notifications are turned off for this page. Open it in its own tab, or allow notifications in your browser settings.';
   }
-  if (state.settings.dailyReminderEnabled) {
-    return `A nudge at ${state.settings.dailyReminderTime}. Add the app to your home screen so it can reach you after school.`;
+  if (state.settings.dailyReminderEnabled || state.settings.bagReminderEnabled) {
+    return 'Add the app to your home screen so it can still reach you after school.';
   }
-  return 'One nudge a day to write down what you got.';
+  return 'Optional. One nudge to write down homework, one to pack your bag.';
+}
+
+function nextOccurrence(hhmm) {
+  const [h, m] = String(hhmm).split(':').map(Number);
+  const next = new Date();
+  next.setHours(h || 0, m || 0, 0, 0);
+  if (next <= new Date()) next.setDate(next.getDate() + 1);
+  return next;
+}
+
+function scheduleOne(key, enabledKey, timeKey, fire) {
+  clearTimeout(timers[key]);
+  if (!state.settings[enabledKey]) return;
+  if (!notifySupported() || Notification.permission !== 'granted') return;
+  timers[key] = setTimeout(() => {
+    fire();
+    // Re-arm only this one. Rescheduling the pair here would cancel the
+    // other reminder's pending timer when both land on the same minute.
+    scheduleOne(key, enabledKey, timeKey, fire);
+  }, nextOccurrence(state.settings[timeKey]) - Date.now());
 }
 
 function scheduleReminder() {
-  clearTimeout(reminderTimer);
-  if (!state.settings.dailyReminderEnabled) return;
-  if (!notifySupported() || Notification.permission !== 'granted') return;
-
-  const [h, m] = state.settings.dailyReminderTime.split(':').map(Number);
-  const next = new Date();
-  next.setHours(h, m, 0, 0);
-  if (next <= new Date()) next.setDate(next.getDate() + 1);
-
-  reminderTimer = setTimeout(() => {
-    fireReminder();
-    scheduleReminder();
-  }, next - Date.now());
+  scheduleOne('daily', 'dailyReminderEnabled', 'dailyReminderTime', fireHomeworkReminder);
+  scheduleOne('bag', 'bagReminderEnabled', 'bagReminderTime', fireBagReminder);
 }
 
-async function fireReminder() {
-  const left = activeHw().length;
-  const body = left ? `You have ${left} left. Anything new today?` : 'Add today’s homework while it’s fresh.';
-  const opts = { body, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: 'daily-homework' };
+async function notify(title, body) {
+  const opts = { body, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: title };
   try {
     const reg = await navigator.serviceWorker?.ready;
-    if (reg) reg.showNotification('Any homework today?', opts);
-    else new Notification('Any homework today?', opts);
+    if (reg) reg.showNotification(title, opts);
+    else new Notification(title, opts);
   } catch {
-    try { new Notification('Any homework today?', opts); } catch { /* nothing more to do */ }
+    try { new Notification(title, opts); } catch { /* nothing more to do */ }
   }
 }
 
-async function toggleReminder(on) {
+function fireHomeworkReminder() {
+  const left = activeHw().length;
+  notify('Any homework today?',
+    left ? `You have ${left} left. Anything new today?` : 'Add today’s homework while it’s fresh.');
+}
+
+/** The next day that actually has school, skipping the weekend. */
+function nextSchoolDay() {
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    const idx = schoolDayIndex(d);
+    if (idx >= 0) return idx;
+  }
+  return -1;
+}
+
+/** Evening nudge: tomorrow's lessons, plus anything you told it to remember. */
+function fireBagReminder() {
+  const idx = nextSchoolDay();
+  if (idx < 0) return;
+  const day = SCHOOL_DAYS[idx];
+  const lessons = lessonsFor(idx).map(l => l.name);
+  const notes = state.notes.filter(n => n.day === null || n.day === idx).map(n => n.text);
+
+  const parts = [];
+  if (lessons.length) parts.push(lessons.join(', '));
+  if (notes.length) parts.push('Don’t forget: ' + notes.join('; '));
+  notify(`Pack for ${day.en}`, parts.join(' — ') || 'Nothing scheduled.');
+}
+
+async function toggleReminder(enabledKey, on) {
   if (on) {
-    if (!notifySupported()) { $('#reminder-toggle').checked = false; renderProfile(); return; }
+    if (!notifySupported()) { renderProfile(); return; }
     let perm = Notification.permission;
     if (perm === 'default') perm = await Notification.requestPermission();
-    if (perm !== 'granted') { state.settings.dailyReminderEnabled = false; save(); renderProfile(); return; }
+    if (perm !== 'granted') { state.settings[enabledKey] = false; save(); renderProfile(); return; }
   }
-  state.settings.dailyReminderEnabled = on;
+  state.settings[enabledKey] = on;
   save();
   scheduleReminder();
   renderProfile();
@@ -876,6 +1147,34 @@ function wireApp() {
   $('#fab').addEventListener('click', () => openHwSheet());
   $('#subject-back').addEventListener('click', closeSubjectPage);
   $('#scrim').addEventListener('click', closeSheet);
+
+  // Timetable, reachable from anywhere
+  $('#tt-btn').addEventListener('click', openTimetable);
+  $('#tt-close').addEventListener('click', closeTimetable);
+
+  // Bag: day switcher, reminders
+  $('#bag-days').addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-day]');
+    if (!chip) return;
+    bagDay = Number(chip.dataset.day);
+    renderBag();
+  });
+
+  $('#bag-body').addEventListener('click', (e) => {
+    const act = e.target.closest('[data-act]');
+    if (!act) return;
+    if (act.dataset.act === 'add-note') addNote();
+    if (act.dataset.act === 'del-note') {
+      const id = act.closest('[data-note]').dataset.note;
+      state.notes = state.notes.filter(n => n.id !== id);
+      save();
+      renderBag();
+    }
+  });
+
+  $('#bag-body').addEventListener('keydown', (e) => {
+    if (e.target.id === 'note-input' && e.key === 'Enter') { e.preventDefault(); addNote(); }
+  });
 
   // Add / edit sheet
   $('#hw-title').addEventListener('input', syncSaveButton);
@@ -924,17 +1223,24 @@ function wireApp() {
   });
 
   // Settings
-  $('#reminder-toggle').addEventListener('change', (e) => toggleReminder(e.target.checked));
+  $('#reminder-toggle').addEventListener('change', (e) => toggleReminder('dailyReminderEnabled', e.target.checked));
+  $('#bag-toggle').addEventListener('change', (e) => toggleReminder('bagReminderEnabled', e.target.checked));
+
   $('#reminder-time').addEventListener('change', (e) => {
     state.settings.dailyReminderTime = e.target.value || '15:00';
     save();
     scheduleReminder();
-    $('#reminder-note').textContent = reminderNote();
+  });
+  $('#bag-time').addEventListener('change', (e) => {
+    state.settings.bagReminderTime = e.target.value || '20:00';
+    save();
+    scheduleReminder();
   });
 
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (openSheetSel) closeSheet();
+    if (!$('#timetable').hidden) closeTimetable();
+    else if (openSheetSel) closeSheet();
     else if (!$('#subject-page').hidden) closeSubjectPage();
   });
 
@@ -962,6 +1268,7 @@ function wireOnboarding() {
 
 function boot() {
   load();
+  saveLocal();      // write the migrated shape back, without bumping the sync clock
   wireApp();
   wireOnboarding();
 

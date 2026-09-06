@@ -34,6 +34,9 @@
   <symbol id="i-tab-home" viewBox="0 0 24 24"><path d="M4 6.8l1.7 1.7L9 5.2"/><path d="M4 15.6l1.7 1.7 3.3-3.3"/><path d="M12.5 7.2H20"/><path d="M12.5 16H20"/></symbol>
   <symbol id="i-tab-subjects" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2.2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2.2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2.2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2.2"/></symbol>
   <symbol id="i-tab-profile" viewBox="0 0 24 24"><circle cx="12" cy="8.4" r="3.8"/><path d="M4.8 20.2a7.4 7.4 0 0 1 14.4 0"/></symbol>
+  <symbol id="i-tab-bag" viewBox="0 0 24 24"><path d="M5.8 9.6A4.6 4.6 0 0 1 10.4 5h3.2a4.6 4.6 0 0 1 4.6 4.6v10a1.2 1.2 0 0 1-1.2 1.2H7a1.2 1.2 0 0 1-1.2-1.2z"/><path d="M9.4 5V4.3a2.6 2.6 0 0 1 5.2 0V5"/><path d="M9 13.2h6"/></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="16" rx="2.6"/><path d="M3.5 9.6h17"/><path d="M9.7 9.6v10.9M15.1 9.6v10.9"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.4 6.4l11.2 11.2M17.6 6.4 6.4 17.6"/></symbol>
 
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></symbol>
   <symbol id="i-back" viewBox="0 0 24 24"><path d="M14.5 5.5 8 12l6.5 6.5"/></symbol>
@@ -70,6 +73,15 @@
     <div id="home-list" class="list"></div>
   </section>
 
+  <section id="view-bag" class="view" data-view="bag" hidden>
+    <header class="head">
+      <h1>Bag</h1>
+      <p id="bag-sub" class="head-sub"></p>
+    </header>
+    <div id="bag-days" class="chips chips-scroll"></div>
+    <div id="bag-body"></div>
+  </section>
+
   <section id="view-subjects" class="view" data-view="subjects" hidden>
     <header class="head"><h1>Subjects</h1></header>
     <div id="subject-list" class="list"></div>
@@ -96,6 +108,17 @@
         <span class="setting-label">Time</span>
         <input id="reminder-time" type="time" class="time-input" value="15:00" />
       </div>
+      <label class="setting">
+        <span class="setting-label">
+          Pack your bag
+          <em>Tomorrow's lessons and reminders, the evening before.</em>
+        </span>
+        <input id="bag-toggle" type="checkbox" class="switch" />
+      </label>
+      <div id="bag-time-row" class="setting" hidden>
+        <span class="setting-label">Time</span>
+        <input id="bag-time" type="time" class="time-input" value="20:00" />
+      </div>
     </div>
     <p id="reminder-note" class="foot-note"></p>
   </section>
@@ -104,9 +127,17 @@
     <svg class="ico" aria-hidden="true"><use href="#i-plus" /></svg>
   </button>
 
+  <!-- Timetable is reachable from every screen, never from first-run setup. -->
+  <button id="tt-btn" class="tt-btn" aria-label="Timetable">
+    <svg class="ico" aria-hidden="true"><use href="#i-table" /></svg>
+  </button>
+
   <nav class="tabbar" role="tablist">
     <button class="tab is-active" data-tab="home" role="tab" aria-selected="true">
       <svg class="ico" aria-hidden="true"><use href="#i-tab-home" /></svg><span>Homework</span>
+    </button>
+    <button class="tab" data-tab="bag" role="tab" aria-selected="false">
+      <svg class="ico" aria-hidden="true"><use href="#i-tab-bag" /></svg><span>Bag</span>
     </button>
     <button class="tab" data-tab="subjects" role="tab" aria-selected="false">
       <svg class="ico" aria-hidden="true"><use href="#i-tab-subjects" /></svg><span>Subjects</span>
@@ -116,6 +147,18 @@
     </button>
   </nav>
 </div>
+
+
+<!-- Timetable, over everything -->
+<section id="timetable" class="timetable" hidden>
+  <header class="tt-head">
+    <h2>Timetable</h2>
+    <button id="tt-close" class="tt-close" aria-label="Close timetable">
+      <svg class="ico" aria-hidden="true"><use href="#i-close" /></svg>
+    </button>
+  </header>
+  <div id="tt-body" class="tt-body"></div>
+</section>
 
 
 <!-- Subject detail, pushed over the tabs -->
