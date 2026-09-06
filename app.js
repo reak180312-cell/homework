@@ -103,18 +103,18 @@ const DEFAULT_EVERYDAY = ['Water bottle', 'Pencil case', 'Lunchbox'];
 /* Levels earn one thing for your desk. Small, finite, and it never asks you
    to spend anything — the homework is still the point. */
 const DESK = [
-  { level: 2,  emoji: '🪴', name: 'Plant' },
-  { level: 3,  emoji: '💡', name: 'Lamp' },
-  { level: 4,  emoji: '☕', name: 'Mug' },
-  { level: 5,  emoji: '🎧', name: 'Headphones' },
-  { level: 6,  emoji: '🖼️', name: 'Poster' },
-  { level: 7,  emoji: '🧸', name: 'Mascot' },
-  { level: 8,  emoji: '📚', name: 'Bookshelf' },
-  { level: 9,  emoji: '🕰️', name: 'Clock' },
-  { level: 10, emoji: '🐠', name: 'Fish tank' },
-  { level: 12, emoji: '🎸', name: 'Guitar' },
-  { level: 14, emoji: '🪟', name: 'Window' },
-  { level: 16, emoji: '🏆', name: 'Trophy' },
+  { level: 2,  emoji: '🪴', name: 'Plant',      idle: 'sway' },
+  { level: 3,  emoji: '💡', name: 'Lamp',       idle: 'glow' },
+  { level: 4,  emoji: '☕', name: 'Mug',        idle: 'bob'  },
+  { level: 5,  emoji: '🎧', name: 'Headphones', idle: 'tilt' },
+  { level: 6,  emoji: '🖼️', name: 'Poster',     idle: 'tilt' },
+  { level: 7,  emoji: '🧸', name: 'Mascot',     idle: 'hop'  },
+  { level: 8,  emoji: '📚', name: 'Bookshelf',  idle: 'bob'  },
+  { level: 9,  emoji: '🕰️', name: 'Clock',      idle: 'tick' },
+  { level: 10, emoji: '🐠', name: 'Fish tank',  idle: 'sway' },
+  { level: 12, emoji: '🎸', name: 'Guitar',     idle: 'tilt' },
+  { level: 14, emoji: '🪟', name: 'Window',     idle: 'glow' },
+  { level: 16, emoji: '🏆', name: 'Trophy',     idle: 'hop'  },
 ];
 
 const deskEarned = (level) => DESK.filter(d => d.level <= level);
@@ -287,6 +287,7 @@ const blank = () => ({
   homework: [],
   notes: [],
   lessonItems: null,      // filled from DEFAULT_ITEMS on first run
+  deskLayout: null,       // where you dragged the things in your room
   everydayItems: null,
   progress: { xp: 0, level: 1 },
   settings: {
@@ -310,6 +311,7 @@ function hydrate(saved) {
   }
   for (const l of LESSONS) if (!Array.isArray(next.lessonItems[l])) next.lessonItems[l] = (DEFAULT_ITEMS[l] || ['Notebook']).slice();
   if (!Array.isArray(next.everydayItems)) next.everydayItems = DEFAULT_EVERYDAY.slice();
+  if (!next.deskLayout || typeof next.deskLayout !== 'object') next.deskLayout = {};
   return next;
 }
 
@@ -457,12 +459,22 @@ function hwRow(hw) {
     </div>`;
 }
 
-const empty = (title, line) => `
-  <div class="empty">
-    <span class="empty-mark"><svg class="ico" aria-hidden="true"><use href="#i-check" /></svg></span>
-    <h2>${esc(title)}</h2>
-    <p>${esc(line)}</p>
-  </div>`;
+/* Each empty screen gets its own mark and its own motion, and where there
+   is an obvious next move the whole block is the button for it. */
+const empty = (title, line, opts = {}) => {
+  const { icon = 'i-check', mood = 'done', act = '' } = opts;
+  const tag = act ? 'button' : 'div';
+  return `
+    <${tag} class="empty empty-${mood}" ${act ? `data-act="${act}"` : ''}>
+      <span class="empty-mark">
+        <svg class="ico" aria-hidden="true"><use href="#${icon}" /></svg>
+        ${mood === 'done' ? `
+          <i class="spark-a"></i><i class="spark-b"></i><i class="spark-c"></i>` : ''}
+      </span>
+      <h2>${esc(title)}</h2>
+      <p>${esc(line)}</p>
+    </${tag}>`;
+};
 
 
 /* ── Render ────────────────────────────────────────────────── */
@@ -488,8 +500,9 @@ function renderHome() {
   box.innerHTML = list.length
     ? list.map(hwRow).join('')
     : (state.homework.length
-        ? empty('All done', 'No homework left.')
-        : empty('Nothing here yet', 'Tap + to add your first homework.'));
+        ? empty('All done', 'No homework left.', { mood: 'done' })
+        : empty('Nothing here yet', 'Tap here to add your first homework.',
+                { icon: 'i-plus', mood: 'invite', act: 'add-first' }));
 }
 
 /* ── Bag: what to bring, and your own reminders ───────────── */
@@ -518,12 +531,8 @@ function renderBag() {
   const loose = dayNotes.filter(n => !n.lesson);
 
   if (!lessons.length) {
-    $('#bag-body').innerHTML = `
-      <div class="empty">
-        <span class="empty-mark"><svg class="ico" aria-hidden="true"><use href="#i-check" /></svg></span>
-        <h2>No lessons</h2>
-        <p>Nothing to pack for ${esc(day.en)}.</p>
-      </div>`;
+    $('#bag-body').innerHTML =
+      empty('No lessons', `Nothing to pack for ${day.en}.`, { icon: 'i-tab-bag', mood: 'rest' });
     return;
   }
 
@@ -674,7 +683,8 @@ function renderReminders() {
 
   if (!n) {
     $('#rem-list').innerHTML = empty('Nothing to remember',
-      'Anything you add shows up in your bag on the right day.');
+      'Tap here and tell it what not to forget.',
+      { icon: 'i-tab-bell', mood: 'ring', act: 'first-reminder' });
     return;
   }
 
@@ -684,7 +694,7 @@ function renderReminders() {
     $('#rem-list').innerHTML = mine.length
       ? `<h3 class="day-title">${today >= 0 ? esc(SCHOOL_DAYS[today].en) : 'Today'}</h3>
          <div class="list">${mine.map(reminderRow).join('')}</div>`
-      : empty('Nothing for today', 'Tap All to see the rest.');
+      : empty('Nothing for today', 'Tap All to see the rest.', { icon: 'i-tab-bell', mood: 'ring' });
     return;
   }
 
@@ -864,7 +874,7 @@ function renderSubjectPage(id) {
     ${open.length ? `
       <h2 class="section-title" style="margin-top:0">Homework</h2>
       <div class="list list-hw">${open.map(hwRow).join('')}</div>
-    ` : empty(`Nothing for ${sub.name} right now`, 'Enjoy it while it lasts.')}
+    ` : empty(`Nothing for ${sub.name} right now`, 'Enjoy it while it lasts.', { mood: 'done' })}
     ${done.length ? `
       <h2 class="section-title">Completed</h2>
       <div class="list">${done.map(h => doneRow(h, sub, false)).join('')}</div>
@@ -935,25 +945,113 @@ function renderProfile() {
 }
 
 
-/** The desk fills up one piece at a time as levels come in. */
+/* ── Your room ─────────────────────────────────────────────
+   Things you earn land in a room you arrange yourself. Drag them
+   anywhere, tap one to poke it. Positions are yours and they stick. */
+
+/** Spread whatever you own along the floor, evenly. */
+function tidyLayout(earned) {
+  const layout = {};
+  earned.forEach((d, i) => {
+    const step = 100 / (earned.length + 1);
+    layout[d.name] = { x: step * (i + 1), y: 62 + (i % 3) * 11 };
+  });
+  return layout;
+}
+
 function renderDesk(level) {
   const box = $('#desk-card');
   if (!box) return;
   const earned = deskEarned(level);
   const next = deskNext(level);
 
+  // Anything newly earned gets a spot the first time it appears.
+  const layout = state.deskLayout || {};
+  let changed = false;
+  earned.forEach((d, i) => {
+    if (!layout[d.name]) {
+      const step = 100 / (earned.length + 1);
+      layout[d.name] = { x: step * (i + 1), y: 62 + (i % 3) * 11 };
+      changed = true;
+    }
+  });
+  if (changed) { state.deskLayout = layout; saveLocal(); }
+
   box.innerHTML = `
-    <div class="desk-scene">
-      ${earned.length
-        ? earned.map((d, i) => `
-            <span class="desk-thing" style="animation-delay:${i * 55}ms" title="${esc(d.name)}">${d.emoji}</span>`).join('')
-        : '<span class="desk-empty">Your desk is bare. Finish homework to furnish it.</span>'}
-      ${next ? '<span class="desk-thing desk-locked" aria-hidden="true">?</span>' : ''}
+    <div class="room ${earned.length ? '' : 'is-bare'}" id="room">
+      <div class="room-floor"></div>
+      ${earned.map((d, i) => `
+        <button class="room-thing idle-${d.idle}" data-thing="${esc(d.name)}"
+                style="left:${layout[d.name].x}%; top:${layout[d.name].y}%; animation-delay:${i * 240}ms"
+                aria-label="${esc(d.name)}">${d.emoji}</button>`).join('')}
+      ${earned.length ? '' : `
+        <p class="room-bare">Your room is empty.<br />Finish homework and it starts filling up.</p>`}
     </div>
-    <div class="desk-surface"></div>
-    <p class="level-note">${next
-      ? `${earned.length} of ${DESK.length}. ${next.emoji} ${esc(next.name)} at level ${next.level}.`
-      : `All ${DESK.length} collected. The desk is complete.`}</p>`;
+    <div class="room-foot">
+      <p class="level-note">${next
+        ? `${earned.length} of ${DESK.length} · ${next.emoji} ${esc(next.name)} at level ${next.level}`
+        : `All ${DESK.length}. The room is full.`}</p>
+      ${earned.length > 1 ? '<button class="edit-btn" data-act="tidy">Tidy up</button>' : ''}
+    </div>`;
+}
+
+/** Drag to move, tap to poke. One pointer handler covers both. */
+function wireRoom() {
+  const card = $('#desk-card');
+  if (!card) return;
+
+  let thing = null, room = null, startX = 0, startY = 0, moved = false, box = null;
+
+  card.addEventListener('pointerdown', (e) => {
+    const hit = e.target.closest('.room-thing');
+    if (!hit) return;
+    thing = hit;
+    room = $('#room');
+    box = room.getBoundingClientRect();
+    startX = e.clientX; startY = e.clientY; moved = false;
+    thing.setPointerCapture(e.pointerId);
+    thing.classList.add('is-held');
+  });
+
+  card.addEventListener('pointermove', (e) => {
+    if (!thing) return;
+    if (!moved && Math.abs(e.clientX - startX) < 6 && Math.abs(e.clientY - startY) < 6) return;
+    moved = true;
+    const x = ((e.clientX - box.left) / box.width) * 100;
+    const y = ((e.clientY - box.top) / box.height) * 100;
+    thing.style.left = Math.max(6, Math.min(94, x)) + '%';
+    thing.style.top = Math.max(10, Math.min(88, y)) + '%';
+  });
+
+  const release = () => {
+    if (!thing) return;
+    const el = thing;
+    thing = null;
+    el.classList.remove('is-held');
+
+    if (moved) {
+      state.deskLayout = state.deskLayout || {};
+      state.deskLayout[el.dataset.thing] = {
+        x: parseFloat(el.style.left),
+        y: parseFloat(el.style.top),
+      };
+      save();
+    } else {
+      el.classList.remove('is-poked');
+      void el.offsetWidth;
+      el.classList.add('is-poked');
+      setTimeout(() => el.classList.remove('is-poked'), 700);
+    }
+  };
+  card.addEventListener('pointerup', release);
+  card.addEventListener('pointercancel', release);
+
+  card.addEventListener('click', (e) => {
+    if (!e.target.closest('[data-act="tidy"]')) return;
+    state.deskLayout = tidyLayout(deskEarned(levelFor(state.progress.xp)));
+    save();
+    renderProfile();
+  });
 }
 
 
@@ -1637,6 +1735,17 @@ function wireApp() {
     if (!$('#timetable').hidden) closeTimetable();
     else if (openSheetSel) closeSheet();
     else if (!$('#subject-page').hidden) closeSubjectPage();
+  });
+
+  wireRoom();
+
+  on('#home-list', 'click', (e) => {
+    if (e.target.closest('[data-act="add-first"]')) openHwSheet();
+  });
+  on('#rem-list', 'click', (e) => {
+    if (!e.target.closest('[data-act="first-reminder"]')) return;
+    const input = $('#rem-input');
+    if (input) input.focus();
   });
 
   wireLists();

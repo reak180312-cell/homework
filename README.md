@@ -38,8 +38,8 @@ Choose subjects → Add homework → See it all together → Finish it → Earn 
 - **Reminders** — things to remember, each set for a day and optionally a single lesson.
   Opens on today; tap **All** to see the rest.
 - **Subjects** — one page per subject: what's open, and what you've already handed in.
-- **Profile** — level, XP, the desk you furnish as you level up, when you finished things,
-  and the reminders.
+- **Profile** — level, XP, the room you furnish as you level up (drag things around, tap one
+  to poke it), when you finished things, and the reminders.
 
 Adding is the fast path: press **+**, type, press Enter. The subject you used last is already
 selected and the due date is optional, so the shortest add is two actions.
@@ -78,7 +78,7 @@ Subject      { id, name, icon, glyph, color }
 Homework     { id, subjectId, title, dueDate, createdAt, completed, completedAt }
 Note         { id, text, day, lesson, createdAt }  // day 0-4 = Sun-Thu, null = every day
 UserProgress { xp, level }              // +10 XP per homework, 100 XP per level
-                                        // each level earns one thing for your desk (DESK in app.js)
+                                        // each level earns one thing for your room (DESK in app.js)
 Settings     { dailyReminderEnabled, dailyReminderTime,
                bagReminderEnabled, bagReminderTime }
 ```
