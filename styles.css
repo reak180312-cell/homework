@@ -1331,3 +1331,227 @@ input.hw-title::placeholder { color: var(--ink-3); }
 
 .tt-grid tbody td.is-today { box-shadow: var(--shadow), inset 0 0 0 1.8px color-mix(in srgb, var(--ink) 26%, transparent); }
 .tt-grid tbody td.tt-free.is-today { box-shadow: inset 0 0 0 1.8px color-mix(in srgb, var(--ink) 16%, transparent); }
+
+
+/* ── Packing lists ───────────────────────────────────────── */
+
+.bag-section { margin-bottom: 6px; }
+
+.bag-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 2px;
+  font-size: 13.5px;
+  font-weight: 550;
+  color: var(--ink-2);
+}
+.edit-btn .ico { width: 15px; height: 15px; }
+.edit-btn:active { color: var(--ink); }
+
+.pack-card {
+  background: var(--card);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow);
+  padding: 14px 16px;
+  overflow: hidden;
+}
+
+.pack-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  margin: -14px -16px 0;
+  padding: 14px 16px 10px;
+  width: calc(100% + 32px);
+  text-align: left;
+}
+
+.pack-items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pack-items li {
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--sc, var(--ink-3)) 10%, var(--line-soft));
+  font-size: 14px;
+  letter-spacing: -.01em;
+  color: var(--ink);
+}
+
+.pack-items-note li { background: var(--line-soft); }
+
+.pack-none {
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+.pack-note {
+  margin-top: 10px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--late) 12%, transparent);
+  color: var(--late);
+  font-size: 14px;
+  line-height: 1.35;
+  letter-spacing: -.01em;
+}
+
+
+/* ── Timetable preview ───────────────────────────────────── */
+
+.tt-preview {
+  display: block;
+  width: 100%;
+  margin-bottom: 18px;
+  padding: 14px 14px 11px;
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  transition: transform .2s var(--ease);
+}
+.tt-preview:active { transform: scale(.985); }
+
+.tt-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+}
+
+.tt-preview-col { display: flex; flex-direction: column; gap: 3px; }
+
+.tt-preview-day {
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .03em;
+  color: var(--ink-3);
+  text-align: center;
+  margin-bottom: 2px;
+}
+.tt-preview-col.is-today .tt-preview-day { color: var(--ink); }
+
+.tt-preview-cell {
+  height: 9px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--sc) 55%, transparent);
+}
+.tt-preview-cell.is-free { background: var(--line-soft); }
+
+.tt-preview-label {
+  display: block;
+  margin-top: 11px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-3);
+  text-align: center;
+}
+
+
+/* ── Reminders page ──────────────────────────────────────── */
+
+.rem-compose {
+  background: var(--card);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow);
+  padding: 14px 0 14px;
+  margin-bottom: 8px;
+}
+
+.rem-compose > input {
+  width: calc(100% - 32px);
+  margin: 0 16px 10px;
+  padding: 10px 0;
+  border: 0;
+  background: none;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -.015em;
+}
+.rem-compose > input:focus { outline: none; }
+.rem-compose > input::placeholder { color: var(--ink-3); }
+
+.rem-compose .chips-scroll { padding-inline: 16px; margin: 0; }
+.rem-compose #rem-lessons { margin-top: 6px; }
+
+.rem-compose .btn-primary {
+  width: calc(100% - 32px);
+  margin: 14px 16px 0;
+  padding: 13px;
+  font-size: 15.5px;
+}
+
+.note-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+
+.note-lesson {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .03em;
+  color: var(--sc);
+}
+
+
+/* ── Items editor (setup step two, and the edit sheet) ───── */
+
+.items-row {
+  display: block;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  background: var(--card);
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+}
+
+.items-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  color: var(--ink-2);
+  margin-bottom: 6px;
+}
+
+.items-row input {
+  width: 100%;
+  padding: 8px 0 2px;
+  border: 0;
+  background: none;
+  font-size: 15.5px;
+  letter-spacing: -.01em;
+}
+.items-row input:focus { outline: none; }
+.items-row input::placeholder { color: var(--ink-3); }
+
+.items-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1.8px var(--ink);
+  font-size: 16.5px;
+  letter-spacing: -.012em;
+}
+.items-input:focus { outline: none; }
+
+/* Five tabs need a little more room for their labels. */
+.tab { font-size: 9.5px; }
+.tab .ico { width: 22px; height: 22px; }

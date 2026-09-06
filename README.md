@@ -33,8 +33,10 @@ Choose subjects → Add homework → See it all together → Finish it → Earn 
 
 - **Homework** — everything unfinished, soonest first. Tap the circle (or swipe a card
   right) to finish it. Tap the card to edit or delete it.
-- **Bag** — what to bring each school day, worked out from the timetable, plus your own
-  reminders ("bring the geometry notebook, not the maths one").
+- **Bag** — what to bring each school day: your every-day things, then each lesson with its
+  own kit, and any reminder pinned to that lesson.
+- **Reminders** — things to remember, each set for a day and optionally a single lesson
+  ("bring the geometry notebook, not the maths one" on Tuesday maths).
 - **Subjects** — one page per subject: what's open, and what you've already handed in.
 - **Profile** — level, XP, when you finished things, and the daily reminder.
 
@@ -43,8 +45,12 @@ selected and the due date is optional, so the shortest add is two actions.
 
 ## Timetable
 
-The weekly schedule is built in, and the button in the top-right corner opens it from any
-screen. Lessons are colour-matched to the subjects you picked at setup.
+The weekly schedule is built in. A miniature of the week sits on the Bag page, and the button
+in the top-right corner opens the full grid from any screen. Lessons are colour-matched to
+the subjects you picked at setup.
+
+What to bring to each lesson is set during setup and editable any time — tap a lesson on the
+Bag page, or Edit beside "Every day".
 
 It lives in `SCHEDULE` in [app.js](app.js) as one row per day, Sunday to Thursday, eight
 periods each — edit that array when the timetable changes. Teacher names, room numbers and

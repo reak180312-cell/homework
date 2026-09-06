@@ -72,6 +72,40 @@ const LESSON_ALIASES = {
   'מעבדה':             ['lab', 'מעבדה', 'science'],
 };
 
+/** Every distinct lesson in the week, in the order it first appears. */
+const LESSONS = (() => {
+  const seen = [];
+  for (const row of SCHEDULE) for (const name of row) if (name && !seen.includes(name)) seen.push(name);
+  return seen;
+})();
+
+// Starting points, not rules — all of it is editable in the app.
+const DEFAULT_ITEMS = {
+  'מתמטיקה':          ['Notebook', 'Textbook', 'Calculator'],
+  'ביולוגיה':          ['Notebook', 'Textbook'],
+  'פיסיקה':            ['Notebook', 'Textbook', 'Calculator'],
+  'אנגלית':            ['Notebook', 'Textbook'],
+  'הסטוריה':           ['Notebook', 'Textbook'],
+  'ספרות':             ['Notebook', 'Book'],
+  'תנ״ך':              ['Notebook', 'Tanach'],
+  'ערבית':             ['Notebook', 'Textbook'],
+  'אזרחות ודמוקרטיה':  ['Notebook'],
+  'חנ״ג':              ['Sports kit', 'Trainers'],
+  'כישורי שפה':        ['Notebook'],
+  'כישורי חיים':       ['Notebook'],
+  'חינוך':             [],
+  'העשרה / מדמ״ח':     ['Laptop', 'Notebook'],
+  'מעבדה':             ['Lab coat', 'Notebook'],
+};
+
+const DEFAULT_EVERYDAY = ['Water bottle', 'Pencil case', 'Lunchbox'];
+
+const itemsFor = (lesson) =>
+  (state.lessonItems && state.lessonItems[lesson]) || [];
+
+const parseItems = (text) =>
+  text.split(',').map(s => s.trim()).filter(Boolean);
+
 /** Lessons that day, in order, collapsed to one entry per subject. */
 function lessonsFor(dayIndex) {
   const row = SCHEDULE[dayIndex] || [];
@@ -170,6 +204,8 @@ const blank = () => ({
   subjects: [],
   homework: [],
   notes: [],
+  lessonItems: null,      // filled from DEFAULT_ITEMS on first run
+  everydayItems: null,
   progress: { xp: 0, level: 1 },
   settings: {
     dailyReminderEnabled: false, dailyReminderTime: '15:00',
@@ -187,15 +223,21 @@ function hydrate(saved) {
   const next = Object.assign(base, saved);
   next.settings = Object.assign(blank().settings, (saved && saved.settings) || {});
   next.notes = Array.isArray(next.notes) ? next.notes : [];
+  if (!next.lessonItems || typeof next.lessonItems !== 'object') {
+    next.lessonItems = Object.fromEntries(LESSONS.map(l => [l, (DEFAULT_ITEMS[l] || ['Notebook']).slice()]));
+  }
+  for (const l of LESSONS) if (!Array.isArray(next.lessonItems[l])) next.lessonItems[l] = (DEFAULT_ITEMS[l] || ['Notebook']).slice();
+  if (!Array.isArray(next.everydayItems)) next.everydayItems = DEFAULT_EVERYDAY.slice();
   return next;
 }
 
 function load() {
+  // Always hydrate, saved data or not: a first run needs the defaults too.
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) state = hydrate(JSON.parse(raw));
+    state = hydrate(raw ? JSON.parse(raw) : {});
   } catch {
-    /* Corrupt or unavailable storage: start clean rather than break. */
+    state = hydrate({});   // corrupt or unavailable storage: start clean
   }
 }
 
@@ -348,6 +390,7 @@ let currentTab = 'home';
 function render() {
   if (currentTab === 'home') renderHome();
   if (currentTab === 'bag') renderBag();
+  if (currentTab === 'reminders') renderReminders();
   if (currentTab === 'subjects') renderSubjects();
   if (currentTab === 'profile') renderProfile();
   if (!$('#subject-page').hidden) renderSubjectPage(openSubjectId);
@@ -385,67 +428,169 @@ function renderBag() {
       ${esc(d.short)}${i === today ? '<span class="today-dot"></span>' : ''}
     </button>`).join('');
 
-  const lessons = lessonsFor(bagDay);
-  const notes = state.notes.filter(n => n.day === null || n.day === bagDay);
+  renderTimetablePreview();
 
-  const bring = lessons.length ? `
-    <h2 class="section-title">Bring</h2>
-    <div class="list">
-      ${lessons.map(l => {
-        const sub = subjectForLesson(l.name);
-        const due = sub ? activeHw().filter(h => h.subjectId === sub.id).length : 0;
-        const meta = [
-          l.periods.length > 1 ? `${l.periods.length} lessons` : '',
-          due ? `${due} homework` : '',
-        ].filter(Boolean).join(' · ');
-        return `
-          <div class="bring-row" style="--sc:${sub ? sub.color : 'var(--ink-3)'}">
-            <span class="bring-dot"></span>
-            <span class="bring-main">
-              <span class="bring-name">${esc(l.name)}</span>
-              ${meta ? `<span class="bring-meta">${esc(meta)}</span>` : ''}
-            </span>
-            <span class="bring-time">${esc(PERIODS[l.periods[0]].split('–')[0])}</span>
-          </div>`;
-      }).join('')}
-    </div>` : `
+  const lessons = lessonsFor(bagDay);
+  const dayNotes = state.notes.filter(n => n.day === null || n.day === bagDay);
+  const loose = dayNotes.filter(n => !n.lesson);
+
+  const everyday = `
+    <div class="bag-section">
+      <div class="bag-section-head">
+        <h2 class="section-title">Every day</h2>
+        <button class="edit-btn" data-act="edit-everyday">
+          <svg class="ico" aria-hidden="true"><use href="#i-edit" /></svg>Edit
+        </button>
+      </div>
+      <div class="pack-card">
+        ${state.everydayItems.length
+          ? `<ul class="pack-items">${state.everydayItems.map(i => `<li>${esc(i)}</li>`).join('')}</ul>`
+          : '<p class="pack-none">Nothing set.</p>'}
+      </div>
+    </div>`;
+
+  const lessonBlocks = lessons.length ? lessons.map(l => {
+    const sub = subjectForLesson(l.name);
+    const items = itemsFor(l.name);
+    const due = sub ? activeHw().filter(h => h.subjectId === sub.id).length : 0;
+    const pinned = dayNotes.filter(n => n.lesson === l.name);
+    const meta = [
+      l.periods.length > 1 ? `${l.periods.length} lessons` : '',
+      due ? `${due} homework` : '',
+    ].filter(Boolean).join(' · ');
+
+    return `
+      <div class="pack-card" style="--sc:${sub ? sub.color : 'var(--ink-3)'}">
+        <button class="pack-head" data-act="edit-lesson" data-lesson="${esc(l.name)}">
+          <span class="bring-dot"></span>
+          <span class="bring-main">
+            <span class="bring-name">${esc(l.name)}</span>
+            ${meta ? `<span class="bring-meta">${esc(meta)}</span>` : ''}
+          </span>
+          <span class="bring-time">${esc(PERIODS[l.periods[0]].split('–')[0])}</span>
+        </button>
+        ${items.length
+          ? `<ul class="pack-items">${items.map(i => `<li>${esc(i)}</li>`).join('')}</ul>`
+          : '<p class="pack-none">Nothing to bring.</p>'}
+        ${pinned.map(n => `<p class="pack-note">${esc(n.text)}</p>`).join('')}
+      </div>`;
+  }).join('') : `
     <div class="empty">
       <span class="empty-mark"><svg class="ico" aria-hidden="true"><use href="#i-check" /></svg></span>
       <h2>No lessons</h2>
       <p>Nothing to pack for ${esc(day.en)}.</p>
     </div>`;
 
-  const reminders = `
-    <h2 class="section-title">Reminders</h2>
-    <div class="list">
-      ${notes.map(n => `
-        <div class="note-row" data-note="${n.id}">
-          <span class="note-text">${esc(n.text)}</span>
-          ${n.day === null ? '<span class="note-tag">Every day</span>' : ''}
-          <button class="note-del" data-act="del-note" aria-label="Delete reminder">
-            <svg class="ico" aria-hidden="true"><use href="#i-close" /></svg>
-          </button>
-        </div>`).join('')}
-      <div class="note-add">
-        <input id="note-input" type="text" placeholder="Add a reminder…"
-               autocomplete="off" enterkeyhint="done" />
-        <button id="note-save" data-act="add-note">Add</button>
+  const looseNotes = loose.length ? `
+    <div class="bag-section">
+      <h2 class="section-title">Also remember</h2>
+      <div class="pack-card">
+        <ul class="pack-items pack-items-note">${loose.map(n => `<li>${esc(n.text)}</li>`).join('')}</ul>
       </div>
-      <p class="note-hint">Saved for ${esc(day.en)}. Reminders stay until you remove them.</p>
-    </div>`;
+    </div>` : '';
 
-  $('#bag-body').innerHTML = bring + reminders;
+  $('#bag-body').innerHTML = `
+    ${everyday}
+    <div class="bag-section">
+      <h2 class="section-title">${lessons.length ? 'For the lessons' : ''}</h2>
+      <div class="list">${lessonBlocks}</div>
+    </div>
+    ${looseNotes}`;
 }
 
-function addNote() {
-  const input = $('#note-input');
+/** A readable miniature of the week that opens the full thing. */
+function renderTimetablePreview() {
+  const today = schoolDayIndex();
+  $('#tt-preview').innerHTML = `
+    <span class="tt-preview-grid">
+      ${SCHOOL_DAYS.map((d, i) => `
+        <span class="tt-preview-col ${i === today ? 'is-today' : ''}">
+          <span class="tt-preview-day">${esc(d.short)}</span>
+          ${SCHEDULE[i].map(name => {
+            if (!name) return '<span class="tt-preview-cell is-free"></span>';
+            const sub = subjectForLesson(name);
+            return `<span class="tt-preview-cell" style="--sc:${sub ? sub.color : 'var(--ink-3)'}"></span>`;
+          }).join('')}
+        </span>`).join('')}
+    </span>
+    <span class="tt-preview-label">Timetable · tap to open</span>`;
+}
+
+
+/* ── Reminders, on their own page ──────────────────────────── */
+
+let remDay = null;       // null = every day
+let remLesson = null;
+
+function renderReminders() {
+  const n = state.notes.length;
+  $('#rem-sub').textContent = n ? `${n} saved` : '';
+
+  $('#rem-days').innerHTML = `
+    <button class="chip chip-day ${remDay === null ? 'is-on' : ''}" data-remday="all">Every day</button>
+    ${SCHOOL_DAYS.map((d, i) => `
+      <button class="chip chip-day ${remDay === i ? 'is-on' : ''}" data-remday="${i}">${esc(d.short)}</button>`).join('')}`;
+
+  // A lesson can only be chosen once a specific day is.
+  const lessons = remDay === null ? [] : lessonsFor(remDay);
+  $('#rem-lessons').hidden = !lessons.length;
+  $('#rem-lessons').innerHTML = lessons.length ? `
+    <button class="chip chip-day ${remLesson === null ? 'is-on' : ''}" data-remlesson="">Whole day</button>
+    ${lessons.map(l => {
+      const sub = subjectForLesson(l.name);
+      return `<button class="chip ${remLesson === l.name ? 'is-on' : ''}"
+        data-remlesson="${esc(l.name)}" style="--sc:${sub ? sub.color : 'var(--ink-3)'}">
+        <span class="chip-dot"></span>${esc(l.name)}</button>`;
+    }).join('')}` : '';
+
+  if (!n) {
+    $('#rem-list').innerHTML = `
+      <div class="empty">
+        <span class="empty-mark"><svg class="ico" aria-hidden="true"><use href="#i-check" /></svg></span>
+        <h2>Nothing to remember</h2>
+        <p>Anything you add shows up in your bag on the right day.</p>
+      </div>`;
+    return;
+  }
+
+  // Every day first, then Sunday through Thursday.
+  const groups = [{ key: null, label: 'Every day' }]
+    .concat(SCHOOL_DAYS.map((d, i) => ({ key: i, label: d.en })));
+
+  $('#rem-list').innerHTML = groups.map(g => {
+    const mine = state.notes.filter(x => x.day === g.key);
+    if (!mine.length) return '';
+    return `
+      <h3 class="day-title">${esc(g.label)}</h3>
+      <div class="list">
+        ${mine.map(x => {
+          const sub = x.lesson ? subjectForLesson(x.lesson) : null;
+          return `
+            <div class="note-row" data-note="${x.id}" style="--sc:${sub ? sub.color : 'var(--ink-3)'}">
+              <span class="note-main">
+                <span class="note-text">${esc(x.text)}</span>
+                ${x.lesson ? `<span class="note-lesson"><span class="chip-dot"></span>${esc(x.lesson)}</span>` : ''}
+              </span>
+              <button class="note-del" data-act="del-note" aria-label="Delete reminder">
+                <svg class="ico" aria-hidden="true"><use href="#i-close" /></svg>
+              </button>
+            </div>`;
+        }).join('')}
+      </div>`;
+  }).join('');
+}
+
+function addReminder() {
+  const input = $('#rem-input');
   const text = input ? input.value.trim() : '';
   if (!text) return;
-  state.notes.push({ id: uid(), text, day: bagDay, createdAt: Date.now() });
+  state.notes.push({ id: uid(), text, day: remDay, lesson: remLesson, createdAt: Date.now() });
   save();
-  renderBag();
-  const again = $('#note-input');
-  if (again) again.focus();
+  input.value = '';
+  remLesson = null;
+  renderReminders();
+  $('#rem-add').disabled = true;
+  $('#rem-input').focus();
 }
 
 
@@ -488,6 +633,32 @@ function renderTimetable() {
       </table>
     </div>`;
 }
+
+/* ── Editing what to bring ─────────────────────────────────── */
+
+let itemsTarget = null;   // a lesson name, or 'everyday'
+
+function openItemsSheet(target) {
+  itemsTarget = target;
+  const everyday = target === 'everyday';
+  $('#items-title').textContent = everyday ? 'Every day' : target;
+  const list = everyday ? state.everydayItems : itemsFor(target);
+  const input = $('#items-input');
+  input.value = list.join(', ');
+  showSheet('#sheet-items');
+  input.focus();
+}
+
+function saveItems() {
+  if (!itemsTarget) return;
+  const items = parseItems($('#items-input').value);
+  if (itemsTarget === 'everyday') state.everydayItems = items;
+  else state.lessonItems[itemsTarget] = items;
+  save();
+  closeSheet();
+  render();
+}
+
 
 function openTimetable() {
   renderTimetable();
@@ -614,7 +785,7 @@ function showTab(tab) {
   }
   // The + adds homework, so it only belongs on the homework screens — and on
   // Bag it would sit on top of the reminder's own Add button.
-  $('#fab').hidden = tab === 'bag' || tab === 'profile';
+  $('#fab').hidden = tab !== 'home' && tab !== 'subjects';
   render();
   window.scrollTo(0, 0);
 }
@@ -1163,17 +1334,47 @@ function wireApp() {
   $('#bag-body').addEventListener('click', (e) => {
     const act = e.target.closest('[data-act]');
     if (!act) return;
-    if (act.dataset.act === 'add-note') addNote();
-    if (act.dataset.act === 'del-note') {
-      const id = act.closest('[data-note]').dataset.note;
-      state.notes = state.notes.filter(n => n.id !== id);
-      save();
-      renderBag();
-    }
+    if (act.dataset.act === 'edit-everyday') openItemsSheet('everyday');
+    if (act.dataset.act === 'edit-lesson') openItemsSheet(act.dataset.lesson);
   });
 
-  $('#bag-body').addEventListener('keydown', (e) => {
-    if (e.target.id === 'note-input' && e.key === 'Enter') { e.preventDefault(); addNote(); }
+  $('#tt-preview').addEventListener('click', openTimetable);
+  $('#items-save').addEventListener('click', saveItems);
+  $('#items-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); saveItems(); }
+  });
+
+  // Reminders page
+  $('#rem-input').addEventListener('input', (e) => {
+    $('#rem-add').disabled = !e.target.value.trim();
+  });
+  $('#rem-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addReminder(); }
+  });
+  $('#rem-add').addEventListener('click', addReminder);
+
+  $('#rem-days').addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-remday]');
+    if (!chip) return;
+    remDay = chip.dataset.remday === 'all' ? null : Number(chip.dataset.remday);
+    remLesson = null;                 // lessons differ from day to day
+    renderReminders();
+  });
+
+  $('#rem-lessons').addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-remlesson]');
+    if (!chip) return;
+    remLesson = chip.dataset.remlesson || null;
+    renderReminders();
+  });
+
+  $('#rem-list').addEventListener('click', (e) => {
+    const act = e.target.closest('[data-act=\"del-note\"]');
+    if (!act) return;
+    const id = act.closest('[data-note]').dataset.note;
+    state.notes = state.notes.filter(n => n.id !== id);
+    save();
+    renderReminders();
   });
 
   // Add / edit sheet
@@ -1247,13 +1448,55 @@ function wireApp() {
   wireLists();
 }
 
+/* Second setup step: what each lesson needs. Pre-filled with sensible
+   guesses so it can be skipped by anyone in a hurry. */
+
+let obStep = 1;
+
+function itemsRow(key, label, list, color) {
+  return `
+    <label class="items-row" style="--sc:${color}">
+      <span class="items-label"><span class="chip-dot"></span>${esc(label)}</span>
+      <input type="text" data-items="${esc(key)}" value="${esc(list.join(', '))}"
+             placeholder="Notebook, textbook…" autocomplete="off" />
+    </label>`;
+}
+
+function renderItemsEditor() {
+  $('#items-editor').innerHTML =
+    itemsRow('everyday', 'Every day', state.everydayItems, 'var(--ink-2)') +
+    LESSONS.map(l => {
+      const sub = subjectForLesson(l);
+      return itemsRow(l, l, itemsFor(l), sub ? sub.color : 'var(--ink-3)');
+    }).join('');
+}
+
+function readItemsEditor() {
+  for (const input of $$('#items-editor [data-items]')) {
+    const key = input.dataset.items;
+    const items = parseItems(input.value);
+    if (key === 'everyday') state.everydayItems = items;
+    else state.lessonItems[key] = items;
+  }
+}
+
 function wireOnboarding() {
   wirePicker($('#subject-picker'), () => {
     $('#onboarding-done').disabled = !picked.length;
   });
   $('#onboarding-done').addEventListener('click', () => {
-    if (!picked.length) return;
-    commitSubjects();
+    if (obStep === 1) {
+      if (!picked.length) return;
+      commitSubjects();
+      obStep = 2;
+      renderItemsEditor();
+      $('#ob-step1').hidden = true;
+      $('#ob-step2').hidden = false;
+      $('#onboarding-done').textContent = 'Done';
+      window.scrollTo(0, 0);
+      return;
+    }
+    readItemsEditor();
     state.onboarded = true;
     save();
     $('#onboarding').hidden = true;

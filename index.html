@@ -36,6 +36,8 @@
   <symbol id="i-tab-profile" viewBox="0 0 24 24"><circle cx="12" cy="8.4" r="3.8"/><path d="M4.8 20.2a7.4 7.4 0 0 1 14.4 0"/></symbol>
   <symbol id="i-tab-bag" viewBox="0 0 24 24"><path d="M5.8 9.6A4.6 4.6 0 0 1 10.4 5h3.2a4.6 4.6 0 0 1 4.6 4.6v10a1.2 1.2 0 0 1-1.2 1.2H7a1.2 1.2 0 0 1-1.2-1.2z"/><path d="M9.4 5V4.3a2.6 2.6 0 0 1 5.2 0V5"/><path d="M9 13.2h6"/></symbol>
   <symbol id="i-table" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="16" rx="2.6"/><path d="M3.5 9.6h17"/><path d="M9.7 9.6v10.9M15.1 9.6v10.9"/></symbol>
+  <symbol id="i-tab-bell" viewBox="0 0 24 24"><path d="M18.2 16.2V10.6a6.2 6.2 0 0 0-12.4 0v5.6l-1.5 2.2h15.4z"/><path d="M9.8 18.4a2.3 2.3 0 0 0 4.4 0"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20.2l4.3-1.1L19 8.4a2.3 2.3 0 0 0-3.2-3.2L5.1 15.8 4 20.2z"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.4 6.4l11.2 11.2M17.6 6.4 6.4 17.6"/></symbol>
 
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></symbol>
@@ -50,11 +52,20 @@
 <!-- First run -->
 <section id="onboarding" class="onboarding" hidden>
   <div class="onboarding-inner">
-    <header class="onboarding-head">
-      <h1>What subjects<br />do you have?</h1>
-      <p>Pick the ones you actually study.</p>
-    </header>
-    <div id="subject-picker" class="picker"></div>
+    <div id="ob-step1">
+      <header class="onboarding-head">
+        <h1>What subjects<br />do you have?</h1>
+        <p>Pick the ones you actually study.</p>
+      </header>
+      <div id="subject-picker" class="picker"></div>
+    </div>
+    <div id="ob-step2" hidden>
+      <header class="onboarding-head">
+        <h1>What do you bring<br />to each lesson?</h1>
+        <p>Separate things with commas. Change any of it later.</p>
+      </header>
+      <div id="items-editor"></div>
+    </div>
   </div>
   <div class="onboarding-foot">
     <button id="onboarding-done" class="btn-primary" disabled>Continue</button>
@@ -78,8 +89,24 @@
       <h1>Bag</h1>
       <p id="bag-sub" class="head-sub"></p>
     </header>
+    <button id="tt-preview" class="tt-preview" aria-label="Open timetable"></button>
     <div id="bag-days" class="chips chips-scroll"></div>
     <div id="bag-body"></div>
+  </section>
+
+  <section id="view-reminders" class="view" data-view="reminders" hidden>
+    <header class="head">
+      <h1>Reminders</h1>
+      <p id="rem-sub" class="head-sub"></p>
+    </header>
+    <div class="rem-compose">
+      <input id="rem-input" type="text" placeholder="Bring the geometry notebook…"
+             autocomplete="off" enterkeyhint="done" />
+      <div id="rem-days" class="chips chips-scroll"></div>
+      <div id="rem-lessons" class="chips chips-scroll"></div>
+      <button id="rem-add" class="btn-primary" disabled>Add reminder</button>
+    </div>
+    <div id="rem-list"></div>
   </section>
 
   <section id="view-subjects" class="view" data-view="subjects" hidden>
@@ -139,6 +166,9 @@
     <button class="tab" data-tab="bag" role="tab" aria-selected="false">
       <svg class="ico" aria-hidden="true"><use href="#i-tab-bag" /></svg><span>Bag</span>
     </button>
+    <button class="tab" data-tab="reminders" role="tab" aria-selected="false">
+      <svg class="ico" aria-hidden="true"><use href="#i-tab-bell" /></svg><span>Reminders</span>
+    </button>
     <button class="tab" data-tab="subjects" role="tab" aria-selected="false">
       <svg class="ico" aria-hidden="true"><use href="#i-tab-subjects" /></svg><span>Subjects</span>
     </button>
@@ -196,6 +226,19 @@
     <div id="subject-picker-2" class="picker"></div>
     <div class="sheet-actions">
       <button id="subjects-done" class="btn-primary">Done</button>
+    </div>
+  </div>
+</div>
+
+<div id="sheet-items" class="sheet" hidden role="dialog" aria-modal="true" aria-label="What to bring">
+  <div class="sheet-grip"></div>
+  <div class="sheet-body">
+    <h2 id="items-title" class="sheet-title">What to bring</h2>
+    <input id="items-input" class="items-input" type="text"
+           placeholder="Notebook, textbook…" autocomplete="off" enterkeyhint="done" />
+    <p class="note-hint">Separate things with commas.</p>
+    <div class="sheet-actions">
+      <button id="items-save" class="btn-primary">Save</button>
     </div>
   </div>
 </div>
