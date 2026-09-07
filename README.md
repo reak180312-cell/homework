@@ -38,8 +38,8 @@ Choose subjects → Add homework → See it all together → Finish it → Earn 
 - **Reminders** — things to remember, each set for a day and optionally a single lesson.
   Opens on today; tap **All** to see the rest.
 - **Subjects** — one page per subject: what's open, and what you've already handed in.
-- **Profile** — level, XP, the room you furnish as you level up (drag things around, tap one
-  to poke it), when you finished things, and the reminders.
+- **Profile** — level, XP, and your passport: a journey across the world where every ten
+  levels reaches a new place. Tap a photograph to open it.
 
 Adding is the fast path: press **+**, type, press Enter. The subject you used last is already
 selected and the due date is optional, so the shortest add is two actions.
@@ -69,6 +69,16 @@ One honest caveat: a web app can only run its timer while it's open or installed
 background. Adding it to your home screen makes this far more reliable — a browser tab you
 closed hours ago can't wake itself up. This is a limitation of web apps, not a bug.
 
+## The passport
+
+Every ten levels is a destination, from Home to Machu Picchu at level 50. The photographs are
+placed at the real geographic spot on the passport map, joined by a dotted flight path; a
+place you have not reached yet stays blurred and unnamed until you are within three levels.
+
+`JOURNEY` in [app.js](app.js) holds the five chapters. Each has a `pin` (where it sits on the
+map) and a `card` (where its photo hangs), both as percentages of `img/passport.jpg`, measured
+off that photograph. Home has no photograph on purpose — level 1 is meant to feel ordinary.
+
 ## Data
 
 Stored under the `homework.v1` key in local storage:
@@ -78,7 +88,6 @@ Subject      { id, name, icon, glyph, color }
 Homework     { id, subjectId, title, dueDate, createdAt, completed, completedAt }
 Note         { id, text, day, lesson, createdAt }  // day 0-4 = Sun-Thu, null = every day
 UserProgress { xp, level }              // +10 XP per homework, 100 XP per level
-                                        // each level earns one thing for your room (DESK in app.js)
 Settings     { dailyReminderEnabled, dailyReminderTime,
                bagReminderEnabled, bagReminderTime }
 ```
@@ -98,6 +107,7 @@ app.js        all behaviour, one file, sectioned
 sw.js         offline cache + notification clicks
 server.js     dependency-free static server
 icons/        app icons, generated from the supplied logo
+img/          passport page and the destination photographs
 ```
 
 ## Design rules

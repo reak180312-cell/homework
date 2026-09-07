@@ -100,25 +100,44 @@ const DEFAULT_ITEMS = {
 
 const DEFAULT_EVERYDAY = ['Water bottle', 'Pencil case', 'Lunchbox'];
 
-/* Levels earn one thing for your desk. Small, finite, and it never asks you
-   to spend anything — the homework is still the point. */
-const DESK = [
-  { level: 2,  emoji: '🪴', name: 'Plant',      idle: 'sway' },
-  { level: 3,  emoji: '💡', name: 'Lamp',       idle: 'glow' },
-  { level: 4,  emoji: '☕', name: 'Mug',        idle: 'bob'  },
-  { level: 5,  emoji: '🎧', name: 'Headphones', idle: 'tilt' },
-  { level: 6,  emoji: '🖼️', name: 'Poster',     idle: 'tilt' },
-  { level: 7,  emoji: '🧸', name: 'Mascot',     idle: 'hop'  },
-  { level: 8,  emoji: '📚', name: 'Bookshelf',  idle: 'bob'  },
-  { level: 9,  emoji: '🕰️', name: 'Clock',      idle: 'tick' },
-  { level: 10, emoji: '🐠', name: 'Fish tank',  idle: 'sway' },
-  { level: 12, emoji: '🎸', name: 'Guitar',     idle: 'tilt' },
-  { level: 14, emoji: '🪟', name: 'Window',     idle: 'glow' },
-  { level: 16, emoji: '🏆', name: 'Trophy',     idle: 'hop'  },
+/* ── The journey ───────────────────────────────────────────
+   Every ten levels is a place. `pin` is where it sits on the passport's
+   own world map, as a percentage of that photograph; `card` is where its
+   photo hangs, kept clear of the passport's printed text and joined back
+   to the pin by a leader line. Both were measured off the map itself. */
+
+const JOURNEY = [
+  { id: 'home', chapter: 'Starting Out', name: 'Home', where: 'Where it starts',
+    from: 1, to: 10, pin: [56.7, 41.5], photo: null },
+
+  { id: 'mountains', chapter: 'Building Momentum', name: 'Mountain Lake', where: 'The Alps',
+    from: 11, to: 20, pin: [49.8, 35.4], card: [30, 21], photo: 'mountains' },
+
+  { id: 'santorini', chapter: 'On a Roll', name: 'Santorini', where: 'Greece',
+    from: 21, to: 30, pin: [53.1, 39.0], card: [45, 64], photo: 'santorini' },
+
+  { id: 'cappadocia', chapter: 'Going Further', name: 'Cappadocia', where: 'Turkey',
+    from: 31, to: 40, pin: [56.4, 37.7], card: [78, 18], photo: 'cappadocia' },
+
+  { id: 'machupicchu', chapter: 'Mastery', name: 'Machu Picchu', where: 'Peru',
+    from: 41, to: 50, pin: [28.1, 54.4], card: [25, 77], photo: 'machupicchu', final: true },
 ];
 
-const deskEarned = (level) => DESK.filter(d => d.level <= level);
-const deskNext = (level) => DESK.find(d => d.level > level) || null;
+const MAX_LEVEL = JOURNEY[JOURNEY.length - 1].to;
+
+/** Which chapter a level belongs to; the last one holds past level 50. */
+const chapterFor = (level) =>
+  JOURNEY.find(d => level >= d.from && level <= d.to) || JOURNEY[JOURNEY.length - 1];
+
+const chapterIndex = (level) => JOURNEY.indexOf(chapterFor(level));
+
+/** done | current | next | far — everything the passport draws hangs off this. */
+function stopState(dest, level) {
+  if (level > dest.to) return 'done';
+  if (level >= dest.from) return 'current';
+  return JOURNEY[chapterIndex(level) + 1] === dest ? 'next' : 'far';
+}
+
 
 // Short forms so the whole week fits one screen without scrolling sideways.
 const SHORT_NAME = {
@@ -287,7 +306,6 @@ const blank = () => ({
   homework: [],
   notes: [],
   lessonItems: null,      // filled from DEFAULT_ITEMS on first run
-  deskLayout: null,       // where you dragged the things in your room
   everydayItems: null,
   progress: { xp: 0, level: 1 },
   settings: {
@@ -311,7 +329,6 @@ function hydrate(saved) {
   }
   for (const l of LESSONS) if (!Array.isArray(next.lessonItems[l])) next.lessonItems[l] = (DEFAULT_ITEMS[l] || ['Notebook']).slice();
   if (!Array.isArray(next.everydayItems)) next.everydayItems = DEFAULT_EVERYDAY.slice();
-  if (!next.deskLayout || typeof next.deskLayout !== 'object') next.deskLayout = {};
   return next;
 }
 
@@ -900,17 +917,24 @@ function renderProfile() {
   const into = xp % XP_PER_LEVEL;
   const doneCount = state.homework.filter(h => h.completed).length;
 
+  const here = chapterFor(level);
+  const nextStop = JOURNEY[chapterIndex(level) + 1];
+  const toGo = here.to - level + 1;
+
   $('#level-card').innerHTML = `
     <div class="level-top">
       <span class="level-name">Level ${level}</span>
       <span class="level-xp">${into} / ${XP_PER_LEVEL} XP</span>
     </div>
     <div class="bar"><div class="bar-fill" style="width:${(into / XP_PER_LEVEL) * 100}%"></div></div>
-    <p class="level-note">${doneCount
-      ? `${doneCount} finished so far. ${XP_PER_LEVEL - into} XP to level ${level + 1}.`
-      : 'Finish some homework to earn XP.'}</p>`;
+    <p class="level-chapter">${esc(here.chapter)} · ${esc(here.name)}</p>
+    <p class="level-note">${state.progress.xp > 0
+      ? (nextStop
+          ? `${toGo} ${toGo === 1 ? 'level' : 'levels'} until ${esc(nextStop.name)}`
+          : 'The whole journey behind you.')
+      : 'Finish some homework to start travelling.'}</p>`;
 
-  renderDesk(level);
+  renderPassport(level);
 
   // History, newest first, grouped by the day it was finished.
   const done = state.homework
@@ -945,113 +969,160 @@ function renderProfile() {
 }
 
 
-/* ── Your room ─────────────────────────────────────────────
-   Things you earn land in a room you arrange yourself. Drag them
-   anywhere, tap one to poke it. Positions are yours and they stick. */
+/* ── The passport ──────────────────────────────────────────
+   One photograph of an open passport, with the journey drawn over it:
+   a pin at each place, its photo hung nearby on a leader line, and a
+   flight path joining the stops you have already made. */
 
-/** Spread whatever you own along the floor, evenly. */
-function tidyLayout(earned) {
-  const layout = {};
-  earned.forEach((d, i) => {
-    const step = 100 / (earned.length + 1);
-    layout[d.name] = { x: step * (i + 1), y: 62 + (i % 3) * 11 };
-  });
-  return layout;
+/** A gently bowed path between two points, as a quadratic curve. */
+function flightPath(a, b) {
+  const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+  const dx = b[0] - a[0], dy = b[1] - a[1];
+  const len = Math.hypot(dx, dy) || 1;
+  const bow = Math.min(9, len * 0.22);
+  return `M ${a[0]} ${a[1]} Q ${mx - (dy / len) * bow} ${my + (dx / len) * bow} ${b[0]} ${b[1]}`;
 }
 
-function renderDesk(level) {
-  const box = $('#desk-card');
+function renderPassport(level) {
+  const box = $('#passport');
   if (!box) return;
-  const earned = deskEarned(level);
-  const next = deskNext(level);
 
-  // Anything newly earned gets a spot the first time it appears.
-  const layout = state.deskLayout || {};
-  let changed = false;
-  earned.forEach((d, i) => {
-    if (!layout[d.name]) {
-      const step = 100 / (earned.length + 1);
-      layout[d.name] = { x: step * (i + 1), y: 62 + (i % 3) * 11 };
-      changed = true;
-    }
+  const states = JOURNEY.map(d => stopState(d, level));
+  const reached = JOURNEY.filter((d, i) => states[i] === 'done' || states[i] === 'current');
+
+  // Route: solid between places you have been, faint to the one you are heading for.
+  let route = '';
+  for (let i = 1; i < JOURNEY.length; i++) {
+    const st = states[i];
+    if (st === 'far') continue;
+    const path = flightPath(JOURNEY[i - 1].pin, JOURNEY[i].pin);
+    const cls = st === 'done' || st === 'current' ? 'leg-done' : 'leg-next';
+    route += `<path class="leg ${cls}" d="${path}" />`;
+  }
+
+  // Leader lines run from each photo to the place it belongs to.
+  let leaders = '';
+  JOURNEY.forEach((d, i) => {
+    if (!d.card || states[i] === 'far') return;
+    leaders += `<line class="leader ${states[i] === 'next' ? 'is-faint' : ''}"
+      x1="${d.card[0]}" y1="${d.card[1]}" x2="${d.pin[0]}" y2="${d.pin[1]}" />`;
   });
-  if (changed) { state.deskLayout = layout; saveLocal(); }
+
+  const pins = JOURNEY.map((d, i) => {
+    const st = states[i];
+    if (st === 'far' || d.id === 'home') return '';
+    return `<span class="pin pin-${st}" style="left:${d.pin[0]}%; top:${d.pin[1]}%"
+                  aria-hidden="true"></span>`;
+  }).join('');
+
+  const cards = JOURNEY.map((d, i) => {
+    const st = states[i];
+    if (!d.card || st === 'far') return '';
+
+    if (st === 'next') {
+      // Close enough to name it, otherwise keep the mystery.
+      const near = d.from - level <= 3;
+      return `
+        <button class="stop stop-next ${d.final ? 'is-final' : ''}"
+                style="left:${d.card[0]}%; top:${d.card[1]}%" data-stop="${d.id}">
+          <span class="stop-photo">
+            <img src="img/${d.photo}-thumb.jpg" alt="" loading="lazy" />
+            <span class="stop-veil"><svg class="ico" aria-hidden="true"><use href="#i-lock" /></svg></span>
+          </span>
+          <span class="stop-name">${near ? esc(d.name) : '???'}</span>
+          <span class="stop-sub">Level ${d.from}</span>
+        </button>`;
+    }
+
+    return `
+      <button class="stop stop-${st} ${d.final ? 'is-final' : ''}"
+              style="left:${d.card[0]}%; top:${d.card[1]}%" data-stop="${d.id}">
+        <span class="stop-photo">
+          <img src="img/${d.photo}-thumb.jpg" alt="${esc(d.name)}" loading="lazy" />
+          ${st === 'done' ? `
+            <span class="stamp"><b>Visited</b></span>` : ''}
+        </span>
+        <span class="stop-name">${esc(d.name)}</span>
+        <span class="stop-sub">${st === 'current' ? `Level ${level} / ${d.to}` : esc(d.where)}</span>
+      </button>`;
+  }).join('');
+
+  // Home has no photograph — it is meant to feel ordinary.
+  const home = JOURNEY[0];
+  const homeMark = `
+    <button class="home-mark ${stopState(home, level) === 'current' ? 'is-current' : ''}"
+            style="left:${home.pin[0]}%; top:${home.pin[1]}%" data-stop="home">
+      <span class="home-dot"></span><span class="home-label">Home</span>
+    </button>`;
 
   box.innerHTML = `
-    <div class="room ${earned.length ? '' : 'is-bare'}" id="room">
-      <div class="room-floor"></div>
-      ${earned.map((d, i) => `
-        <button class="room-thing idle-${d.idle}" data-thing="${esc(d.name)}"
-                style="left:${layout[d.name].x}%; top:${layout[d.name].y}%; animation-delay:${i * 240}ms"
-                aria-label="${esc(d.name)}">${d.emoji}</button>`).join('')}
-      ${earned.length ? '' : `
-        <p class="room-bare">Your room is empty.<br />Finish homework and it starts filling up.</p>`}
-    </div>
-    <div class="room-foot">
-      <p class="level-note">${next
-        ? `${earned.length} of ${DESK.length} · ${next.emoji} ${esc(next.name)} at level ${next.level}`
-        : `All ${DESK.length}. The room is full.`}</p>
-      ${earned.length > 1 ? '<button class="edit-btn" data-act="tidy">Tidy up</button>' : ''}
+    <div class="pp-page">
+      <img class="pp-paper" src="img/passport.jpg" alt="An open passport showing a world map" />
+      <svg class="pp-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        ${route}${leaders}
+      </svg>
+      ${pins}${homeMark}${cards}
     </div>`;
+
+  $('#passport-note').textContent =
+    `${reached.length} of ${JOURNEY.length} places · ${chapterFor(level).chapter}`;
 }
 
-/** Drag to move, tap to poke. One pointer handler covers both. */
-function wireRoom() {
-  const card = $('#desk-card');
-  if (!card) return;
+/** The full-size view behind a destination photo. */
+function openStop(id) {
+  const d = JOURNEY.find(x => x.id === id);
+  if (!d) return;
+  const level = levelFor(state.progress.xp);
+  const st = stopState(d, level);
+  const done = state.homework.filter(h => h.completed).length;
 
-  let thing = null, room = null, startX = 0, startY = 0, moved = false, box = null;
+  let status;
+  if (st === 'done') {
+    status = `<p class="dv-status is-done"><svg class="ico" aria-hidden="true"><use href="#i-check" /></svg>Visited</p>`;
+  } else if (st === 'current') {
+    const into = level - d.from, span = d.to - d.from + 1;
+    const left = d.to - level + 1;
+    const nextStop = JOURNEY[JOURNEY.indexOf(d) + 1];
+    status = `
+      <p class="dv-status">Level ${level} of ${d.to}</p>
+      <div class="bar"><div class="bar-fill" style="width:${Math.round((into / span) * 100)}%"></div></div>
+      <p class="dv-hint">${nextStop
+        ? `${left} ${left === 1 ? 'level' : 'levels'} until ${esc(nextStop.name)}`
+        : `${left} ${left === 1 ? 'level' : 'levels'} to the end of the journey`}</p>`;
+  } else {
+    status = `<p class="dv-status is-locked">
+      <svg class="ico" aria-hidden="true"><use href="#i-lock" /></svg>Unlocks at level ${d.from}</p>`;
+  }
 
-  card.addEventListener('pointerdown', (e) => {
-    const hit = e.target.closest('.room-thing');
-    if (!hit) return;
-    thing = hit;
-    room = $('#room');
-    box = room.getBoundingClientRect();
-    startX = e.clientX; startY = e.clientY; moved = false;
-    thing.setPointerCapture(e.pointerId);
-    thing.classList.add('is-held');
-  });
+  const hidden = st === 'next' && d.from - level > 3;
 
-  card.addEventListener('pointermove', (e) => {
-    if (!thing) return;
-    if (!moved && Math.abs(e.clientX - startX) < 6 && Math.abs(e.clientY - startY) < 6) return;
-    moved = true;
-    const x = ((e.clientX - box.left) / box.width) * 100;
-    const y = ((e.clientY - box.top) / box.height) * 100;
-    thing.style.left = Math.max(6, Math.min(94, x)) + '%';
-    thing.style.top = Math.max(10, Math.min(88, y)) + '%';
-  });
+  $('#dv-body').innerHTML = `
+    <p class="dv-chapter">${esc(d.chapter)}</p>
+    <h2 class="dv-name">${hidden ? '???' : esc(d.name)}</h2>
+    ${d.where && !hidden ? `<p class="dv-where">${esc(d.where)}</p>` : ''}
+    ${d.photo ? `
+      <div class="dv-photo ${hidden ? 'is-hidden' : ''} ${d.final ? 'is-final' : ''}">
+        <img src="img/${d.photo}.jpg" alt="${hidden ? '' : esc(d.name)}" />
+      </div>` : `
+      <div class="dv-photo dv-home"><span>Where every journey starts</span></div>`}
+    <p class="dv-levels">Levels ${d.from}–${d.to}</p>
+    ${status}
+    ${st === 'done' || st === 'current' ? `
+      <div class="dv-facts">
+        <span><b>${done}</b>homework finished</span>
+        <span><b>${state.progress.xp}</b>XP earned</span>
+      </div>` : ''}`;
 
-  const release = () => {
-    if (!thing) return;
-    const el = thing;
-    thing = null;
-    el.classList.remove('is-held');
+  const view = $('#destination');
+  view.hidden = false;
+  view.classList.remove('is-leaving');
+}
 
-    if (moved) {
-      state.deskLayout = state.deskLayout || {};
-      state.deskLayout[el.dataset.thing] = {
-        x: parseFloat(el.style.left),
-        y: parseFloat(el.style.top),
-      };
-      save();
-    } else {
-      el.classList.remove('is-poked');
-      void el.offsetWidth;
-      el.classList.add('is-poked');
-      setTimeout(() => el.classList.remove('is-poked'), 700);
-    }
-  };
-  card.addEventListener('pointerup', release);
-  card.addEventListener('pointercancel', release);
-
-  card.addEventListener('click', (e) => {
-    if (!e.target.closest('[data-act="tidy"]')) return;
-    state.deskLayout = tidyLayout(deskEarned(levelFor(state.progress.xp)));
-    save();
-    renderProfile();
-  });
+function closeStop() {
+  const view = $('#destination');
+  if (!view || view.hidden) return;
+  view.classList.add('is-leaving');
+  setTimeout(() => { view.hidden = true; view.classList.remove('is-leaving'); }, 260);
 }
 
 
@@ -1254,7 +1325,7 @@ function completeHw(id, node) {
   }
 
   showToast(`Completed  ·  +${XP_PER_HOMEWORK} XP`, () => undoComplete(id));
-  if (after > before) setTimeout(() => showLevelUp(after), 950);
+  if (after > before) setTimeout(() => showLevelUp(after, before), 950);
 }
 
 function undoComplete(id) {
@@ -1287,20 +1358,66 @@ function hideToast() {
   setTimeout(() => { toast.hidden = true; toast.classList.remove('is-leaving'); }, 220);
 }
 
-function showLevelUp(level) {
+/** A level is quick and quiet. Arriving somewhere new is not. */
+function showLevelUp(level, from) {
   const box = $('#levelup');
-  $('#levelup-num').textContent = level;
-  const got = DESK.find(d => d.level === level);
-  $('#levelup-sub').textContent = got ? `${got.emoji} ${got.name} for your desk` : 'Keep it going.';
+  const arrived = JOURNEY.find(d => d.from === level && d.photo);
+  const here = chapterFor(level);
+  const nextStop = JOURNEY[chapterIndex(level) + 1];
+  const toGo = here.to - level + 1;
+
+  box.classList.toggle('is-arrival', !!arrived);
+
+  if (arrived) {
+    box.innerHTML = `
+      <div class="arrival">
+        <p class="arrival-kicker">Destination unlocked</p>
+        <div class="arrival-photo">
+          <img src="img/${arrived.photo}.jpg" alt="${esc(arrived.name)}" />
+          <span class="stamp stamp-big"><b>VISITED</b><i>${esc(arrived.name)}</i><u>LVL ${arrived.from}</u></span>
+        </div>
+        <h2 class="arrival-name">${esc(arrived.name)}</h2>
+        <p class="arrival-where">${esc(arrived.where)} · ${esc(arrived.chapter)} · Levels ${arrived.from}–${arrived.to}</p>
+      </div>`;
+  } else {
+    box.innerHTML = `
+      <div class="levelup-card">
+        <div class="levelup-ring"><span>${level}</span></div>
+        <h2>Level ${from || level - 1} → ${level}</h2>
+        <p>${esc(here.chapter)} · ${esc(here.name)}</p>
+        <p class="levelup-far">${nextStop
+          ? `${toGo} ${toGo === 1 ? 'level' : 'levels'} until ${esc(nextStop.name)}`
+          : 'The journey is complete.'}</p>
+      </div>`;
+  }
+
   box.hidden = false;
   box.classList.remove('is-leaving');
-  sparks();
+  if (!arrived) sparks();
+
   const close = () => {
     box.classList.add('is-leaving');
-    setTimeout(() => { box.hidden = true; box.classList.remove('is-leaving'); }, 300);
+    setTimeout(() => {
+      box.hidden = true;
+      box.classList.remove('is-leaving', 'is-arrival');
+      if (arrived) markArrival(arrived);
+    }, 320);
   };
   box.onclick = close;
-  setTimeout(close, 2200);
+  setTimeout(close, arrived ? 4600 : 2200);
+}
+
+/** Draw the new leg and settle the new photo onto the passport. */
+function markArrival(dest) {
+  if (currentTab !== 'profile') return;
+  renderProfile();
+  requestAnimationFrame(() => {
+    const card = $(`.stop[data-stop="${dest.id}"]`);
+    if (card) card.classList.add('is-arriving');
+    const legs = $$('.leg-done');
+    const last = legs[legs.length - 1];
+    if (last) last.classList.add('is-drawing');
+  });
 }
 
 /** A small burst — celebratory, over in a second, gone. */
@@ -1732,12 +1849,11 @@ function wireApp() {
 
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (!$('#timetable').hidden) closeTimetable();
+    if (!$('#destination').hidden) closeStop();
+    else if (!$('#timetable').hidden) closeTimetable();
     else if (openSheetSel) closeSheet();
     else if (!$('#subject-page').hidden) closeSubjectPage();
   });
-
-  wireRoom();
 
   on('#home-list', 'click', (e) => {
     if (e.target.closest('[data-act="add-first"]')) openHwSheet();
@@ -1747,6 +1863,12 @@ function wireApp() {
     const input = $('#rem-input');
     if (input) input.focus();
   });
+
+  on('#passport', 'click', (e) => {
+    const stop = e.target.closest('[data-stop]');
+    if (stop) openStop(stop.dataset.stop);
+  });
+  on('#dv-close', 'click', closeStop);
 
   wireLists();
 }

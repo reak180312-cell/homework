@@ -38,6 +38,7 @@
   <symbol id="i-table" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="16" rx="2.6"/><path d="M3.5 9.6h17"/><path d="M9.7 9.6v10.9M15.1 9.6v10.9"/></symbol>
   <symbol id="i-tab-bell" viewBox="0 0 24 24"><path d="M18.2 16.2V10.6a6.2 6.2 0 0 0-12.4 0v5.6l-1.5 2.2h15.4z"/><path d="M9.8 18.4a2.3 2.3 0 0 0 4.4 0"/></symbol>
   <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20.2l4.3-1.1L19 8.4a2.3 2.3 0 0 0-3.2-3.2L5.1 15.8 4 20.2z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.6"/><path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.4 6.4l11.2 11.2M17.6 6.4 6.4 17.6"/></symbol>
 
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></symbol>
@@ -120,8 +121,9 @@
     <header class="head"><h1>Profile</h1></header>
     <div id="level-card" class="level-card"></div>
 
-    <h2 class="section-title">Your room</h2>
-    <div id="desk-card" class="desk-card"></div>
+    <h2 class="section-title">Your passport</h2>
+    <div id="passport" class="passport"></div>
+    <p id="passport-note" class="foot-note"></p>
 
     <h2 class="section-title">Completed</h2>
     <div id="history-list" class="list"></div>
@@ -249,18 +251,20 @@
   </div>
 </div>
 
+<section id="destination" class="destination" hidden role="dialog" aria-modal="true" aria-label="Destination">
+  <button id="dv-close" class="dv-close" aria-label="Close">
+    <svg class="ico" aria-hidden="true"><use href="#i-close" /></svg>
+  </button>
+  <div id="dv-body" class="dv-body"></div>
+</section>
+
 <div id="toast" class="toast" hidden>
   <span id="toast-text"></span>
   <button id="toast-undo" class="toast-undo">Undo</button>
 </div>
 
-<div id="levelup" class="levelup" hidden>
-  <div class="levelup-card">
-    <div class="levelup-ring"><span id="levelup-num">2</span></div>
-    <h2>Level up</h2>
-    <p id="levelup-sub">Nice work.</p>
-  </div>
-</div>
+<!-- Filled in when you level up, or arrive somewhere new. -->
+<div id="levelup" class="levelup" hidden></div>
 
 <script src="app.js"></script>
 </body>
