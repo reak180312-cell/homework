@@ -127,6 +127,11 @@ img/          passport page and the destination photographs
 
 ## Design rules
 
-Colour belongs to the subjects. Everything else is warm paper, near-black ink for actions,
-and green only for "done". Before adding a button, option, or screen, the test is: *does this
-make entering or completing homework easier?* If not, it doesn't go in.
+The app wears the passport's world: aged parchment, the deep ink-blue its map is printed in,
+and the red-brown of a rubber stamp where something is being marked. A serif carries the
+headings the way a passport prints a name; everything you operate stays in the sans, where it
+reads faster. Colour otherwise still belongs to the subjects, so those stay the thing you
+recognise at a glance.
+
+Before adding a button, option, or screen, the test is: *does this make entering or completing
+homework easier?* If not, it doesn't go in.

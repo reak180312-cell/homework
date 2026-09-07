@@ -1,25 +1,30 @@
 /* ── Foundations ─────────────────────────────────────────────
-   Warm paper, near-black ink for actions, green only for "done".
-   Colour otherwise belongs to the subjects alone, so the app
-   stays quiet and the subjects stay recognisable.            */
+   The passport's own world, carried through the app: aged parchment,
+   the deep ink-blue its map is printed in, and the red-brown of a
+   rubber stamp. Colour otherwise still belongs to the subjects, so
+   they stay the thing you recognise at a glance.               */
 
 :root {
-  --paper:      #FBFAF8;
-  --card:       #FFFFFF;
-  --ink:        #1A1917;
-  --ink-2:      #6E695F;
-  --ink-3:      #A29C92;
-  --line:       #EDE9E3;
-  --line-soft:  #F4F1EC;
-  --done:       #2F9E6E;
-  --late:       #B8763A;
-  --tint:       12%;      /* subject colour over paper */
-  --on-ink:     #FFFFFF;
+  --paper:      #F4EEE1;   /* parchment */
+  --card:       #FCF8EF;
+  --ink:        #22303F;   /* passport ink */
+  --ink-2:      #5C6875;
+  --ink-3:      #97A1AD;
+  --line:       #E4DAC8;
+  --line-soft:  #EEE7D8;
+  --done:       #3F7D5F;
+  --late:       #A56B33;
+  --stamp:      #9A4A38;   /* the red-brown of an inked stamp */
+  --tint:       14%;       /* subject colour over parchment */
+  --on-ink:     #FBF7EE;
+
+  --font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino,
+                  'Book Antiqua', Georgia, 'Times New Roman', serif;
 
   --r-card:     18px;
   --r-pill:     999px;
-  --shadow:     0 1px 2px rgba(26,25,23,.04), 0 10px 28px -16px rgba(26,25,23,.22);
-  --shadow-lift:0 2px 6px rgba(26,25,23,.06), 0 18px 40px -18px rgba(26,25,23,.30);
+  --shadow:     0 1px 2px rgba(56,44,28,.06), 0 10px 28px -16px rgba(56,44,28,.30);
+  --shadow-lift:0 2px 6px rgba(56,44,28,.09), 0 18px 40px -18px rgba(56,44,28,.38);
 
   --ease:       cubic-bezier(.32,.72,0,1);
   --spring:     cubic-bezier(.34,1.32,.64,1);
@@ -34,37 +39,39 @@
    overridden it, or they've explicitly asked for dark. Same values, both gates. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper:     #0F0F11;
-    --card:      #18181B;
-    --ink:       #F3F1ED;
-    --ink-2:     #9A958D;
-    --ink-3:     #6B6761;
-    --line:      #26262A;
-    --line-soft: #202024;
-    --done:      #4FBF8B;
-    --late:      #D9A063;
-    --tint:      22%;
-    --on-ink:    #161513;
-    --shadow:    0 1px 2px rgba(0,0,0,.4), 0 10px 28px -16px rgba(0,0,0,.7);
-    --shadow-lift:0 2px 6px rgba(0,0,0,.5), 0 18px 40px -18px rgba(0,0,0,.8);
+    --paper:     #13171C;
+    --card:      #1B2027;
+    --ink:       #EFE7D7;
+    --ink-2:     #9AA3AE;
+    --ink-3:     #6B7480;
+    --line:      #2A313A;
+    --line-soft: #232931;
+    --done:      #5FA87F;
+    --late:      #C99150;
+    --stamp:     #C4705A;
+    --tint:      24%;
+    --on-ink:    #12161B;
+    --shadow:    0 1px 2px rgba(0,0,0,.45), 0 10px 28px -16px rgba(0,0,0,.75);
+    --shadow-lift:0 2px 6px rgba(0,0,0,.55), 0 18px 40px -18px rgba(0,0,0,.85);
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --paper:     #0F0F11;
-  --card:      #18181B;
-  --ink:       #F3F1ED;
-  --ink-2:     #9A958D;
-  --ink-3:     #6B6761;
-  --line:      #26262A;
-  --line-soft: #202024;
-  --done:      #4FBF8B;
-  --late:      #D9A063;
-  --tint:      22%;
-  --on-ink:    #161513;
-  --shadow:    0 1px 2px rgba(0,0,0,.4), 0 10px 28px -16px rgba(0,0,0,.7);
-  --shadow-lift:0 2px 6px rgba(0,0,0,.5), 0 18px 40px -18px rgba(0,0,0,.8);
+  --paper:     #13171C;
+  --card:      #1B2027;
+  --ink:       #EFE7D7;
+  --ink-2:     #9AA3AE;
+  --ink-3:     #6B7480;
+  --line:      #2A313A;
+  --line-soft: #232931;
+  --done:      #5FA87F;
+  --late:      #C99150;
+  --stamp:     #C4705A;
+  --tint:      24%;
+  --on-ink:    #12161B;
+  --shadow:    0 1px 2px rgba(0,0,0,.45), 0 10px 28px -16px rgba(0,0,0,.75);
+  --shadow-lift:0 2px 6px rgba(0,0,0,.55), 0 18px 40px -18px rgba(0,0,0,.85);
   color-scheme: dark;
 }
 
@@ -2420,3 +2427,79 @@ input.hw-title::placeholder { color: var(--ink-3); }
   .jn-plane { display: none; }
   .jn-camera { transition: none !important; }
 }
+
+
+/* ── Travel dress ────────────────────────────────────────────
+   A serif carries the headings, the way a passport prints a name;
+   everything you operate stays in the sans, where it reads faster. */
+
+.head h1,
+.onboarding-head h1,
+.sheet-title,
+.empty h2,
+.level-name,
+.dv-name,
+.jn-name,
+.jn-levels,
+.subject-hero h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -.012em;
+}
+
+/* The serif carries its own weight, so it wants less negative tracking
+   and a touch more size than the sans it replaces. */
+.head h1 { font-size: 36px; letter-spacing: -.015em; }
+.onboarding-head h1 { font-size: 35px; letter-spacing: -.015em; line-height: 1.14; }
+.empty h2 { font-size: 23px; letter-spacing: -.01em; }
+.level-name { font-size: 26px; letter-spacing: -.012em; }
+.dv-name { font-size: 34px; letter-spacing: -.016em; }
+.jn-name { font-size: 36px; letter-spacing: -.016em; }
+.jn-levels { font-size: 46px; letter-spacing: -.01em; }
+.sheet-title { font-size: 22px; letter-spacing: -.008em; }
+.subject-hero h1 { font-size: 31px; letter-spacing: -.014em; }
+
+/* Small labels read as stamped ink. */
+.section-title,
+.jn-found,
+.jn-kicker,
+.dv-levels {
+  color: var(--ink-2);
+  letter-spacing: .13em;
+  font-weight: 650;
+}
+
+.hw-subject { letter-spacing: .08em; }
+.done-subject { letter-spacing: .08em; }
+
+/* Cards sit on parchment, so they need an edge as well as a shadow. */
+.hw, .card, .subject-row, .level-card, .pack-card, .done-row, .note-row,
+.pack-list, .lesson-line, .rem-compose, .items-row, .passport, .dv-facts span {
+  border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+
+/* A faint grain, so the ground reads as paper rather than flat colour.
+   It lives in the body background, not a layer over it - a fixed overlay
+   would fight every position: fixed element in the app. */
+body {
+  background-color: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27180%27 height=%27180%27%3E%3Cfilter id=%27g%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%27.85%27 numOctaves=%273%27 stitchTiles=%27stitch%27/%3E%3CfeColorMatrix type=%27saturate%27 values=%270%27/%3E%3C/filter%3E%3Crect width=%27180%27 height=%27180%27 filter=%27url(%23g)%27 opacity=%27.05%27/%3E%3C/svg%3E");
+}
+
+/* On a dark screen the grain just reads as noise. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body { background-image: none; }
+}
+:root[data-theme="dark"] body { background-image: none; }
+
+/* The stamp red-brown, used sparingly: the place you are now, and
+   the "visited" marks in the passport. */
+.pin-here { background: var(--stamp); }
+.stop-current { box-shadow: 0 1px 2px rgba(30,26,20,.2), 0 8px 18px -6px rgba(30,26,20,.5),
+                            0 0 0 1.5px color-mix(in srgb, var(--stamp) 55%, transparent); }
+.home-mark.is-current .home-dot { background: var(--stamp); }
+.home-mark.is-current .home-label { color: var(--stamp); }
+
+/* Primary actions take the passport's ink rather than plain black. */
+.btn-primary, .fab, .toast, .chip-day.is-on, .chip-due.is-on, .item-chip.is-on,
+.pick-input button { background: var(--ink); color: var(--on-ink); }
