@@ -106,37 +106,53 @@ const DEFAULT_EVERYDAY = ['Water bottle', 'Pencil case', 'Lunchbox'];
    photo hangs, kept clear of the passport's printed text and joined back
    to the pin by a leader line. Both were measured off the map itself. */
 
+/* One level, one place. Each is anchored by real latitude and longitude, so
+   the photograph lands on the right country whatever size the passport is
+   drawn at. `offset` only slides the photo clear of its neighbours — the pin
+   and the flight path always sit on the true coordinates. */
+
 const JOURNEY = [
-  { id: 'home', chapter: 'Starting Out', name: 'Home', where: 'Where it starts',
-    from: 1, to: 10, pin: [56.7, 41.5], photo: null },
+  { level: 1, id: 'home',        name: 'Home',          country: '',
+    lat: 31.8,   lon: 35.0,  photo: null },
 
-  { id: 'mountains', chapter: 'Building Momentum', name: 'Mountain Lake', where: 'The Alps',
-    from: 11, to: 20, pin: [49.8, 35.4], card: [30, 21], photo: 'mountains' },
+  { level: 2, id: 'mountains',   name: 'Mountain Lake', country: 'The Alps',
+    lat: 46.5,   lon: 8.5,   photo: 'mountains',   offset: [-10, -12] },
 
-  { id: 'santorini', chapter: 'On a Roll', name: 'Santorini', where: 'Greece',
-    from: 21, to: 30, pin: [53.1, 39.0], card: [45, 64], photo: 'santorini' },
+  { level: 3, id: 'santorini',   name: 'Santorini',     country: 'Greece',
+    lat: 36.4,   lon: 25.4,  photo: 'santorini',   offset: [-9, 13] },
 
-  { id: 'cappadocia', chapter: 'Going Further', name: 'Cappadocia', where: 'Turkey',
-    from: 31, to: 40, pin: [56.4, 37.7], card: [78, 18], photo: 'cappadocia' },
+  { level: 4, id: 'cappadocia',  name: 'Cappadocia',    country: 'Turkey',
+    lat: 38.6,   lon: 34.8,  photo: 'cappadocia',  offset: [14, -11] },
 
-  { id: 'machupicchu', chapter: 'Mastery', name: 'Machu Picchu', where: 'Peru',
-    from: 41, to: 50, pin: [28.1, 54.4], card: [25, 77], photo: 'machupicchu', final: true },
+  { level: 5, id: 'machupicchu', name: 'Machu Picchu',  country: 'Peru',
+    lat: -13.16, lon: -72.5, photo: 'machupicchu', offset: [0, 14], final: true },
 ];
 
-const MAX_LEVEL = JOURNEY[JOURNEY.length - 1].to;
+const MAX_LEVEL = JOURNEY.length;
 
-/** Which chapter a level belongs to; the last one holds past level 50. */
-const chapterFor = (level) =>
-  JOURNEY.find(d => level >= d.from && level <= d.to) || JOURNEY[JOURNEY.length - 1];
+/* Where the map sits inside img/passport.jpg. Fitted against landmarks read
+   off that photograph — the equator lands on 50.2%, Greenwich on 47.4%. */
+const MAP = { lon0: 47.4, lonScale: 0.2661, lat0: 50.2, latScale: 0.3183 };
 
-const chapterIndex = (level) => JOURNEY.indexOf(chapterFor(level));
+/** Latitude and longitude to a percentage of the passport page. */
+const project = (lat, lon) => [
+  MAP.lon0 + lon * MAP.lonScale,
+  MAP.lat0 - lat * MAP.latScale,
+];
 
-/** done | current | next | far — everything the passport draws hangs off this. */
-function stopState(dest, level) {
-  if (level > dest.to) return 'done';
-  if (level >= dest.from) return 'current';
-  return JOURNEY[chapterIndex(level) + 1] === dest ? 'next' : 'far';
+const pinOf = (d) => project(d.lat, d.lon);
+
+/** Where the photograph hangs: on its pin, nudged clear of its neighbours. */
+function photoAt(d) {
+  const [x, y] = pinOf(d);
+  const [dx, dy] = d.offset || [0, 0];
+  return [x + dx, y + dy];
 }
+
+const stopFor = (level) => JOURNEY[Math.min(level, MAX_LEVEL) - 1];
+
+/** Everywhere reached at this level, in the order they were discovered. */
+const discovered = (level) => JOURNEY.filter(d => d.level <= level);
 
 
 // Short forms so the whole week fits one screen without scrolling sideways.
@@ -307,7 +323,7 @@ const blank = () => ({
   notes: [],
   lessonItems: null,      // filled from DEFAULT_ITEMS on first run
   everydayItems: null,
-  progress: { xp: 0, level: 1 },
+  progress: { xp: 0, level: 1, shownUpTo: 1 },
   settings: {
     dailyReminderEnabled: false, dailyReminderTime: '15:00',
     bagReminderEnabled: false, bagReminderTime: '20:00',
@@ -329,6 +345,9 @@ function hydrate(saved) {
   }
   for (const l of LESSONS) if (!Array.isArray(next.lessonItems[l])) next.lessonItems[l] = (DEFAULT_ITEMS[l] || ['Notebook']).slice();
   if (!Array.isArray(next.everydayItems)) next.everydayItems = DEFAULT_EVERYDAY.slice();
+  next.progress = Object.assign({ xp: 0, level: 1, shownUpTo: 1 }, next.progress);
+  // Anyone already part way through should not be shown a burst of arrivals.
+  if (typeof next.progress.shownUpTo !== 'number') next.progress.shownUpTo = levelFor(next.progress.xp || 0);
   return next;
 }
 
@@ -428,7 +447,7 @@ function sortForList(list) {
   });
 }
 
-const levelFor = (xp) => Math.floor(xp / XP_PER_LEVEL) + 1;
+const levelFor = (xp) => Math.min(MAX_LEVEL, Math.floor(xp / XP_PER_LEVEL) + 1);
 
 function monogram(name) {
   const words = name.trim().split(/\s+/);
@@ -917,22 +936,21 @@ function renderProfile() {
   const into = xp % XP_PER_LEVEL;
   const doneCount = state.homework.filter(h => h.completed).length;
 
-  const here = chapterFor(level);
-  const nextStop = JOURNEY[chapterIndex(level) + 1];
-  const toGo = here.to - level + 1;
+  const place = stopFor(level);
+  const journeyDone = level >= MAX_LEVEL;
 
   $('#level-card').innerHTML = `
     <div class="level-top">
       <span class="level-name">Level ${level}</span>
-      <span class="level-xp">${into} / ${XP_PER_LEVEL} XP</span>
+      <span class="level-xp">${journeyDone ? 'Journey complete' : `${into} / ${XP_PER_LEVEL} XP`}</span>
     </div>
-    <div class="bar"><div class="bar-fill" style="width:${(into / XP_PER_LEVEL) * 100}%"></div></div>
-    <p class="level-chapter">${esc(here.chapter)} · ${esc(here.name)}</p>
-    <p class="level-note">${state.progress.xp > 0
-      ? (nextStop
-          ? `${toGo} ${toGo === 1 ? 'level' : 'levels'} until ${esc(nextStop.name)}`
-          : 'The whole journey behind you.')
-      : 'Finish some homework to start travelling.'}</p>`;
+    <div class="bar"><div class="bar-fill" style="width:${journeyDone ? 100 : (into / XP_PER_LEVEL) * 100}%"></div></div>
+    <p class="level-chapter">${esc(place.name)}${place.country ? ` · ${esc(place.country)}` : ''}</p>
+    <p class="level-note">${journeyDone
+      ? 'Every place discovered.'
+      : (xp > 0
+          ? `${XP_PER_LEVEL - into} XP until the next destination`
+          : 'Finish some homework to start travelling.')}</p>`;
 
   renderPassport(level);
 
@@ -970,148 +988,116 @@ function renderProfile() {
 
 
 /* ── The passport ──────────────────────────────────────────
-   One photograph of an open passport, with the journey drawn over it:
-   a pin at each place, its photo hung nearby on a leader line, and a
-   flight path joining the stops you have already made. */
+   Built from four small pieces that the level-up journey reuses:
+   worldMap() draws the page, flightPath() the route between two places,
+   destinationPhoto() one travel memory, and renderPassport() puts them
+   together for whatever level you have reached. */
 
-/** A gently bowed path between two points, as a quadratic curve. */
+/** A gently bowed great-circle-ish curve between two points on the page. */
 function flightPath(a, b) {
   const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
   const dx = b[0] - a[0], dy = b[1] - a[1];
   const len = Math.hypot(dx, dy) || 1;
-  const bow = Math.min(9, len * 0.22);
+  const bow = Math.min(11, len * 0.24);
   return `M ${a[0]} ${a[1]} Q ${mx - (dy / len) * bow} ${my + (dx / len) * bow} ${b[0]} ${b[1]}`;
+}
+
+/** One travel memory pinned to the page. */
+function destinationPhoto(d, opts = {}) {
+  const [px, py] = photoAt(d);
+  const cls = ['stop', d.final ? 'is-final' : '', opts.hidden ? 'is-hidden' : ''].filter(Boolean).join(' ');
+  return `
+    <button class="${cls}" style="left:${px}%; top:${py}%" data-stop="${d.id}"
+            aria-label="${esc(d.name)}">
+      <span class="stop-photo">
+        <img src="img/${d.photo}-thumb.jpg" alt="${esc(d.name)}" loading="lazy" />
+      </span>
+    </button>`;
+}
+
+/** The passport page with a route, its pins and whichever photos belong. */
+function worldMap({ upTo, hidePhoto = null, legs = 'all' } = {}) {
+  const stops = discovered(upTo);
+
+  let route = '';
+  for (let i = 1; i < stops.length; i++) {
+    if (legs === 'exceptLast' && i === stops.length - 1) continue;
+    route += `<path class="leg" d="${flightPath(pinOf(stops[i - 1]), pinOf(stops[i]))}" />`;
+  }
+
+  // A hairline from each photo back to the spot it belongs to, so the
+  // geography stays legible even though the photo is nudged clear.
+  const leaders = stops
+    .filter(d => d.photo && d.id !== hidePhoto)
+    .map(d => {
+      const [px, py] = photoAt(d), [x, y] = pinOf(d);
+      return `<line class="leader" x1="${px}" y1="${py}" x2="${x}" y2="${y}" />`;
+    }).join('');
+
+  const pins = stops.map(d => {
+    const [x, y] = pinOf(d);
+    const last = d.level === upTo;
+    return `<span class="pin ${last ? 'pin-here' : ''}" style="left:${x}%; top:${y}%" aria-hidden="true"></span>`;
+  }).join('');
+
+  const home = JOURNEY[0];
+  const [hx, hy] = pinOf(home);
+  const homeMark = `
+    <button class="home-mark ${upTo === 1 ? 'is-current' : ''}"
+            style="left:${hx}%; top:${hy}%" data-stop="home">
+      <span class="home-dot"></span><span class="home-label">Home</span>
+    </button>`;
+
+  const photos = stops
+    .filter(d => d.photo && d.id !== hidePhoto)
+    .map(d => destinationPhoto(d))
+    .join('');
+
+  return `
+    <div class="pp-page">
+      <img class="pp-paper" src="img/passport.jpg" alt="An open passport showing a world map" />
+      <svg class="pp-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${route}${leaders}</svg>
+      ${pins}${homeMark}${photos}
+    </div>`;
 }
 
 function renderPassport(level) {
   const box = $('#passport');
   if (!box) return;
+  box.innerHTML = worldMap({ upTo: level });
 
-  const states = JOURNEY.map(d => stopState(d, level));
-  const reached = JOURNEY.filter((d, i) => states[i] === 'done' || states[i] === 'current');
-
-  // Route: solid between places you have been, faint to the one you are heading for.
-  let route = '';
-  for (let i = 1; i < JOURNEY.length; i++) {
-    const st = states[i];
-    if (st === 'far') continue;
-    const path = flightPath(JOURNEY[i - 1].pin, JOURNEY[i].pin);
-    const cls = st === 'done' || st === 'current' ? 'leg-done' : 'leg-next';
-    route += `<path class="leg ${cls}" d="${path}" />`;
+  const n = discovered(level).length;
+  const note = $('#passport-note');
+  if (note) {
+    note.textContent = level >= MAX_LEVEL
+      ? `${n} of ${MAX_LEVEL} places · the journey is complete`
+      : `${n} of ${MAX_LEVEL} places · keep going to discover the next`;
   }
-
-  // Leader lines run from each photo to the place it belongs to.
-  let leaders = '';
-  JOURNEY.forEach((d, i) => {
-    if (!d.card || states[i] === 'far') return;
-    leaders += `<line class="leader ${states[i] === 'next' ? 'is-faint' : ''}"
-      x1="${d.card[0]}" y1="${d.card[1]}" x2="${d.pin[0]}" y2="${d.pin[1]}" />`;
-  });
-
-  const pins = JOURNEY.map((d, i) => {
-    const st = states[i];
-    if (st === 'far' || d.id === 'home') return '';
-    return `<span class="pin pin-${st}" style="left:${d.pin[0]}%; top:${d.pin[1]}%"
-                  aria-hidden="true"></span>`;
-  }).join('');
-
-  const cards = JOURNEY.map((d, i) => {
-    const st = states[i];
-    if (!d.card || st === 'far') return '';
-
-    if (st === 'next') {
-      // Close enough to name it, otherwise keep the mystery.
-      const near = d.from - level <= 3;
-      return `
-        <button class="stop stop-next ${d.final ? 'is-final' : ''}"
-                style="left:${d.card[0]}%; top:${d.card[1]}%" data-stop="${d.id}">
-          <span class="stop-photo">
-            <img src="img/${d.photo}-thumb.jpg" alt="" loading="lazy" />
-            <span class="stop-veil"><svg class="ico" aria-hidden="true"><use href="#i-lock" /></svg></span>
-          </span>
-          <span class="stop-name">${near ? esc(d.name) : '???'}</span>
-          <span class="stop-sub">Level ${d.from}</span>
-        </button>`;
-    }
-
-    return `
-      <button class="stop stop-${st} ${d.final ? 'is-final' : ''}"
-              style="left:${d.card[0]}%; top:${d.card[1]}%" data-stop="${d.id}">
-        <span class="stop-photo">
-          <img src="img/${d.photo}-thumb.jpg" alt="${esc(d.name)}" loading="lazy" />
-          ${st === 'done' ? `
-            <span class="stamp"><b>Visited</b></span>` : ''}
-        </span>
-        <span class="stop-name">${esc(d.name)}</span>
-        <span class="stop-sub">${st === 'current' ? `Level ${level} / ${d.to}` : esc(d.where)}</span>
-      </button>`;
-  }).join('');
-
-  // Home has no photograph — it is meant to feel ordinary.
-  const home = JOURNEY[0];
-  const homeMark = `
-    <button class="home-mark ${stopState(home, level) === 'current' ? 'is-current' : ''}"
-            style="left:${home.pin[0]}%; top:${home.pin[1]}%" data-stop="home">
-      <span class="home-dot"></span><span class="home-label">Home</span>
-    </button>`;
-
-  box.innerHTML = `
-    <div class="pp-page">
-      <img class="pp-paper" src="img/passport.jpg" alt="An open passport showing a world map" />
-      <svg class="pp-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        ${route}${leaders}
-      </svg>
-      ${pins}${homeMark}${cards}
-    </div>`;
-
-  $('#passport-note').textContent =
-    `${reached.length} of ${JOURNEY.length} places · ${chapterFor(level).chapter}`;
 }
 
-/** The full-size view behind a destination photo. */
+
+/* ── One destination, full size ────────────────────────────── */
+
 function openStop(id) {
   const d = JOURNEY.find(x => x.id === id);
   if (!d) return;
   const level = levelFor(state.progress.xp);
-  const st = stopState(d, level);
-  const done = state.homework.filter(h => h.completed).length;
+  if (d.level > level) return;                 // not discovered, nothing to show
 
-  let status;
-  if (st === 'done') {
-    status = `<p class="dv-status is-done"><svg class="ico" aria-hidden="true"><use href="#i-check" /></svg>Visited</p>`;
-  } else if (st === 'current') {
-    const into = level - d.from, span = d.to - d.from + 1;
-    const left = d.to - level + 1;
-    const nextStop = JOURNEY[JOURNEY.indexOf(d) + 1];
-    status = `
-      <p class="dv-status">Level ${level} of ${d.to}</p>
-      <div class="bar"><div class="bar-fill" style="width:${Math.round((into / span) * 100)}%"></div></div>
-      <p class="dv-hint">${nextStop
-        ? `${left} ${left === 1 ? 'level' : 'levels'} until ${esc(nextStop.name)}`
-        : `${left} ${left === 1 ? 'level' : 'levels'} to the end of the journey`}</p>`;
-  } else {
-    status = `<p class="dv-status is-locked">
-      <svg class="ico" aria-hidden="true"><use href="#i-lock" /></svg>Unlocks at level ${d.from}</p>`;
-  }
-
-  const hidden = st === 'next' && d.from - level > 3;
+  const when = (state.progress.discoveredAt || {})[d.id];
 
   $('#dv-body').innerHTML = `
-    <p class="dv-chapter">${esc(d.chapter)}</p>
-    <h2 class="dv-name">${hidden ? '???' : esc(d.name)}</h2>
-    ${d.where && !hidden ? `<p class="dv-where">${esc(d.where)}</p>` : ''}
+    <h2 class="dv-name">${esc(d.name)}</h2>
+    ${d.country ? `<p class="dv-where">${esc(d.country)}</p>` : ''}
     ${d.photo ? `
-      <div class="dv-photo ${hidden ? 'is-hidden' : ''} ${d.final ? 'is-final' : ''}">
-        <img src="img/${d.photo}.jpg" alt="${hidden ? '' : esc(d.name)}" />
+      <div class="dv-photo ${d.final ? 'is-final' : ''}">
+        <img src="img/${d.photo}.jpg" alt="${esc(d.name)}" />
+        <span class="stamp stamp-mid"><b>Visited</b><i>${esc(d.name)}</i></span>
       </div>` : `
-      <div class="dv-photo dv-home"><span>Where every journey starts</span></div>`}
-    <p class="dv-levels">Levels ${d.from}–${d.to}</p>
-    ${status}
-    ${st === 'done' || st === 'current' ? `
-      <div class="dv-facts">
-        <span><b>${done}</b>homework finished</span>
-        <span><b>${state.progress.xp}</b>XP earned</span>
-      </div>` : ''}`;
+      <div class="dv-photo dv-home"><span>Where the journey starts</span></div>`}
+    <p class="dv-levels">${d.level === 1 ? 'Starting point' : `Discovered at level ${d.level}`}</p>
+    ${when ? `<p class="dv-hint">${esc(new Date(when).toLocaleDateString([], {
+      day: 'numeric', month: 'long', year: 'numeric' }))}</p>` : ''}`;
 
   const view = $('#destination');
   view.hidden = false;
@@ -1125,6 +1111,165 @@ function closeStop() {
   setTimeout(() => { view.hidden = true; view.classList.remove('is-leaving'); }, 260);
 }
 
+
+/* ── The journey: a full screen, a plane, a new memory ─────── */
+
+let journeyTimers = [];
+const clearJourney = () => { journeyTimers.forEach(clearTimeout); journeyTimers = []; };
+const step = (fn, at) => { journeyTimers.push(setTimeout(fn, at)); };
+
+/**
+ * Flies from the place before it to the one just reached, draws the route as
+ * it goes, then settles the new photograph onto the map for good.
+ */
+function playJourney(dest, fromLevel) {
+  const box = $('#journey');
+  if (!box || !dest.photo) return;
+
+  const prev = JOURNEY[dest.level - 2] || JOURNEY[0];
+  const a = pinOf(prev), b = pinOf(dest);
+  const [px, py] = photoAt(dest);
+
+  clearJourney();
+  box.innerHTML = `
+    <div class="jn-stage">
+      <div class="jn-title">
+        <span class="jn-kicker">Level up</span>
+        <span class="jn-levels">${fromLevel} <i>→</i> ${dest.level}</span>
+      </div>
+
+      <div class="jn-camera">
+        <div class="jn-book">
+          ${worldMap({ upTo: dest.level, hidePhoto: dest.id, legs: 'exceptLast' })}
+          <svg class="jn-route" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <path id="jn-line" class="leg jn-line" d="${flightPath(a, b)}" />
+          </svg>
+          <span class="jn-plane" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M21 15.5 13.5 11V4.8a1.5 1.5 0 0 0-3 0V11L3 15.5v2l7.5-2.2v4l-2.2 1.5v1.5l3.7-1 3.7 1v-1.5L13.5 19.3v-4l7.5 2.2z"/></svg>
+          </span>
+          <div class="jn-drop" style="left:${px}%; top:${py}%">
+            <span class="stop ${dest.final ? 'is-final' : ''} jn-photo">
+              <span class="stop-photo"><img src="img/${dest.photo}-thumb.jpg" alt="" /></span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="jn-reveal">
+        <p class="jn-found">You discovered</p>
+        <h2 class="jn-name">${esc(dest.name)}</h2>
+        ${dest.country ? `<p class="jn-country">${esc(dest.country)}</p>` : ''}
+      </div>
+
+      <button class="jn-continue btn-primary">Explore passport</button>
+    </div>`;
+
+  box.hidden = false;
+  box.classList.remove('is-leaving');
+  box.classList.add('is-running');
+
+  const stage = $('.jn-stage', box);
+  const camera = $('.jn-camera', box);
+  const line = $('#jn-line', box);
+  const plane = $('.jn-plane', box);
+  const drop = $('.jn-drop', box);
+
+  // Camera. Short hops between neighbouring countries need far more zoom than
+  // an ocean crossing, or the flight reads as a twitch.
+  const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+  const hop = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const travelZoom = Math.max(1.45, Math.min(2.2, 130 / (hop + 28)));
+  // Land looking at both the pin and where the photograph will settle.
+  const landAt = [(b[0] + px) / 2, (b[1] + py) / 2];
+
+  const focus = (x, y, scale, ms) => {
+    camera.style.transition = `transform ${ms}ms cubic-bezier(.32,.72,0,1)`;
+    camera.style.transform = `scale(${scale}) translate(${(50 - x)}%, ${(50 - y)}%)`;
+  };
+
+  const len = line.getTotalLength();
+  line.style.strokeDasharray = `${len}`;
+  line.style.strokeDashoffset = `${len}`;
+
+  const FLY = 2900;
+  let raf = 0;
+
+  const fly = () => {
+    const t0 = performance.now();
+    const tick = (now) => {
+      // Ease in and out so the plane sets off and lands gently.
+      const raw = Math.min(1, (now - t0) / FLY);
+      const t = raw < .5 ? 2 * raw * raw : 1 - Math.pow(-2 * raw + 2, 2) / 2;
+      const p = line.getPointAtLength(t * len);
+      const q = line.getPointAtLength(Math.min(len, t * len + 0.6));
+      const angle = Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI;
+      plane.style.left = `${p.x}%`;
+      plane.style.top = `${p.y}%`;
+      plane.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+      line.style.strokeDashoffset = `${len * (1 - t)}`;
+      if (raw < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+  };
+
+  // 1. the announcement, 2. the passport, 3. the flight, 4. the arrival.
+  step(() => stage.classList.add('show-book'), 1300);
+  step(() => focus(mid[0], mid[1], travelZoom, 900), 1500);
+  step(() => { plane.classList.add('is-flying'); fly(); }, 2400);
+  step(() => focus(landAt[0], landAt[1], travelZoom * 1.08, 1100), 2400 + FLY * 0.55);
+  step(() => { plane.classList.add('is-gone'); drop.classList.add('is-landing'); }, 2400 + FLY + 250);
+  step(() => stage.classList.add('show-reveal'), 2400 + FLY + 900);
+  step(() => {
+    stage.classList.remove('show-reveal');
+    focus(50, 50, 1, 1200);                    // pull back to the whole passport
+    stage.classList.add('show-all');
+  }, 2400 + FLY + 3400);
+  step(() => stage.classList.add('show-continue'), 2400 + FLY + 4200);
+
+  const finish = () => {
+    cancelAnimationFrame(raf);
+    clearJourney();
+    box.classList.add('is-leaving');
+    setTimeout(() => {
+      box.hidden = true;
+      box.classList.remove('is-leaving', 'is-running');
+      box.innerHTML = '';
+      if (currentTab === 'profile') renderProfile();
+    }, 420);
+  };
+
+  $('.jn-continue', box).addEventListener('click', finish);
+  // Tapping anywhere jumps to the end rather than trapping anyone in the film.
+  box.addEventListener('click', (e) => {
+    if (e.target.closest('.jn-continue')) return;
+    if (stage.classList.contains('show-continue')) { finish(); return; }
+    clearJourney();
+    cancelAnimationFrame(raf);
+    line.style.strokeDashoffset = '0';
+    plane.classList.add('is-gone');
+    drop.classList.add('is-landing');
+    focus(50, 50, 1, 700);
+    stage.classList.add('show-book', 'show-all', 'show-continue');
+  });
+}
+
+/** Called after a level lands. Plays once per level, ever. */
+function maybeJourney(level, fromLevel) {
+  const seen = state.progress.shownUpTo || 1;
+  if (level <= seen) return false;
+
+  const dest = stopFor(level);
+  state.progress.shownUpTo = level;
+  state.progress.discoveredAt = state.progress.discoveredAt || {};
+  if (dest && !state.progress.discoveredAt[dest.id]) {
+    state.progress.discoveredAt[dest.id] = Date.now();
+  }
+  save();
+
+  if (!dest || !dest.photo) return false;
+  playJourney(dest, fromLevel);
+  return true;
+}
 
 /* ── Navigation ────────────────────────────────────────────── */
 
@@ -1358,66 +1503,27 @@ function hideToast() {
   setTimeout(() => { toast.hidden = true; toast.classList.remove('is-leaving'); }, 220);
 }
 
-/** A level is quick and quiet. Arriving somewhere new is not. */
+/** Every level reaches a new place, so every level flies there. */
 function showLevelUp(level, from) {
+  if (maybeJourney(level, from)) return;
+
+  // No journey to play (already seen, or past the last place): a quiet note.
   const box = $('#levelup');
-  const arrived = JOURNEY.find(d => d.from === level && d.photo);
-  const here = chapterFor(level);
-  const nextStop = JOURNEY[chapterIndex(level) + 1];
-  const toGo = here.to - level + 1;
-
-  box.classList.toggle('is-arrival', !!arrived);
-
-  if (arrived) {
-    box.innerHTML = `
-      <div class="arrival">
-        <p class="arrival-kicker">Destination unlocked</p>
-        <div class="arrival-photo">
-          <img src="img/${arrived.photo}.jpg" alt="${esc(arrived.name)}" />
-          <span class="stamp stamp-big"><b>VISITED</b><i>${esc(arrived.name)}</i><u>LVL ${arrived.from}</u></span>
-        </div>
-        <h2 class="arrival-name">${esc(arrived.name)}</h2>
-        <p class="arrival-where">${esc(arrived.where)} · ${esc(arrived.chapter)} · Levels ${arrived.from}–${arrived.to}</p>
-      </div>`;
-  } else {
-    box.innerHTML = `
-      <div class="levelup-card">
-        <div class="levelup-ring"><span>${level}</span></div>
-        <h2>Level ${from || level - 1} → ${level}</h2>
-        <p>${esc(here.chapter)} · ${esc(here.name)}</p>
-        <p class="levelup-far">${nextStop
-          ? `${toGo} ${toGo === 1 ? 'level' : 'levels'} until ${esc(nextStop.name)}`
-          : 'The journey is complete.'}</p>
-      </div>`;
-  }
-
+  box.innerHTML = `
+    <div class="levelup-card">
+      <div class="levelup-ring"><span>${level}</span></div>
+      <h2>Level ${from || level - 1} → ${level}</h2>
+      <p>${esc(stopFor(level).name)}</p>
+    </div>`;
   box.hidden = false;
   box.classList.remove('is-leaving');
-  if (!arrived) sparks();
-
+  sparks();
   const close = () => {
     box.classList.add('is-leaving');
-    setTimeout(() => {
-      box.hidden = true;
-      box.classList.remove('is-leaving', 'is-arrival');
-      if (arrived) markArrival(arrived);
-    }, 320);
+    setTimeout(() => { box.hidden = true; box.classList.remove('is-leaving'); }, 320);
   };
   box.onclick = close;
-  setTimeout(close, arrived ? 4600 : 2200);
-}
-
-/** Draw the new leg and settle the new photo onto the passport. */
-function markArrival(dest) {
-  if (currentTab !== 'profile') return;
-  renderProfile();
-  requestAnimationFrame(() => {
-    const card = $(`.stop[data-stop="${dest.id}"]`);
-    if (card) card.classList.add('is-arriving');
-    const legs = $$('.leg-done');
-    const last = legs[legs.length - 1];
-    if (last) last.classList.add('is-drawing');
-  });
+  setTimeout(close, 2200);
 }
 
 /** A small burst — celebratory, over in a second, gone. */

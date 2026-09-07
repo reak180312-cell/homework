@@ -38,8 +38,8 @@ Choose subjects → Add homework → See it all together → Finish it → Earn 
 - **Reminders** — things to remember, each set for a day and optionally a single lesson.
   Opens on today; tap **All** to see the rest.
 - **Subjects** — one page per subject: what's open, and what you've already handed in.
-- **Profile** — level, XP, and your passport: a journey across the world where every ten
-  levels reaches a new place. Tap a photograph to open it.
+- **Profile** — level, XP, and your passport: five levels, five places, each photograph left
+  on the map where you found it. Tap one to open it.
 
 Adding is the fast path: press **+**, type, press Enter. The subject you used last is already
 selected and the due date is optional, so the shortest add is two actions.
@@ -71,13 +71,27 @@ closed hours ago can't wake itself up. This is a limitation of web apps, not a b
 
 ## The passport
 
-Every ten levels is a destination, from Home to Machu Picchu at level 50. The photographs are
-placed at the real geographic spot on the passport map, joined by a dotted flight path; a
-place you have not reached yet stays blurred and unnamed until you are within three levels.
+Five levels, one place each. Level 1 is Home; every level after it discovers somewhere new,
+and the photograph stays on the passport for good.
 
-`JOURNEY` in [app.js](app.js) holds the five chapters. Each has a `pin` (where it sits on the
-map) and a `card` (where its photo hangs), both as percentages of `img/passport.jpg`, measured
-off that photograph. Home has no photograph on purpose — level 1 is meant to feel ordinary.
+  1. Home
+  2. Mountain Lake, the Alps
+  3. Santorini, Greece
+  4. Cappadocia, Turkey
+  5. Machu Picchu, Peru
+
+Reaching a level takes over the whole screen: a plane flies from where you were to where you
+are going, drawing its route as it goes, the camera follows, the new photograph lands on its
+country and the passport pulls back to show everywhere you have been. It plays once, the
+first time you reach that level, and never again.
+
+JOURNEY in [app.js](app.js) holds the five places. Each carries a real latitude and
+longitude; project() turns those into a position on the passport photograph, so a photo
+cannot drift onto the wrong country when the screen changes size. offset only slides a photo
+clear of its neighbours - its pin and flight path stay on the true coordinates.
+
+Nothing you have not reached is drawn, so the passport genuinely fills up.
+Home has no photograph on purpose - level 1 is meant to feel ordinary.
 
 ## Data
 
@@ -87,7 +101,8 @@ Stored under the `homework.v1` key in local storage:
 Subject      { id, name, icon, glyph, color }
 Homework     { id, subjectId, title, dueDate, createdAt, completed, completedAt }
 Note         { id, text, day, lesson, createdAt }  // day 0-4 = Sun-Thu, null = every day
-UserProgress { xp, level }              // +10 XP per homework, 100 XP per level
+UserProgress { xp, level, shownUpTo,    // +10 XP per homework, 100 XP per level, five levels
+               discoveredAt }           // shownUpTo stops a journey replaying
 Settings     { dailyReminderEnabled, dailyReminderTime,
                bagReminderEnabled, bagReminderTime }
 ```
