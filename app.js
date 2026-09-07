@@ -993,12 +993,24 @@ function renderProfile() {
    destinationPhoto() one travel memory, and renderPassport() puts them
    together for whatever level you have reached. */
 
-/** A gently bowed great-circle-ish curve between two points on the page. */
-function flightPath(a, b) {
+/* The overlay's viewBox matches the passport photograph's shape, so one unit
+   is the same length across as it is down. Without that, curves come out
+   stretched and anything measured along a path — a plane's position, its
+   heading — is measured in the wrong space. */
+const PP_ASPECT = 1216 / 847;
+const SVG_H = Math.round((100 / PP_ASPECT) * 1000) / 1000;
+
+/** Percentage of the page to a point in that square-unit space, and back. */
+const toSvg = ([x, y]) => [x, (y * SVG_H) / 100];
+const svgYToPct = (sy) => (sy * 100) / SVG_H;
+
+/** A gently bowed curve between two places, in square units. */
+function flightPath(pa, pb) {
+  const a = toSvg(pa), b = toSvg(pb);
   const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
   const dx = b[0] - a[0], dy = b[1] - a[1];
   const len = Math.hypot(dx, dy) || 1;
-  const bow = Math.min(11, len * 0.24);
+  const bow = Math.min(9, len * 0.22);
   return `M ${a[0]} ${a[1]} Q ${mx - (dy / len) * bow} ${my + (dx / len) * bow} ${b[0]} ${b[1]}`;
 }
 
@@ -1030,7 +1042,7 @@ function worldMap({ upTo, hidePhoto = null, legs = 'all' } = {}) {
   const leaders = stops
     .filter(d => d.photo && d.id !== hidePhoto)
     .map(d => {
-      const [px, py] = photoAt(d), [x, y] = pinOf(d);
+      const [px, py] = toSvg(photoAt(d)), [x, y] = toSvg(pinOf(d));
       return `<line class="leader" x1="${px}" y1="${py}" x2="${x}" y2="${y}" />`;
     }).join('');
 
@@ -1056,7 +1068,7 @@ function worldMap({ upTo, hidePhoto = null, legs = 'all' } = {}) {
   return `
     <div class="pp-page">
       <img class="pp-paper" src="img/passport.jpg" alt="An open passport showing a world map" />
-      <svg class="pp-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${route}${leaders}</svg>
+      <svg class="pp-lines" viewBox="0 0 100 ${SVG_H}" aria-hidden="true">${route}${leaders}</svg>
       ${pins}${homeMark}${photos}
     </div>`;
 }
@@ -1141,7 +1153,7 @@ function playJourney(dest, fromLevel) {
       <div class="jn-camera">
         <div class="jn-book">
           ${worldMap({ upTo: dest.level, hidePhoto: dest.id, legs: 'exceptLast' })}
-          <svg class="jn-route" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <svg class="jn-route" viewBox="0 0 100 ${SVG_H}" aria-hidden="true">
             <path id="jn-line" class="leg jn-line" d="${flightPath(a, b)}" />
           </svg>
           <span class="jn-plane" aria-hidden="true">
@@ -1200,12 +1212,19 @@ function playJourney(dest, fromLevel) {
       // Ease in and out so the plane sets off and lands gently.
       const raw = Math.min(1, (now - t0) / FLY);
       const t = raw < .5 ? 2 * raw * raw : 1 - Math.pow(-2 * raw + 2, 2) / 2;
-      const p = line.getPointAtLength(t * len);
-      const q = line.getPointAtLength(Math.min(len, t * len + 0.6));
-      const angle = Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI;
+      const at = t * len;
+
+      const p = line.getPointAtLength(at);
+      // Take the heading from a span either side of the plane, so it stays
+      // steady at both ends instead of snapping when the samples coincide.
+      const back = line.getPointAtLength(Math.max(0, at - 0.7));
+      const fwd = line.getPointAtLength(Math.min(len, at + 0.7));
+      // The glyph points north, so east (0 rad) needs a quarter turn.
+      const angle = Math.atan2(fwd.y - back.y, fwd.x - back.x) * 180 / Math.PI + 90;
+
       plane.style.left = `${p.x}%`;
-      plane.style.top = `${p.y}%`;
-      plane.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+      plane.style.top = `${svgYToPct(p.y)}%`;
+      plane.style.transform = `translate(-50%, -50%) rotate(${angle.toFixed(2)}deg)`;
       line.style.strokeDashoffset = `${len * (1 - t)}`;
       if (raw < 1) raf = requestAnimationFrame(tick);
     };
