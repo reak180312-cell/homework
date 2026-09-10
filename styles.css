@@ -2503,3 +2503,92 @@ body {
 /* Primary actions take the passport's ink rather than plain black. */
 .btn-primary, .fab, .toast, .chip-day.is-on, .chip-due.is-on, .item-chip.is-on,
 .pick-input button { background: var(--ink); color: var(--on-ink); }
+
+
+/* ── The journey, redrawn to the reference frames ────────────
+   The passport is lit against a dark ground and stays whole for the
+   entire flight: no camera move, so you can see where you set off and
+   where you are heading at the same time. */
+
+.journey {
+  background: #0E1116;
+  color: #EFE7D7;
+}
+
+.jn-stage {
+  grid-template-rows: 1fr auto 1fr;
+  padding: calc(env(safe-area-inset-top) + 18px) 0 calc(env(safe-area-inset-bottom) + 22px);
+}
+
+.jn-kicker { color: #8A9099; }
+.jn-levels { color: #F3ECDD; }
+.jn-levels i { color: #6E7681; }
+
+/* Edge to edge: on a phone the map is only as big as the screen is wide. */
+.jn-camera {
+  padding: 0;
+  max-width: none;
+  transform: none;
+  transition: opacity .7s var(--ease);
+}
+.show-book .jn-camera { transform: none; }
+
+.jn-book {
+  border-radius: 0;
+  box-shadow: 0 24px 70px -20px rgba(0,0,0,.85);
+  animation: jn-open .9s var(--ease) backwards;
+}
+@keyframes jn-open {
+  from { opacity: 0; transform: perspective(1100px) rotateX(18deg) scale(.94); }
+}
+
+/* The trail: individual dashes laid along the curve, each turned to face
+   the way the plane was going when it passed. */
+.jn-route { position: absolute; inset: 0; pointer-events: none; }
+
+.jn-dash {
+  position: absolute;
+  width: 7px;
+  height: 2.6px;
+  border-radius: 1.3px;
+  background: #1E2A36;
+  opacity: 0;
+  transform-origin: 50% 50%;
+  transition: opacity .32s ease;
+}
+.jn-dash.is-on { opacity: .82; }
+
+/* The plane rides the line and is big enough to read at a glance. */
+.jn-plane {
+  width: 26px; height: 26px;
+  color: #1B2632;
+  filter: drop-shadow(0 0 3px rgba(255,255,255,.9)) drop-shadow(0 2px 4px rgba(0,0,0,.4));
+}
+
+/* The place you are heading for, marked in stamp red. */
+.jn-book .pin-here {
+  width: 11px; height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  background: #C4552F;
+  box-shadow: 0 0 0 2.5px rgba(255,255,255,.92);
+}
+
+/* The reveal sits on the dark ground, not on parchment. */
+.jn-reveal {
+  background: linear-gradient(to bottom, transparent, #0E1116 38%, #0E1116);
+  padding: 52px var(--gutter) 28px;
+}
+.jn-found { color: #8A9099; }
+.jn-name { color: #F3ECDD; }
+.jn-country { color: #A9B0B9; }
+
+.jn-continue {
+  background: #F3ECDD;
+  color: #16202B;
+}
+
+/* Landscape, or a big screen: the passport can breathe. */
+@media (min-width: 620px) {
+  .jn-camera { max-width: 900px; margin-inline: auto; padding: 0 24px; }
+  .jn-book { border-radius: 12px; }
+}

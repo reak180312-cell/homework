@@ -1004,14 +1004,81 @@ const SVG_H = Math.round((100 / PP_ASPECT) * 1000) / 1000;
 const toSvg = ([x, y]) => [x, (y * SVG_H) / 100];
 const svgYToPct = (sy) => (sy * 100) / SVG_H;
 
-/** A gently bowed curve between two places, in square units. */
-function flightPath(pa, pb) {
+/** The three control points of the bowed curve between two places. */
+function curveOf(pa, pb) {
   const a = toSvg(pa), b = toSvg(pb);
   const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
   const dx = b[0] - a[0], dy = b[1] - a[1];
   const len = Math.hypot(dx, dy) || 1;
   const bow = Math.min(9, len * 0.22);
-  return `M ${a[0]} ${a[1]} Q ${mx - (dy / len) * bow} ${my + (dx / len) * bow} ${b[0]} ${b[1]}`;
+  return [a, [mx - (dy / len) * bow, my + (dx / len) * bow], b];
+}
+
+/** A gently bowed curve between two places, in square units. */
+function flightPath(pa, pb) {
+  const [a, c, b] = curveOf(pa, pb);
+  return `M ${a[0]} ${a[1]} Q ${c[0]} ${c[1]} ${b[0]} ${b[1]}`;
+}
+
+/* The flight is measured by hand rather than by an SVG path: a quadratic
+   curve is two lines of maths, and doing it here means the plane, the trail
+   and the heading all read from one source instead of three. */
+
+const quadAt = ([a, c, b], t) => {
+  const u = 1 - t;
+  return [u * u * a[0] + 2 * u * t * c[0] + t * t * b[0],
+          u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]];
+};
+
+const quadAngle = ([a, c, b], t) => {
+  const u = 1 - t;
+  const dx = 2 * u * (c[0] - a[0]) + 2 * t * (b[0] - c[0]);
+  const dy = 2 * u * (c[1] - a[1]) + 2 * t * (b[1] - c[1]);
+  return Math.atan2(dy, dx) * 180 / Math.PI;
+};
+
+/** Even spacing along the curve needs arc length, not the raw parameter. */
+function arcTable(curve, steps = 240) {
+  const table = [0];
+  let last = quadAt(curve, 0);
+  for (let i = 1; i <= steps; i++) {
+    const p = quadAt(curve, i / steps);
+    table.push(table[i - 1] + Math.hypot(p[0] - last[0], p[1] - last[1]));
+    last = p;
+  }
+  return table;
+}
+
+/** Distance along the curve, back to the curve's own parameter. */
+function tAtLength(table, d) {
+  const total = table[table.length - 1];
+  const want = Math.max(0, Math.min(total, d));
+  let lo = 0, hi = table.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (table[mid] < want) lo = mid + 1; else hi = mid;
+  }
+  return lo / (table.length - 1);
+}
+
+/** The dashes of the route, laid along the curve and hidden until flown. */
+function trail(pa, pb) {
+  const curve = curveOf(pa, pb);
+  const table = arcTable(curve);
+  const total = table[table.length - 1];
+  const gap = 2.5;
+  const n = Math.max(3, Math.round(total / gap));
+
+  let out = '';
+  for (let i = 1; i < n; i++) {
+    const at = (i / n) * total;
+    const t = tAtLength(table, at);
+    const [x, y] = quadAt(curve, t);
+    out += `<i class="jn-dash" data-at="${(at / total).toFixed(4)}"
+              style="left:${x}%; top:${svgYToPct(y)}%;
+                     transform:translate(-50%,-50%) rotate(${quadAngle(curve, t).toFixed(1)}deg)"></i>`;
+  }
+  return out;
 }
 
 /** One travel memory pinned to the page. */
@@ -1139,7 +1206,12 @@ function playJourney(dest, fromLevel) {
   if (!box || !dest.photo) return;
 
   const prev = JOURNEY[dest.level - 2] || JOURNEY[0];
-  const a = pinOf(prev), b = pinOf(dest);
+  // Fly photo to photo. A leg between two true pins can be a couple of
+  // percent long — Greece to Turkey is almost nothing on a world map — and
+  // with the whole map in view that reads as a twitch rather than a journey.
+  // The photographs sit over the right part of the world anyway.
+  const anchor = (d) => (d.photo ? photoAt(d) : pinOf(d));
+  const a = anchor(prev), b = anchor(dest);
   const [px, py] = photoAt(dest);
 
   clearJourney();
@@ -1153,9 +1225,7 @@ function playJourney(dest, fromLevel) {
       <div class="jn-camera">
         <div class="jn-book">
           ${worldMap({ upTo: dest.level, hidePhoto: dest.id, legs: 'exceptLast' })}
-          <svg class="jn-route" viewBox="0 0 100 ${SVG_H}" aria-hidden="true">
-            <path id="jn-line" class="leg jn-line" d="${flightPath(a, b)}" />
-          </svg>
+          <div class="jn-route" aria-hidden="true">${trail(a, b)}</div>
           <span class="jn-plane" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="M21 15.5 13.5 11V4.8a1.5 1.5 0 0 0-3 0V11L3 15.5v2l7.5-2.2v4l-2.2 1.5v1.5l3.7-1 3.7 1v-1.5L13.5 19.3v-4l7.5 2.2z"/></svg>
           </span>
@@ -1181,27 +1251,16 @@ function playJourney(dest, fromLevel) {
   box.classList.add('is-running');
 
   const stage = $('.jn-stage', box);
-  const camera = $('.jn-camera', box);
-  const line = $('#jn-line', box);
   const plane = $('.jn-plane', box);
   const drop = $('.jn-drop', box);
 
-  // Camera. Short hops between neighbouring countries need far more zoom than
-  // an ocean crossing, or the flight reads as a twitch.
-  const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
-  const hop = Math.hypot(b[0] - a[0], b[1] - a[1]);
-  const travelZoom = Math.max(1.45, Math.min(2.2, 130 / (hop + 28)));
-  // Land looking at both the pin and where the photograph will settle.
-  const landAt = [(b[0] + px) / 2, (b[1] + py) / 2];
+  // The whole map stays in view for the whole flight: you can see where you
+  // set off and where you are heading at once, and the route reads as a line
+  // across the world rather than a twitch behind a moving camera.
 
-  const focus = (x, y, scale, ms) => {
-    camera.style.transition = `transform ${ms}ms cubic-bezier(.32,.72,0,1)`;
-    camera.style.transform = `scale(${scale}) translate(${(50 - x)}%, ${(50 - y)}%)`;
-  };
-
-  const len = line.getTotalLength();
-  line.style.strokeDasharray = `${len}`;
-  line.style.strokeDashoffset = `${len}`;
+  const curve = curveOf(a, b);
+  const table = arcTable(curve);
+  const dashes = $$('.jn-dash', box);
 
   const FLY = 2900;
   let raf = 0;
@@ -1211,21 +1270,21 @@ function playJourney(dest, fromLevel) {
     const tick = (now) => {
       // Ease in and out so the plane sets off and lands gently.
       const raw = Math.min(1, (now - t0) / FLY);
-      const t = raw < .5 ? 2 * raw * raw : 1 - Math.pow(-2 * raw + 2, 2) / 2;
-      const at = t * len;
+      const eased = raw < .5 ? 2 * raw * raw : 1 - Math.pow(-2 * raw + 2, 2) / 2;
+      const t = tAtLength(table, eased * table[table.length - 1]);
 
-      const p = line.getPointAtLength(at);
-      // Take the heading from a span either side of the plane, so it stays
-      // steady at both ends instead of snapping when the samples coincide.
-      const back = line.getPointAtLength(Math.max(0, at - 0.7));
-      const fwd = line.getPointAtLength(Math.min(len, at + 0.7));
+      const [x, y] = quadAt(curve, t);
       // The glyph points north, so east (0 rad) needs a quarter turn.
-      const angle = Math.atan2(fwd.y - back.y, fwd.x - back.x) * 180 / Math.PI + 90;
+      const angle = quadAngle(curve, t) + 90;
 
-      plane.style.left = `${p.x}%`;
-      plane.style.top = `${svgYToPct(p.y)}%`;
+      plane.style.left = `${x}%`;
+      plane.style.top = `${svgYToPct(y)}%`;
       plane.style.transform = `translate(-50%, -50%) rotate(${angle.toFixed(2)}deg)`;
-      line.style.strokeDashoffset = `${len * (1 - t)}`;
+
+      // The trail appears behind the plane, one dash at a time.
+      for (const d of dashes) {
+        if (!d.classList.contains('is-on') && +d.dataset.at <= eased) d.classList.add('is-on');
+      }
       if (raw < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -1233,14 +1292,11 @@ function playJourney(dest, fromLevel) {
 
   // 1. the announcement, 2. the passport, 3. the flight, 4. the arrival.
   step(() => stage.classList.add('show-book'), 1300);
-  step(() => focus(mid[0], mid[1], travelZoom, 900), 1500);
   step(() => { plane.classList.add('is-flying'); fly(); }, 2400);
-  step(() => focus(landAt[0], landAt[1], travelZoom * 1.08, 1100), 2400 + FLY * 0.55);
   step(() => { plane.classList.add('is-gone'); drop.classList.add('is-landing'); }, 2400 + FLY + 250);
   step(() => stage.classList.add('show-reveal'), 2400 + FLY + 900);
   step(() => {
     stage.classList.remove('show-reveal');
-    focus(50, 50, 1, 1200);                    // pull back to the whole passport
     stage.classList.add('show-all');
   }, 2400 + FLY + 3400);
   step(() => stage.classList.add('show-continue'), 2400 + FLY + 4200);
@@ -1264,10 +1320,9 @@ function playJourney(dest, fromLevel) {
     if (stage.classList.contains('show-continue')) { finish(); return; }
     clearJourney();
     cancelAnimationFrame(raf);
-    line.style.strokeDashoffset = '0';
+    $$('.jn-dash', box).forEach(d => d.classList.add('is-on'));
     plane.classList.add('is-gone');
     drop.classList.add('is-landing');
-    focus(50, 50, 1, 700);
     stage.classList.add('show-book', 'show-all', 'show-continue');
   });
 }
