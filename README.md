@@ -38,8 +38,7 @@ Choose subjects → Add homework → See it all together → Finish it → Earn 
 - **Reminders** — things to remember, each set for a day and optionally a single lesson.
   Opens on today; tap **All** to see the rest.
 - **Subjects** — one page per subject: what's open, and what you've already handed in.
-- **Profile** — level, XP, and your passport: five levels, five places, each photograph left
-  on the map where you found it. Tap one to open it.
+- **Profile** — level, XP, and the creatures you have collected. Tap one to read about it.
 
 Adding is the fast path: press **+**, type, press Enter. The subject you used last is already
 selected and the due date is optional, so the shortest add is two actions.
@@ -69,29 +68,22 @@ One honest caveat: a web app can only run its timer while it's open or installed
 background. Adding it to your home screen makes this far more reliable — a browser tab you
 closed hours ago can't wake itself up. This is a limitation of web apps, not a bug.
 
-## The passport
+## The collection
 
-Five levels, one place each. Level 1 is Home; every level after it discovers somewhere new,
-and the photograph stays on the passport for good.
+Twelve little creatures, one per level. Blip turns up at level 1, Luna at level 12, and each
+one stays on the shelf on your Profile once it has found you.
 
-  1. Home
-  2. Mountain Lake, the Alps
-  3. Santorini, Greece
-  4. Cappadocia, Turkey
-  5. Machu Picchu, Peru
+Reaching a level takes over the screen: the new creature pops in, introduces itself, and
+joins the shelf. It happens once, the first time you reach that level. Tap any of them to
+read their page - name, age, hobbies, and when they turned up.
 
-Reaching a level takes over the whole screen: a plane flies from where you were to where you
-are going, drawing its route as it goes, the camera follows, the new photograph lands on its
-country and the passport pulls back to show everywhere you have been. It plays once, the
-first time you reach that level, and never again.
+Only the very next one is hinted at, as a grey silhouette with a question mark; the rest are
+blank slots, so the shelf genuinely fills up.
 
-JOURNEY in [app.js](app.js) holds the five places. Each carries a real latitude and
-longitude; project() turns those into a position on the passport photograph, so a photo
-cannot drift onto the wrong country when the screen changes size. offset only slides a photo
-clear of its neighbours - its pin and flight path stay on the true coordinates.
-
-Nothing you have not reached is drawn, so the passport genuinely fills up.
-Home has no photograph on purpose - level 1 is meant to feel ordinary.
+MONSTERS in [app.js](app.js) holds all twelve. They are drawn, not pictures: monsterSvg()
+composes a body shape, one to three eyes, something on top and a marking, over a shared set
+of big eyes, blush and a smile - so twelve of them read as one family and nothing has to be
+downloaded.
 
 ## Data
 
@@ -101,8 +93,8 @@ Stored under the `homework.v1` key in local storage:
 Subject      { id, name, icon, glyph, color }
 Homework     { id, subjectId, title, dueDate, createdAt, completed, completedAt }
 Note         { id, text, day, lesson, createdAt }  // day 0-4 = Sun-Thu, null = every day
-UserProgress { xp, level, shownUpTo,    // +10 XP per homework, 100 XP per level, five levels
-               discoveredAt }           // shownUpTo stops a journey replaying
+UserProgress { xp, level, shownUpTo,    // +10 XP per homework, 100 XP per level, twelve levels
+               metAt }                  // shownUpTo stops an arrival replaying
 Settings     { dailyReminderEnabled, dailyReminderTime,
                bagReminderEnabled, bagReminderTime }
 ```
@@ -122,16 +114,14 @@ app.js        all behaviour, one file, sectioned
 sw.js         offline cache + notification clicks
 server.js     dependency-free static server
 icons/        app icons, generated from the supplied logo
-img/          passport page and the destination photographs
 ```
 
 ## Design rules
 
-The app wears the passport's world: aged parchment, the deep ink-blue its map is printed in,
-and the red-brown of a rubber stamp where something is being marked. A serif carries the
-headings the way a passport prints a name; everything you operate stays in the sans, where it
-reads faster. Colour otherwise still belongs to the subjects, so those stay the thing you
-recognise at a glance.
+Aged parchment, deep ink-blue for text and every primary action, and a red-brown where
+something is being marked. A serif carries the headings; everything you operate stays in the
+sans, where it reads faster. Colour otherwise belongs to the subjects and the creatures, so
+those stay the things you recognise at a glance.
 
 Before adding a button, option, or screen, the test is: *does this make entering or completing
 homework easier?* If not, it doesn't go in.

@@ -100,61 +100,6 @@ const DEFAULT_ITEMS = {
 
 const DEFAULT_EVERYDAY = ['Water bottle', 'Pencil case', 'Lunchbox'];
 
-/* ── The journey ───────────────────────────────────────────
-   Every ten levels is a place. `pin` is where it sits on the passport's
-   own world map, as a percentage of that photograph; `card` is where its
-   photo hangs, kept clear of the passport's printed text and joined back
-   to the pin by a leader line. Both were measured off the map itself. */
-
-/* One level, one place. Each is anchored by real latitude and longitude, so
-   the photograph lands on the right country whatever size the passport is
-   drawn at. `offset` only slides the photo clear of its neighbours — the pin
-   and the flight path always sit on the true coordinates. */
-
-const JOURNEY = [
-  { level: 1, id: 'home',        name: 'Home',          country: '',
-    lat: 31.8,   lon: 35.0,  photo: null },
-
-  { level: 2, id: 'mountains',   name: 'Mountain Lake', country: 'The Alps',
-    lat: 46.5,   lon: 8.5,   photo: 'mountains',   offset: [-10, -12] },
-
-  { level: 3, id: 'santorini',   name: 'Santorini',     country: 'Greece',
-    lat: 36.4,   lon: 25.4,  photo: 'santorini',   offset: [-9, 13] },
-
-  { level: 4, id: 'cappadocia',  name: 'Cappadocia',    country: 'Turkey',
-    lat: 38.6,   lon: 34.8,  photo: 'cappadocia',  offset: [14, -11] },
-
-  { level: 5, id: 'machupicchu', name: 'Machu Picchu',  country: 'Peru',
-    lat: -13.16, lon: -72.5, photo: 'machupicchu', offset: [0, 14], final: true },
-];
-
-const MAX_LEVEL = JOURNEY.length;
-
-/* Where the map sits inside img/passport.jpg. Fitted against landmarks read
-   off that photograph — the equator lands on 50.2%, Greenwich on 47.4%. */
-const MAP = { lon0: 47.4, lonScale: 0.2661, lat0: 50.2, latScale: 0.3183 };
-
-/** Latitude and longitude to a percentage of the passport page. */
-const project = (lat, lon) => [
-  MAP.lon0 + lon * MAP.lonScale,
-  MAP.lat0 - lat * MAP.latScale,
-];
-
-const pinOf = (d) => project(d.lat, d.lon);
-
-/** Where the photograph hangs: on its pin, nudged clear of its neighbours. */
-function photoAt(d) {
-  const [x, y] = pinOf(d);
-  const [dx, dy] = d.offset || [0, 0];
-  return [x + dx, y + dy];
-}
-
-const stopFor = (level) => JOURNEY[Math.min(level, MAX_LEVEL) - 1];
-
-/** Everywhere reached at this level, in the order they were discovered. */
-const discovered = (level) => JOURNEY.filter(d => d.level <= level);
-
-
 // Short forms so the whole week fits one screen without scrolling sideways.
 const SHORT_NAME = {
   'אזרחות ודמוקרטיה': 'אזרחות',
@@ -238,6 +183,159 @@ function subjectForLesson(name) {
 /** Weekday index into SCHOOL_DAYS, or -1 at the weekend. */
 function schoolDayIndex(d = new Date()) {
   return SCHOOL_DAYS.findIndex(x => x.js === d.getDay());
+}
+
+/* ── The collection ────────────────────────────────────────
+   One little creature per level. They are drawn rather than dropped in
+   as pictures: same line weight, same big eyes, same rounded everything,
+   so twelve of them sit together as one family. */
+
+const MONSTERS = [
+  { level: 1,  id: 'blip',   name: 'Blip',   colour: '#5FB89C', shape: 'round',  eyes: 1, top: 'antennae', mark: 'none',
+    age: 'Three weeks old', hobbies: ['Blinking slowly', 'Rolling downhill'] },
+
+  { level: 2,  id: 'pom',    name: 'Pom',    colour: '#E08BA6', shape: 'cloud',  eyes: 2, top: 'none',     mark: 'none',
+    age: 'Half a year',    hobbies: ['Napping in socks', 'Being carried'] },
+
+  { level: 3,  id: 'nib',    name: 'Nib',    colour: '#9186D4', shape: 'tall',   eyes: 3, top: 'none',     mark: 'none',
+    age: 'Four months',    hobbies: ['Watching everything at once', 'Tidying'] },
+
+  { level: 4,  id: 'tuft',   name: 'Tuft',   colour: '#EC9A72', shape: 'round',  eyes: 2, top: 'ears',     mark: 'none',
+    age: 'One year',       hobbies: ['Listening to rain', 'Hiding in bags'] },
+
+  { level: 5,  id: 'glim',   name: 'Glim',   colour: '#E3B655', shape: 'drop',   eyes: 2, top: 'none',     mark: 'glow',
+    age: 'Nobody knows',   hobbies: ['Glowing gently', 'Reading past bedtime'] },
+
+  { level: 6,  id: 'moss',   name: 'Moss',   colour: '#6BA155', shape: 'round',  eyes: 2, top: 'sprout',   mark: 'none',
+    age: 'Two springs',    hobbies: ['Growing things', 'Sitting in the sun'] },
+
+  { level: 7,  id: 'wisp',   name: 'Wisp',   colour: '#7BAED6', shape: 'wisp',   eyes: 2, top: 'none',     mark: 'none',
+    age: 'Older than it looks', hobbies: ['Drifting', 'Turning up quietly'] },
+
+  { level: 8,  id: 'cinder', name: 'Cinder', colour: '#DB7F52', shape: 'round',  eyes: 2, top: 'horns',    mark: 'none',
+    age: 'Eight months',   hobbies: ['Warming cold hands', 'Small mischief'] },
+
+  { level: 9,  id: 'pebble', name: 'Pebble', colour: '#7F92A6', shape: 'square', eyes: 2, top: 'none',     mark: 'spots',
+    age: 'Very old',       hobbies: ['Staying put', 'Collecting smaller pebbles'] },
+
+  { level: 10, id: 'fizz',   name: 'Fizz',   colour: '#49A9A8', shape: 'round',  eyes: 2, top: 'antennae', mark: 'bubbles',
+    age: 'Two months',     hobbies: ['Fizzing', 'Asking questions'] },
+
+  { level: 11, id: 'snug',   name: 'Snug',   colour: '#AC825E', shape: 'cloud',  eyes: 2, top: 'fringe',   mark: 'none',
+    age: 'Three years',    hobbies: ['Blanket forts', 'Long breakfasts'] },
+
+  { level: 12, id: 'luna',   name: 'Luna',   colour: '#6A78C0', shape: 'tall',   eyes: 2, top: 'none',     mark: 'stars',
+    age: 'One whole moon', hobbies: ['Staying up late', 'Naming the stars'] },
+];
+
+const MAX_LEVEL = MONSTERS.length;
+
+const monsterFor = (level) => MONSTERS[Math.min(level, MAX_LEVEL) - 1];
+const collected = (level) => MONSTERS.filter(m => m.level <= level);
+
+/** The body outline. Everything else is placed relative to it. */
+function bodyPath(shape) {
+  switch (shape) {
+    case 'tall':
+      return '<ellipse cx="50" cy="55" rx="25" ry="34" />';
+    case 'square':
+      return '<rect x="22" y="26" width="56" height="58" rx="22" />';
+    case 'drop':
+      return '<path d="M50 16c14 18 24 27 24 40a24 24 0 0 1-48 0c0-13 10-22 24-40z" />';
+    case 'cloud':
+      return '<path d="M28 52a13 13 0 0 1 6-12 15 15 0 0 1 15-11 15 15 0 0 1 15 11 13 13 0 0 1 6 12v14a18 18 0 0 1-18 18h-6a18 18 0 0 1-18-18z" />';
+    case 'wisp':
+      return '<path d="M50 20a28 28 0 0 1 28 28v34c-5 0-6-6-11-6s-6 6-11 6-6-6-11-6-6 6-11 6-6-6-11-6V48A28 28 0 0 1 50 20z" />';
+    default:
+      return '<ellipse cx="50" cy="56" rx="29" ry="28" />';
+  }
+}
+
+/** Eyes, always big and always with a highlight — that is most of the cuteness. */
+function eyesOf(n) {
+  const eye = (cx, cy, r) => `
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="#FFFDF8" />
+    <circle cx="${cx}" cy="${cy + r * 0.12}" r="${r * 0.52}" fill="#2A2622" />
+    <circle cx="${cx - r * 0.28}" cy="${cy - r * 0.3}" r="${r * 0.2}" fill="#FFFDF8" />`;
+  if (n === 1) return eye(50, 50, 13);
+  if (n === 3) return eye(36, 49, 7) + eye(50, 43, 7.5) + eye(64, 49, 7);
+  return eye(39, 51, 8.5) + eye(61, 51, 8.5);
+}
+
+function topOf(top, colour) {
+  switch (top) {
+    case 'antennae':
+      return `<g stroke="${colour}" stroke-width="3" stroke-linecap="round" fill="none">
+                <path d="M40 30c-3-7-5-10-7-13" /><path d="M60 30c3-7 5-10 7-13" />
+              </g>
+              <circle cx="31.5" cy="15" r="4" fill="${colour}" />
+              <circle cx="68.5" cy="15" r="4" fill="${colour}" />`;
+    case 'ears':
+      return `<ellipse cx="24" cy="34" rx="9" ry="13" fill="${colour}" transform="rotate(-22 24 34)" />
+              <ellipse cx="76" cy="34" rx="9" ry="13" fill="${colour}" transform="rotate(22 76 34)" />`;
+    case 'horns':
+      return `<path d="M33 30c-2-8-1-13 2-16 2 4 5 9 6 14z" fill="${colour}" />
+              <path d="M67 30c2-8 1-13-2-16-2 4-5 9-6 14z" fill="${colour}" />`;
+    case 'sprout':
+      return `<path d="M50 30V16" stroke="#6BA155" stroke-width="3" stroke-linecap="round" fill="none" />
+              <path d="M50 20c6-6 12-5 14-4-1 6-8 9-14 4z" fill="#8CC46A" />`;
+    case 'fringe':
+      return `<path d="M24 40c4-5 8-2 10 1 2-5 7-6 10-1 2-5 8-6 11-1 2-4 8-4 11 1 -3-12-14-19-21-19S27 28 24 40z"
+                    fill="${colour}" opacity=".82" />`;
+    default:
+      return '';
+  }
+}
+
+function markOf(mark, colour) {
+  switch (mark) {
+    case 'spots':
+      return `<g fill="#2A2622" opacity=".14">
+                <circle cx="35" cy="68" r="4" /><circle cx="58" cy="72" r="3" /><circle cx="67" cy="60" r="2.6" />
+              </g>`;
+    case 'bubbles':
+      return `<g fill="#FFFDF8" opacity=".5">
+                <circle cx="34" cy="66" r="3.4" /><circle cx="45" cy="73" r="2.4" /><circle cx="63" cy="68" r="4" />
+              </g>`;
+    case 'stars':
+      return `<g fill="#FFFDF8" opacity=".72">
+                <path d="M34 66l1.4 3.2 3.2 1.4-3.2 1.4L34 75l-1.4-3.2-3.2-1.4 3.2-1.4z" />
+                <path d="M64 62l1.1 2.4 2.4 1.1-2.4 1.1L64 69l-1.1-2.4-2.4-1.1 2.4-1.1z" />
+                <path d="M55 76l.9 2 2 .9-2 .9-.9 2-.9-2-2-.9 2-.9z" />
+              </g>`;
+    case 'glow':
+      return `<circle cx="50" cy="56" r="34" fill="${colour}" opacity=".16" />`;
+    default:
+      return '';
+  }
+}
+
+/**
+ * One creature, drawn. `locked` gives back only its silhouette, so what is
+ * still to come stays a surprise.
+ */
+function monsterSvg(m, { locked = false } = {}) {
+  if (locked) {
+    return `<svg class="mon" viewBox="0 0 100 100" aria-hidden="true">
+              <g fill="currentColor" opacity=".2">${bodyPath(m.shape)}</g>
+              <text x="50" y="63" text-anchor="middle" class="mon-q">?</text>
+            </svg>`;
+  }
+  return `<svg class="mon" viewBox="0 0 100 100" aria-hidden="true">
+    ${markOf(m.mark === 'glow' ? 'glow' : 'none', m.colour)}
+    <g class="mon-feet" fill="${m.colour}">
+      <ellipse cx="38" cy="86" rx="8" ry="5" /><ellipse cx="62" cy="86" rx="8" ry="5" />
+    </g>
+    ${topOf(m.top, m.colour)}
+    <g class="mon-body" fill="${m.colour}">${bodyPath(m.shape)}</g>
+    ${markOf(m.mark === 'glow' ? 'none' : m.mark, m.colour)}
+    <g class="mon-blush" fill="#E86A7C" opacity=".26">
+      <ellipse cx="31" cy="62" rx="6" ry="3.6" /><ellipse cx="69" cy="62" rx="6" ry="3.6" />
+    </g>
+    ${eyesOf(m.eyes)}
+    <path class="mon-smile" d="M44 65q6 6 12 0" fill="none" stroke="#2A2622"
+          stroke-width="2.6" stroke-linecap="round" />
+  </svg>`;
 }
 
 const PALETTE = PRESETS.map(p => p.color);
@@ -936,23 +1034,23 @@ function renderProfile() {
   const into = xp % XP_PER_LEVEL;
   const doneCount = state.homework.filter(h => h.completed).length;
 
-  const place = stopFor(level);
-  const journeyDone = level >= MAX_LEVEL;
+  const here = monsterFor(level);
+  const allFound = level >= MAX_LEVEL;
 
   $('#level-card').innerHTML = `
     <div class="level-top">
       <span class="level-name">Level ${level}</span>
-      <span class="level-xp">${journeyDone ? 'Journey complete' : `${into} / ${XP_PER_LEVEL} XP`}</span>
+      <span class="level-xp">${allFound ? 'All found' : `${into} / ${XP_PER_LEVEL} XP`}</span>
     </div>
-    <div class="bar"><div class="bar-fill" style="width:${journeyDone ? 100 : (into / XP_PER_LEVEL) * 100}%"></div></div>
-    <p class="level-chapter">${esc(place.name)}${place.country ? ` · ${esc(place.country)}` : ''}</p>
-    <p class="level-note">${journeyDone
-      ? 'Every place discovered.'
+    <div class="bar"><div class="bar-fill" style="width:${allFound ? 100 : (into / XP_PER_LEVEL) * 100}%"></div></div>
+    <p class="level-chapter">${esc(here.name)} is with you</p>
+    <p class="level-note">${allFound
+      ? 'Everyone has turned up.'
       : (xp > 0
-          ? `${XP_PER_LEVEL - into} XP until the next destination`
-          : 'Finish some homework to start travelling.')}</p>`;
+          ? `${XP_PER_LEVEL - into} XP until the next one turns up`
+          : 'Finish some homework and someone will turn up.')}</p>`;
 
-  renderPassport(level);
+  renderCollection(level);
 
   // History, newest first, grouped by the day it was finished.
   const done = state.homework
@@ -987,361 +1085,111 @@ function renderProfile() {
 }
 
 
-/* ── The passport ──────────────────────────────────────────
-   Built from four small pieces that the level-up journey reuses:
-   worldMap() draws the page, flightPath() the route between two places,
-   destinationPhoto() one travel memory, and renderPassport() puts them
-   together for whatever level you have reached. */
+/** The shelf of everyone you have met, with the next one waiting. */
+function renderCollection(level) {
+  const box = $('#collection');
+  if (!box) return;
+  const have = collected(level);
+  const next = MONSTERS[level] || null;
 
-/* The overlay's viewBox matches the passport photograph's shape, so one unit
-   is the same length across as it is down. Without that, curves come out
-   stretched and anything measured along a path — a plane's position, its
-   heading — is measured in the wrong space. */
-const PP_ASPECT = 1216 / 847;
-const SVG_H = Math.round((100 / PP_ASPECT) * 1000) / 1000;
-
-/** Percentage of the page to a point in that square-unit space, and back. */
-const toSvg = ([x, y]) => [x, (y * SVG_H) / 100];
-const svgYToPct = (sy) => (sy * 100) / SVG_H;
-
-/** The three control points of the bowed curve between two places. */
-function curveOf(pa, pb) {
-  const a = toSvg(pa), b = toSvg(pb);
-  const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
-  const dx = b[0] - a[0], dy = b[1] - a[1];
-  const len = Math.hypot(dx, dy) || 1;
-  const bow = Math.min(9, len * 0.22);
-  return [a, [mx - (dy / len) * bow, my + (dx / len) * bow], b];
-}
-
-/** A gently bowed curve between two places, in square units. */
-function flightPath(pa, pb) {
-  const [a, c, b] = curveOf(pa, pb);
-  return `M ${a[0]} ${a[1]} Q ${c[0]} ${c[1]} ${b[0]} ${b[1]}`;
-}
-
-/* The flight is measured by hand rather than by an SVG path: a quadratic
-   curve is two lines of maths, and doing it here means the plane, the trail
-   and the heading all read from one source instead of three. */
-
-const quadAt = ([a, c, b], t) => {
-  const u = 1 - t;
-  return [u * u * a[0] + 2 * u * t * c[0] + t * t * b[0],
-          u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]];
-};
-
-const quadAngle = ([a, c, b], t) => {
-  const u = 1 - t;
-  const dx = 2 * u * (c[0] - a[0]) + 2 * t * (b[0] - c[0]);
-  const dy = 2 * u * (c[1] - a[1]) + 2 * t * (b[1] - c[1]);
-  return Math.atan2(dy, dx) * 180 / Math.PI;
-};
-
-/** Even spacing along the curve needs arc length, not the raw parameter. */
-function arcTable(curve, steps = 240) {
-  const table = [0];
-  let last = quadAt(curve, 0);
-  for (let i = 1; i <= steps; i++) {
-    const p = quadAt(curve, i / steps);
-    table.push(table[i - 1] + Math.hypot(p[0] - last[0], p[1] - last[1]));
-    last = p;
-  }
-  return table;
-}
-
-/** Distance along the curve, back to the curve's own parameter. */
-function tAtLength(table, d) {
-  const total = table[table.length - 1];
-  const want = Math.max(0, Math.min(total, d));
-  let lo = 0, hi = table.length - 1;
-  while (lo < hi) {
-    const mid = (lo + hi) >> 1;
-    if (table[mid] < want) lo = mid + 1; else hi = mid;
-  }
-  return lo / (table.length - 1);
-}
-
-/** The dashes of the route, laid along the curve and hidden until flown. */
-function trail(pa, pb) {
-  const curve = curveOf(pa, pb);
-  const table = arcTable(curve);
-  const total = table[table.length - 1];
-  const gap = 2.5;
-  const n = Math.max(3, Math.round(total / gap));
-
-  let out = '';
-  for (let i = 1; i < n; i++) {
-    const at = (i / n) * total;
-    const t = tAtLength(table, at);
-    const [x, y] = quadAt(curve, t);
-    out += `<i class="jn-dash" data-at="${(at / total).toFixed(4)}"
-              style="left:${x}%; top:${svgYToPct(y)}%;
-                     transform:translate(-50%,-50%) rotate(${quadAngle(curve, t).toFixed(1)}deg)"></i>`;
-  }
-  return out;
-}
-
-/** One travel memory pinned to the page. */
-function destinationPhoto(d, opts = {}) {
-  const [px, py] = photoAt(d);
-  const cls = ['stop', d.final ? 'is-final' : '', opts.hidden ? 'is-hidden' : ''].filter(Boolean).join(' ');
-  return `
-    <button class="${cls}" style="left:${px}%; top:${py}%" data-stop="${d.id}"
-            aria-label="${esc(d.name)}">
-      <span class="stop-photo">
-        <img src="img/${d.photo}-thumb.jpg" alt="${esc(d.name)}" loading="lazy" />
-      </span>
-    </button>`;
-}
-
-/** The passport page with a route, its pins and whichever photos belong. */
-function worldMap({ upTo, hidePhoto = null, legs = 'all' } = {}) {
-  const stops = discovered(upTo);
-
-  let route = '';
-  for (let i = 1; i < stops.length; i++) {
-    if (legs === 'exceptLast' && i === stops.length - 1) continue;
-    route += `<path class="leg" d="${flightPath(pinOf(stops[i - 1]), pinOf(stops[i]))}" />`;
-  }
-
-  // A hairline from each photo back to the spot it belongs to, so the
-  // geography stays legible even though the photo is nudged clear.
-  const leaders = stops
-    .filter(d => d.photo && d.id !== hidePhoto)
-    .map(d => {
-      const [px, py] = toSvg(photoAt(d)), [x, y] = toSvg(pinOf(d));
-      return `<line class="leader" x1="${px}" y1="${py}" x2="${x}" y2="${y}" />`;
-    }).join('');
-
-  const pins = stops.map(d => {
-    const [x, y] = pinOf(d);
-    const last = d.level === upTo;
-    return `<span class="pin ${last ? 'pin-here' : ''}" style="left:${x}%; top:${y}%" aria-hidden="true"></span>`;
+  box.innerHTML = MONSTERS.map(m => {
+    const got = m.level <= level;
+    // Only the very next one is teased; the rest are not even outlined.
+    if (!got && (!next || m.level > next.level)) {
+      return '<span class="mon-slot is-empty" aria-hidden="true"></span>';
+    }
+    if (!got) {
+      return `<span class="mon-slot is-locked" title="Level ${m.level}">
+                ${monsterSvg(m, { locked: true })}
+                <span class="mon-name">Level ${m.level}</span>
+              </span>`;
+    }
+    return `<button class="mon-slot" data-monster="${m.id}" style="--mc:${m.colour}">
+              ${monsterSvg(m)}
+              <span class="mon-name">${esc(m.name)}</span>
+            </button>`;
   }).join('');
 
-  const home = JOURNEY[0];
-  const [hx, hy] = pinOf(home);
-  const homeMark = `
-    <button class="home-mark ${upTo === 1 ? 'is-current' : ''}"
-            style="left:${hx}%; top:${hy}%" data-stop="home">
-      <span class="home-dot"></span><span class="home-label">Home</span>
-    </button>`;
-
-  const photos = stops
-    .filter(d => d.photo && d.id !== hidePhoto)
-    .map(d => destinationPhoto(d))
-    .join('');
-
-  return `
-    <div class="pp-page">
-      <img class="pp-paper" src="img/passport.jpg" alt="An open passport showing a world map" />
-      <svg class="pp-lines" viewBox="0 0 100 ${SVG_H}" aria-hidden="true">${route}${leaders}</svg>
-      ${pins}${homeMark}${photos}
-    </div>`;
-}
-
-function renderPassport(level) {
-  const box = $('#passport');
-  if (!box) return;
-  box.innerHTML = worldMap({ upTo: level });
-
-  const n = discovered(level).length;
-  const note = $('#passport-note');
+  const note = $('#collection-note');
   if (note) {
-    note.textContent = level >= MAX_LEVEL
-      ? `${n} of ${MAX_LEVEL} places · the journey is complete`
-      : `${n} of ${MAX_LEVEL} places · keep going to discover the next`;
+    note.textContent = have.length >= MAX_LEVEL
+      ? `All ${MAX_LEVEL} found. That is everyone.`
+      : `${have.length} of ${MAX_LEVEL} found · next one at level ${next ? next.level : MAX_LEVEL}`;
   }
 }
 
+/** One creature's page: who they are, and not much else. */
+function openMonster(id) {
+  const m = MONSTERS.find(x => x.id === id);
+  if (!m || m.level > levelFor(state.progress.xp)) return;
+  const met = (state.progress.metAt || {})[m.id];
 
-/* ── One destination, full size ────────────────────────────── */
+  $('#album-body').innerHTML = `
+    <div class="album-hero" style="--mc:${m.colour}">${monsterSvg(m)}</div>
+    <h2 class="album-name">${esc(m.name)}</h2>
+    <dl class="album-facts">
+      <div><dt>Age</dt><dd>${esc(m.age)}</dd></div>
+      <div><dt>Hobbies</dt><dd>${m.hobbies.map(esc).join(', ')}</dd></div>
+      <div><dt>Found</dt><dd>at level ${m.level}${met
+        ? ` · ${esc(new Date(met).toLocaleDateString([], { day: 'numeric', month: 'long' }))}` : ''}</dd></div>
+    </dl>`;
 
-function openStop(id) {
-  const d = JOURNEY.find(x => x.id === id);
-  if (!d) return;
-  const level = levelFor(state.progress.xp);
-  if (d.level > level) return;                 // not discovered, nothing to show
-
-  const when = (state.progress.discoveredAt || {})[d.id];
-
-  $('#dv-body').innerHTML = `
-    <h2 class="dv-name">${esc(d.name)}</h2>
-    ${d.country ? `<p class="dv-where">${esc(d.country)}</p>` : ''}
-    ${d.photo ? `
-      <div class="dv-photo ${d.final ? 'is-final' : ''}">
-        <img src="img/${d.photo}.jpg" alt="${esc(d.name)}" />
-        <span class="stamp stamp-mid"><b>Visited</b><i>${esc(d.name)}</i></span>
-      </div>` : `
-      <div class="dv-photo dv-home"><span>Where the journey starts</span></div>`}
-    <p class="dv-levels">${d.level === 1 ? 'Starting point' : `Discovered at level ${d.level}`}</p>
-    ${when ? `<p class="dv-hint">${esc(new Date(when).toLocaleDateString([], {
-      day: 'numeric', month: 'long', year: 'numeric' }))}</p>` : ''}`;
-
-  const view = $('#destination');
+  const view = $('#album');
   view.hidden = false;
   view.classList.remove('is-leaving');
 }
 
-function closeStop() {
-  const view = $('#destination');
+function closeMonster() {
+  const view = $('#album');
   if (!view || view.hidden) return;
   view.classList.add('is-leaving');
   setTimeout(() => { view.hidden = true; view.classList.remove('is-leaving'); }, 260);
 }
 
+/** Meeting someone new: full screen, brief, and quiet about it. */
+function showArrival(m, fromLevel) {
+  const box = $('#arrival');
+  if (!box) return;
 
-/* ── The journey: a full screen, a plane, a new memory ─────── */
-
-let journeyTimers = [];
-const clearJourney = () => { journeyTimers.forEach(clearTimeout); journeyTimers = []; };
-const step = (fn, at) => { journeyTimers.push(setTimeout(fn, at)); };
-
-/**
- * Flies from the place before it to the one just reached, draws the route as
- * it goes, then settles the new photograph onto the map for good.
- */
-function playJourney(dest, fromLevel) {
-  const box = $('#journey');
-  if (!box || !dest.photo) return;
-
-  const prev = JOURNEY[dest.level - 2] || JOURNEY[0];
-  // Fly photo to photo. A leg between two true pins can be a couple of
-  // percent long — Greece to Turkey is almost nothing on a world map — and
-  // with the whole map in view that reads as a twitch rather than a journey.
-  // The photographs sit over the right part of the world anyway.
-  const anchor = (d) => (d.photo ? photoAt(d) : pinOf(d));
-  const a = anchor(prev), b = anchor(dest);
-  const [px, py] = photoAt(dest);
-
-  clearJourney();
   box.innerHTML = `
-    <div class="jn-stage">
-      <div class="jn-title">
-        <span class="jn-kicker">Level up</span>
-        <span class="jn-levels">${fromLevel} <i>→</i> ${dest.level}</span>
-      </div>
-
-      <div class="jn-camera">
-        <div class="jn-book">
-          ${worldMap({ upTo: dest.level, hidePhoto: dest.id, legs: 'exceptLast' })}
-          <div class="jn-route" aria-hidden="true">${trail(a, b)}</div>
-          <span class="jn-plane" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M21 15.5 13.5 11V4.8a1.5 1.5 0 0 0-3 0V11L3 15.5v2l7.5-2.2v4l-2.2 1.5v1.5l3.7-1 3.7 1v-1.5L13.5 19.3v-4l7.5 2.2z"/></svg>
-          </span>
-          <div class="jn-drop" style="left:${px}%; top:${py}%">
-            <span class="stop ${dest.final ? 'is-final' : ''} jn-photo">
-              <span class="stop-photo"><img src="img/${dest.photo}-thumb.jpg" alt="" /></span>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="jn-reveal">
-        <p class="jn-found">You discovered</p>
-        <h2 class="jn-name">${esc(dest.name)}</h2>
-        ${dest.country ? `<p class="jn-country">${esc(dest.country)}</p>` : ''}
-      </div>
-
-      <button class="jn-continue btn-primary">Explore passport</button>
+    <div class="ar-stage">
+      <p class="ar-kicker">Level ${fromLevel} → ${m.level}</p>
+      <div class="ar-mon" style="--mc:${m.colour}">${monsterSvg(m)}</div>
+      <h2 class="ar-name">${esc(m.name)} found you</h2>
+      <p class="ar-line">${esc(m.age)} · ${esc(m.hobbies[0].toLowerCase())}</p>
+      <button class="ar-continue btn-primary">Say hello</button>
     </div>`;
 
   box.hidden = false;
   box.classList.remove('is-leaving');
-  box.classList.add('is-running');
+  requestAnimationFrame(() => box.classList.add('is-in'));
 
-  const stage = $('.jn-stage', box);
-  const plane = $('.jn-plane', box);
-  const drop = $('.jn-drop', box);
-
-  // The whole map stays in view for the whole flight: you can see where you
-  // set off and where you are heading at once, and the route reads as a line
-  // across the world rather than a twitch behind a moving camera.
-
-  const curve = curveOf(a, b);
-  const table = arcTable(curve);
-  const dashes = $$('.jn-dash', box);
-
-  const FLY = 2900;
-  let raf = 0;
-
-  const fly = () => {
-    const t0 = performance.now();
-    const tick = (now) => {
-      // Ease in and out so the plane sets off and lands gently.
-      const raw = Math.min(1, (now - t0) / FLY);
-      const eased = raw < .5 ? 2 * raw * raw : 1 - Math.pow(-2 * raw + 2, 2) / 2;
-      const t = tAtLength(table, eased * table[table.length - 1]);
-
-      const [x, y] = quadAt(curve, t);
-      // The glyph points north, so east (0 rad) needs a quarter turn.
-      const angle = quadAngle(curve, t) + 90;
-
-      plane.style.left = `${x}%`;
-      plane.style.top = `${svgYToPct(y)}%`;
-      plane.style.transform = `translate(-50%, -50%) rotate(${angle.toFixed(2)}deg)`;
-
-      // The trail appears behind the plane, one dash at a time.
-      for (const d of dashes) {
-        if (!d.classList.contains('is-on') && +d.dataset.at <= eased) d.classList.add('is-on');
-      }
-      if (raw < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-  };
-
-  // 1. the announcement, 2. the passport, 3. the flight, 4. the arrival.
-  step(() => stage.classList.add('show-book'), 1300);
-  step(() => { plane.classList.add('is-flying'); fly(); }, 2400);
-  step(() => { plane.classList.add('is-gone'); drop.classList.add('is-landing'); }, 2400 + FLY + 250);
-  step(() => stage.classList.add('show-reveal'), 2400 + FLY + 900);
-  step(() => {
-    stage.classList.remove('show-reveal');
-    stage.classList.add('show-all');
-  }, 2400 + FLY + 3400);
-  step(() => stage.classList.add('show-continue'), 2400 + FLY + 4200);
-
-  const finish = () => {
-    cancelAnimationFrame(raf);
-    clearJourney();
+  const close = () => {
     box.classList.add('is-leaving');
     setTimeout(() => {
       box.hidden = true;
-      box.classList.remove('is-leaving', 'is-running');
+      box.classList.remove('is-leaving', 'is-in');
       box.innerHTML = '';
       if (currentTab === 'profile') renderProfile();
-    }, 420);
+    }, 340);
   };
-
-  $('.jn-continue', box).addEventListener('click', finish);
-  // Tapping anywhere jumps to the end rather than trapping anyone in the film.
-  box.addEventListener('click', (e) => {
-    if (e.target.closest('.jn-continue')) return;
-    if (stage.classList.contains('show-continue')) { finish(); return; }
-    clearJourney();
-    cancelAnimationFrame(raf);
-    $$('.jn-dash', box).forEach(d => d.classList.add('is-on'));
-    plane.classList.add('is-gone');
-    drop.classList.add('is-landing');
-    stage.classList.add('show-book', 'show-all', 'show-continue');
-  });
+  box.addEventListener('click', close);
+  setTimeout(close, 6000);
 }
 
-/** Called after a level lands. Plays once per level, ever. */
-function maybeJourney(level, fromLevel) {
+/** Called after a level lands. Each creature turns up once, ever. */
+function maybeArrival(level, fromLevel) {
   const seen = state.progress.shownUpTo || 1;
   if (level <= seen) return false;
 
-  const dest = stopFor(level);
+  const m = monsterFor(level);
   state.progress.shownUpTo = level;
-  state.progress.discoveredAt = state.progress.discoveredAt || {};
-  if (dest && !state.progress.discoveredAt[dest.id]) {
-    state.progress.discoveredAt[dest.id] = Date.now();
-  }
+  state.progress.metAt = state.progress.metAt || {};
+  if (m && !state.progress.metAt[m.id]) state.progress.metAt[m.id] = Date.now();
   save();
 
-  if (!dest || !dest.photo) return false;
-  playJourney(dest, fromLevel);
+  if (!m) return false;
+  showArrival(m, fromLevel || level - 1);
   return true;
 }
 
@@ -1579,15 +1427,15 @@ function hideToast() {
 
 /** Every level reaches a new place, so every level flies there. */
 function showLevelUp(level, from) {
-  if (maybeJourney(level, from)) return;
+  if (maybeArrival(level, from)) return;
 
-  // No journey to play (already seen, or past the last place): a quiet note.
+  // Nobody new (already met, or past the last of them): a quiet note.
   const box = $('#levelup');
   box.innerHTML = `
     <div class="levelup-card">
       <div class="levelup-ring"><span>${level}</span></div>
       <h2>Level ${from || level - 1} → ${level}</h2>
-      <p>${esc(stopFor(level).name)}</p>
+      <p>${esc(monsterFor(level).name)} is still with you</p>
     </div>`;
   box.hidden = false;
   box.classList.remove('is-leaving');
@@ -2029,7 +1877,7 @@ function wireApp() {
 
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (!$('#destination').hidden) closeStop();
+    if (!$('#album').hidden) closeMonster();
     else if (!$('#timetable').hidden) closeTimetable();
     else if (openSheetSel) closeSheet();
     else if (!$('#subject-page').hidden) closeSubjectPage();
@@ -2044,11 +1892,11 @@ function wireApp() {
     if (input) input.focus();
   });
 
-  on('#passport', 'click', (e) => {
-    const stop = e.target.closest('[data-stop]');
-    if (stop) openStop(stop.dataset.stop);
+  on('#collection', 'click', (e) => {
+    const slot = e.target.closest('[data-monster]');
+    if (slot) openMonster(slot.dataset.monster);
   });
-  on('#dv-close', 'click', closeStop);
+  on('#album-close', 'click', closeMonster);
 
   wireLists();
 }

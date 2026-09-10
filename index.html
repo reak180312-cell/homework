@@ -121,9 +121,9 @@
     <header class="head"><h1>Profile</h1></header>
     <div id="level-card" class="level-card"></div>
 
-    <h2 class="section-title">Your passport</h2>
-    <div id="passport" class="passport"></div>
-    <p id="passport-note" class="foot-note"></p>
+    <h2 class="section-title">Your collection</h2>
+    <div id="collection" class="collection"></div>
+    <p id="collection-note" class="foot-note"></p>
 
     <h2 class="section-title">Completed</h2>
     <div id="history-list" class="list"></div>
@@ -251,11 +251,11 @@
   </div>
 </div>
 
-<section id="destination" class="destination" hidden role="dialog" aria-modal="true" aria-label="Destination">
-  <button id="dv-close" class="dv-close" aria-label="Close">
+<section id="album" class="album" hidden role="dialog" aria-modal="true" aria-label="Creature">
+  <button id="album-close" class="dv-close" aria-label="Close">
     <svg class="ico" aria-hidden="true"><use href="#i-close" /></svg>
   </button>
-  <div id="dv-body" class="dv-body"></div>
+  <div id="album-body" class="dv-body"></div>
 </section>
 
 <div id="toast" class="toast" hidden>
@@ -266,8 +266,8 @@
 <!-- Filled in when you level up, or arrive somewhere new. -->
 <div id="levelup" class="levelup" hidden></div>
 
-<!-- The full-screen flight to a newly discovered place. -->
-<div id="journey" class="journey" hidden></div>
+<!-- Someone new turning up. -->
+<div id="arrival" class="arrival-screen" hidden></div>
 
 <script src="app.js"></script>
 </body>
