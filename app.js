@@ -395,6 +395,19 @@ function dueLabel(key) {
   return keyToDate(key).toLocaleDateString([], { day: 'numeric', month: 'short' });
 }
 
+/** The card reads as a sentence: "for thursday", "for next monday". */
+function duePhrase(key) {
+  const diff = daysFromToday(key);
+  const weekday = () => keyToDate(key).toLocaleDateString([], { weekday: 'long' }).toLowerCase();
+  if (diff < -1) return 'overdue';
+  if (diff === -1) return 'was for yesterday';
+  if (diff === 0) return 'for today';
+  if (diff === 1) return 'for tomorrow';
+  if (diff <= 6) return `for ${weekday()}`;
+  if (diff <= 13) return `for next ${weekday()}`;
+  return `for ${keyToDate(key).toLocaleDateString([], { day: 'numeric', month: 'long' })}`;
+}
+
 function dayHeading(ts) {
   const key = dayKey(new Date(ts));
   const diff = daysFromToday(key);
@@ -579,15 +592,15 @@ function hwRow(hw) {
   return `
     <div class="hw-slot" data-id="${hw.id}">
       <div class="hw ${soon ? 'is-soon' : ''} ${late ? 'is-late' : ''}" style="--sc:${color}">
+        <span class="hw-tab">${esc(sub ? sub.name : 'Subject')}</span>
+        <button class="hw-main" data-act="edit">
+          <span class="hw-due">${hw.dueDate ? esc(duePhrase(hw.dueDate)) : 'no date yet'}</span>
+          <span class="hw-title">${esc(hw.title)}</span>
+        </button>
         <button class="check" data-act="complete" aria-label="Mark ${esc(hw.title)} as done">
           <span class="check-circle">
             <svg class="check-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.6 9.6 17 19 7"/></svg>
           </span>
-        </button>
-        <button class="hw-main" data-act="edit">
-          <span class="hw-subject"><span class="hw-dot"></span>${esc(sub ? sub.name : 'Subject')}</span>
-          <span class="hw-title">${esc(hw.title)}</span>
-          ${hw.dueDate ? `<span class="hw-due">${esc(dueLabel(hw.dueDate))}</span>` : ''}
         </button>
       </div>
     </div>`;

@@ -119,7 +119,7 @@ button { border: 0; background: none; cursor: pointer; }
 .view {
   padding: 0 var(--gutter);
   padding-top: calc(env(safe-area-inset-top) + 26px);
-  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 96px);
+  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 40px);
   min-height: 100dvh;
   animation: view-in .34s var(--ease);
 }
@@ -170,19 +170,20 @@ button { border: 0; background: none; cursor: pointer; }
 }
 
 
-/* ── Homework row ────────────────────────────────────────── */
+/* ── Homework row ────────────────────────────────────────────
+   The card belongs to its subject: the name runs down the spine, the
+   colour washes the whole card, the date says when it is for, and the
+   circle waits on the right. */
 
 .hw {
   position: relative;
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 14px;
-  align-items: start;
-  padding: 14px 16px 15px;
-  background: var(--card);
+  grid-template-columns: auto 1fr auto;
+  align-items: stretch;
   border-radius: var(--r-card);
-  box-shadow: var(--shadow);
   overflow: hidden;
+  background: color-mix(in srgb, var(--sc) 15%, var(--card));
+  box-shadow: var(--shadow);
   transition: transform .22s var(--ease), opacity .22s linear, box-shadow .2s var(--ease);
   touch-action: pan-y;
 }
@@ -194,79 +195,79 @@ button { border: 0; background: none; cursor: pointer; }
   content: "";
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, var(--done) 14%, var(--card));
+  background: color-mix(in srgb, var(--done) 24%, var(--card));
   opacity: 0;
   transition: opacity .16s linear;
   pointer-events: none;
 }
 .hw.is-swiping::before { opacity: 1; }
 
+/* The spine: the subject's name, read from the bottom up. */
+.hw-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0;
+  min-width: 30px;
+  background: color-mix(in srgb, var(--sc) 34%, var(--card));
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: color-mix(in srgb, var(--sc) 72%, var(--ink));
+  white-space: nowrap;
+  overflow: hidden;
+}
+
 .hw-main {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  justify-content: center;
+  gap: 4px;
   min-width: 0;
+  padding: 15px 6px 16px 14px;
   cursor: pointer;
   text-align: left;
-  padding: 0;
 }
 
-.hw-subject {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11.5px;
-  font-weight: 650;
+.hw-due {
+  font-size: 13.5px;
+  font-weight: 550;
   line-height: 1.25;
-  letter-spacing: .055em;
-  text-transform: uppercase;
-  color: var(--sc, var(--ink-2));
+  letter-spacing: .005em;
+  color: color-mix(in srgb, var(--sc) 62%, var(--ink-2));
 }
-
-.hw-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: currentColor;
-  flex: none;
-}
+.hw.is-soon .hw-due { color: color-mix(in srgb, var(--sc) 50%, var(--ink)); font-weight: 650; }
+.hw.is-late .hw-due { color: var(--late); font-weight: 650; }
 
 .hw-title {
-  font-size: 17px;
-  font-weight: 500;
+  font-size: 17.5px;
+  font-weight: 550;
   letter-spacing: -.012em;
-  line-height: 1.35;
+  line-height: 1.3;
   color: var(--ink);
   overflow-wrap: anywhere;
 }
-
-.hw.is-soon .hw-title { font-weight: 600; }
-
-.hw-due {
-  font-size: 14px;
-  line-height: 1.25;
-  letter-spacing: -.005em;
-  color: var(--ink-3);
-}
-.hw.is-soon .hw-due { color: var(--ink-2); }
-.hw.is-late .hw-due { color: var(--late); }
-
+.hw.is-soon .hw-title { font-weight: 650; }
 
 /* The circle. Big target, quiet until it matters. */
 .check {
   --size: 27px;
-  position: relative;
-  width: 44px; height: 44px;
-  /* Nudged so the circle centres on the title line, not the small subject label. */
-  margin: 9px -8px -8px -9px;
   display: grid;
   place-items: center;
+  width: 52px;
   flex: none;
+  align-self: center;
 }
 
 .check-circle {
   width: var(--size); height: var(--size);
   border-radius: 50%;
-  border: 1.8px solid color-mix(in srgb, var(--ink-3) 62%, transparent);
+  border: 1.9px solid color-mix(in srgb, var(--sc) 55%, var(--ink-3));
+  background: color-mix(in srgb, var(--card) 55%, transparent);
   transition: border-color .2s var(--ease), background-color .2s var(--ease),
               transform .34s var(--spring);
   display: grid;
@@ -291,20 +292,16 @@ button { border: 0; background: none; cursor: pointer; }
   border-color: var(--done);
   transform: scale(1.06);
 }
-.hw.is-done .check-mark {
-  animation: draw .3s var(--ease) .04s forwards;
-}
+.hw.is-done .check-mark { animation: draw .3s var(--ease) .04s forwards; }
 @keyframes draw { to { stroke-dashoffset: 0; } }
 
 .hw.is-done .hw-title,
-.hw.is-done .hw-due,
-.hw.is-done .hw-subject { color: var(--ink-3); transition: color .3s ease; }
+.hw.is-done .hw-due { color: var(--ink-3); transition: color .3s ease; }
 .hw.is-done .hw-title { text-decoration: line-through; text-decoration-color: var(--ink-3); }
 
 /* Collapse out of the list once the tick has landed. */
 .hw-slot { overflow: hidden; transition: height .32s var(--ease), opacity .24s linear; }
 .hw-slot.is-leaving { opacity: 0; }
-
 
 /* ── Empty states ────────────────────────────────────────── */
 
@@ -610,10 +607,10 @@ button { border: 0; background: none; cursor: pointer; }
 /* Floating add button */
 .fab {
   position: fixed;
-  right: max(calc((100% - 540px)/2 + var(--gutter)), var(--gutter));
-  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 18px);
-  z-index: 20;
-  width: 58px; height: 58px;
+  top: calc(env(safe-area-inset-top) + 18px);
+  right: calc(max(calc((100% - 540px) / 2 + var(--gutter)), var(--gutter)) + 56px);
+  z-index: 22;
+  width: 46px; height: 46px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -622,7 +619,7 @@ button { border: 0; background: none; cursor: pointer; }
   box-shadow: var(--shadow-lift);
   transition: transform .22s var(--spring);
 }
-.fab .ico { width: 25px; height: 25px; stroke-width: 2.1; }
+.fab .ico { width: 23px; height: 23px; stroke-width: 2.2; }
 .fab:active { transform: scale(.9); }
 
 
@@ -977,7 +974,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 88px);   /* clears the add button */
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 20px);
   transform: translateX(-50%);
   z-index: 50;
   display: flex;
@@ -2010,7 +2007,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
 .done-subject { letter-spacing: .08em; }
 
 /* Cards sit on parchment, so they need an edge as well as a shadow. */
-.hw, .card, .subject-row, .level-card, .pack-card, .done-row, .note-row,
+.card, .subject-row, .level-card, .pack-card, .done-row, .note-row,
 .pack-list, .lesson-line, .rem-compose, .items-row, .passport, .dv-facts span {
   border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
 }

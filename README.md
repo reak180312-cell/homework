@@ -31,8 +31,9 @@ Once installed it opens full screen, works offline, and keeps its own data.
 Choose subjects → Add homework → See it all together → Finish it → Earn XP → Repeat tomorrow
 ```
 
-- **Homework** — everything unfinished, soonest first. Tap the circle (or swipe a card
-  right) to finish it. Tap the card to edit or delete it.
+- **Homework** — everything unfinished, soonest first. Each card wears its subject's colour
+  with the name down its spine, when it is for, and what to do. Tap the circle on the right
+  (or swipe the card right) to finish it; tap the card to edit or delete it.
 - **Bag** — what to bring each school day: your every-day things, then each lesson with its
   own kit, and any reminder pinned to that lesson.
 - **Reminders** — things to remember, each set for a day and optionally a single lesson.
