@@ -121,7 +121,7 @@ button { border: 0; background: none; cursor: pointer; }
   padding-top: calc(env(safe-area-inset-top) + 26px);
   padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 40px);
   min-height: 100dvh;
-  animation: view-in .34s var(--ease);
+  animation: view-in .22s var(--ease);
 }
 
 @keyframes view-in {
@@ -268,8 +268,8 @@ button { border: 0; background: none; cursor: pointer; }
   border-radius: 50%;
   border: 1.9px solid color-mix(in srgb, var(--sc) 55%, var(--ink-3));
   background: color-mix(in srgb, var(--card) 55%, transparent);
-  transition: border-color .2s var(--ease), background-color .2s var(--ease),
-              transform .34s var(--spring);
+  transition: border-color .16s var(--ease), background-color .16s var(--ease),
+              transform .24s var(--spring);
   display: grid;
   place-items: center;
 }
@@ -292,7 +292,7 @@ button { border: 0; background: none; cursor: pointer; }
   border-color: var(--done);
   transform: scale(1.06);
 }
-.hw.is-done .check-mark { animation: draw .3s var(--ease) .04s forwards; }
+.hw.is-done .check-mark { animation: draw .2s var(--ease) .02s forwards; }
 @keyframes draw { to { stroke-dashoffset: 0; } }
 
 .hw.is-done .hw-title,
@@ -300,7 +300,7 @@ button { border: 0; background: none; cursor: pointer; }
 .hw.is-done .hw-title { text-decoration: line-through; text-decoration-color: var(--ink-3); }
 
 /* Collapse out of the list once the tick has landed. */
-.hw-slot { overflow: hidden; transition: height .32s var(--ease), opacity .24s linear; }
+.hw-slot { overflow: hidden; transition: height .19s var(--ease), opacity .16s linear; }
 .hw-slot.is-leaving { opacity: 0; }
 
 /* ── Empty states ────────────────────────────────────────── */
@@ -311,7 +311,7 @@ button { border: 0; background: none; cursor: pointer; }
   align-items: center;
   text-align: center;
   padding: 54px 24px 40px;
-  animation: view-in .4s var(--ease);
+  animation: view-in .26s var(--ease);
 }
 
 .empty-mark {
@@ -387,10 +387,14 @@ button { border: 0; background: none; cursor: pointer; }
   display: block;
   width: 100%;
   height: auto;
+  opacity: 0;
+  transition: opacity .45s ease;
   -webkit-user-drag: none;
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 86%, transparent 100%);
   mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 86%, transparent 100%);
 }
+
+.empty-art.is-ready { opacity: 1; }
 
 /* The scene is lit for a bright room; at night it dims down to the paper. */
 @media (prefers-color-scheme: dark) {
@@ -746,10 +750,10 @@ button { border: 0; background: none; cursor: pointer; }
   background: var(--paper);
   border-radius: 24px 24px 0 0;
   box-shadow: 0 -8px 40px -12px rgba(0,0,0,.28);
-  animation: sheet-in .38s var(--ease);
+  animation: sheet-in .28s var(--ease);
   padding-bottom: env(safe-area-inset-bottom);
 }
-.sheet.is-leaving { animation: sheet-out .26s var(--ease) forwards; }
+.sheet.is-leaving { animation: sheet-out .2s var(--ease) forwards; }
 @keyframes sheet-in { from { transform: translateY(101%); } }
 @keyframes sheet-out { to { transform: translateY(101%); } }
 
@@ -1288,9 +1292,9 @@ input.hw-title::placeholder { color: var(--ink-3); }
   background: var(--paper);
   display: flex;
   flex-direction: column;
-  animation: tt-in .3s var(--ease);
+  animation: tt-in .2s var(--ease);
 }
-.timetable.is-leaving { animation: tt-out .22s var(--ease) forwards; }
+.timetable.is-leaving { animation: tt-out .18s var(--ease) forwards; }
 @keyframes tt-in  { from { opacity: 0; transform: scale(.98); } }
 @keyframes tt-out { to   { opacity: 0; transform: scale(.98); } }
 
@@ -1999,7 +2003,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
 
 /* A row leaving must not re-run the entry animation. */
 .hw-slot.is-leaving { animation: none !important; }
-@keyframes dv-in  { from { opacity: 0; transform: scale(.97); } }
+@keyframes dv-in  { from { opacity: 0; transform: scale(.98); } }
 @keyframes dv-out { to   { opacity: 0; transform: scale(.98); } }
 
 .dv-close {
@@ -2255,9 +2259,9 @@ button.mon-slot:active { transform: scale(.93); }
   flex-direction: column;
   background: var(--paper);
   overscroll-behavior: contain;
-  animation: dv-in .34s var(--ease);
+  animation: dv-in .22s var(--ease);
 }
-.book.is-leaving { animation: dv-out .26s var(--ease) forwards; }
+.book.is-leaving { animation: dv-out .2s var(--ease) forwards; }
 
 .book .dv-close {
   position: absolute;
@@ -2424,10 +2428,10 @@ button.mon-slot:active { transform: scale(.93); }
 .page-l.is-waiting .portrait { background: color-mix(in srgb, var(--mc) 10%, transparent); }
 
 /* Turning a page: the arriving page swings in off the spine. */
-.turn-next .page-r { transform-origin: left center;  animation: pg-flip-r .46s var(--ease) both; }
-.turn-next .page-l { animation: pg-soft .32s ease both; }
-.turn-prev .page-l { transform-origin: right center; animation: pg-flip-l .46s var(--ease) both; }
-.turn-prev .page-r { animation: pg-soft .32s ease both; }
+.turn-next .page-r { transform-origin: left center;  animation: pg-flip-r .3s var(--ease) both; }
+.turn-next .page-l { animation: pg-soft .22s ease both; }
+.turn-prev .page-l { transform-origin: right center; animation: pg-flip-l .3s var(--ease) both; }
+.turn-prev .page-r { animation: pg-soft .22s ease both; }
 @keyframes pg-flip-r { from { transform: rotateY(-74deg); opacity: .2; } }
 @keyframes pg-flip-l { from { transform: rotateY(74deg);  opacity: .2; } }
 @keyframes pg-soft   { from { opacity: 0; } }

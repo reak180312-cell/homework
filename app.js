@@ -172,12 +172,28 @@ function lessonsFor(dayIndex) {
 }
 
 /** The subject you picked that this lesson belongs to, if any. */
+/* Drawing a week asks this once per cell — forty times for the Bag page alone,
+   and again for the miniature and the full grid. The answer only changes when
+   the subjects do, and those are replaced wholesale rather than edited in
+   place, so the array itself tells us when to start over. */
+let lessonSubjectsFor = null;
+let lessonSubjectCache = new Map();
+
 function subjectForLesson(name) {
+  if (lessonSubjectsFor !== state.subjects) {
+    lessonSubjectsFor = state.subjects;
+    lessonSubjectCache = new Map();
+  }
+  if (lessonSubjectCache.has(name)) return lessonSubjectCache.get(name);
+
   const aliases = LESSON_ALIASES[name] || [name];
-  return state.subjects.find(s => {
+  const found = state.subjects.find(s => {
     const n = s.name.toLowerCase();
     return aliases.some(a => n.includes(a.toLowerCase()) || a.toLowerCase().includes(n));
   }) || null;
+
+  lessonSubjectCache.set(name, found);
+  return found;
 }
 
 /** Weekday index into SCHOOL_DAYS, or -1 at the weekend. */
@@ -853,6 +869,15 @@ const empty = (title, line, opts = {}) => {
 /* Nothing left to do. The screen clears down to one line and one button — the
    + leaves the header and comes to sit beside the sentence, so there is only
    ever one of it — over a desk that has been tidied for the day. */
+/* Show the picture only once it has decoded. Half a photo drawn top-down looks
+   like something went wrong; nothing, and then all of it, does not. */
+function revealArt(box) {
+  const art = box.querySelector('.empty-art');
+  if (!art) return;
+  if (art.complete && art.naturalWidth) art.classList.add('is-ready');
+  else art.addEventListener('load', () => art.classList.add('is-ready'), { once: true });
+}
+
 const emptyHome = (title) => `
   <div class="empty-home">
     <h2 class="empty-home-line">
@@ -861,7 +886,8 @@ const emptyHome = (title) => `
         <svg class="ico" aria-hidden="true"><use href="#i-plus" /></svg>
       </button>
     </h2>
-    <img class="empty-art" src="art/desk.jpg" alt="" draggable="false" />
+    <img class="empty-art" src="art/desk.jpg" alt="" width="941" height="820"
+         decoding="async" draggable="false" />
   </div>`;
 
 
@@ -889,6 +915,7 @@ function renderHome() {
   box.innerHTML = list.length
     ? list.map(hwRow).join('')
     : emptyHome(state.homework.length ? 'You finished all' : 'Nothing here yet');
+  if (!list.length) revealArt(box);
   syncFab();
 }
 
@@ -982,9 +1009,15 @@ function renderBag() {
 }
 
 /** The corner button is itself a tiny timetable, not a generic glyph. */
+let ttButtonKey = '';
+
 function renderTtButton() {
   const btn = $('#tt-btn');
   if (!btn) return;
+  // Redrawn only when the subjects behind its colours change, not every render.
+  const key = state.subjects.map(x => x.id + x.color + x.name).join('|');
+  if (key === ttButtonKey && btn.firstChild) return;
+  ttButtonKey = key;
   btn.innerHTML = '<span class="tt-mini">' + SCHOOL_DAYS.map((d, i) =>
     '<span class="tt-mini-col">' + SCHEDULE[i].slice(0, 6).map(name => {
       if (!name) return '<span class="tt-mini-cell is-free"></span>';
@@ -1228,7 +1261,7 @@ function closeTimetable() {
   const box = $('#timetable');
   if (box.hidden) return;
   box.classList.add('is-leaving');
-  setTimeout(() => { box.hidden = true; box.classList.remove('is-leaving'); }, 240);
+  setTimeout(() => { box.hidden = true; box.classList.remove('is-leaving'); }, 180);
 }
 
 
@@ -1498,7 +1531,7 @@ function closeBook() {
   const view = $('#book');
   if (!view || view.hidden) return;
   view.classList.add('is-leaving');
-  setTimeout(() => { view.hidden = true; view.classList.remove('is-leaving'); }, 260);
+  setTimeout(() => { view.hidden = true; view.classList.remove('is-leaving'); }, 200);
 }
 
 /* A book turns by being pushed, so this one turns by being swiped too. */
@@ -1757,7 +1790,7 @@ function closeSheet() {
     $(sel).classList.remove('is-leaving');
     scrim.hidden = true;
     scrim.classList.remove('is-leaving');
-  }, 250);
+  }, 200);
 }
 
 
@@ -1781,20 +1814,20 @@ function completeHw(id, node) {
 
   if (slot) {
     slot.querySelector('.hw').classList.add('is-done');
-    // Let the tick land before the row leaves, so it never just blinks away.
+    // Long enough to see the tick drawn, short enough not to be waiting on it.
     setTimeout(() => {
       slot.style.height = `${slot.offsetHeight}px`;
       void slot.offsetHeight;
       slot.classList.add('is-leaving');
       slot.style.height = '0px';
-      setTimeout(() => { render(); }, 330);
-    }, 560);
+      setTimeout(() => { render(); }, 190);
+    }, 215);
   } else {
     render();
   }
 
   showToast(`Completed  ·  +${XP_PER_HOMEWORK} XP`, () => undoComplete(id));
-  if (after > before) setTimeout(() => showLevelUp(after, before), 950);
+  if (after > before) setTimeout(() => showLevelUp(after, before), 520);
 }
 
 function undoComplete(id) {

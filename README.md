@@ -136,6 +136,28 @@ art/          the desk the homework screen clears to when nothing is left
 icons/        app icons, generated from the supplied logo
 ```
 
+## Speed
+
+The whole app is meant to answer immediately, because the thing it is for —
+writing down homework and ticking it off — is worth about four seconds of anyone's
+attention.
+
+- The service worker serves the shell **from its own cache first** and fetches a
+  fresh copy behind it for next time. A launch does not wait on the network, which
+  is what made it stall inside other apps' browsers. A new version is still never
+  more than one launch away, because the cache name changes with every release.
+- Ticking something off clears the row in about **0.4s**, down from 0.9s. The tick
+  is still drawn; it just isn't admired for half a second first.
+- The tab icon is a 8 KB file rather than the 51 KB app icon, which the browser
+  used to fetch twice on every load.
+- The desk picture waits until it has decoded and then fades in, instead of
+  painting itself in halfway down the screen, and it reserves its space so nothing
+  jumps when it lands.
+
+`test-speed.js` holds these to account: finishing inside 600ms on a four-times
+slowed-down phone, the shell served with no network request, and the picture
+ending up actually visible.
+
 ## Design rules
 
 Aged parchment, deep ink-blue for text and every primary action, and a red-brown where

@@ -2,13 +2,14 @@
 
 // Bump this whenever the shell changes shape: it drops every older cache on
 // activate, so a page can never be served new markup with stale script.
-const CACHE = 'homework-v5';
+const CACHE = 'homework-v6';
 const SHELL = [
   './index.html',
   './styles.css',
   './app.js',
   './manifest.webmanifest',
   './art/desk.jpg',
+  './icons/favicon-64.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
 ];
@@ -30,18 +31,38 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// Network first, so edits show up; cache is the fallback when offline.
+/**
+ * Cache first, then refresh in the background.
+ *
+ * This used to go to the network first so that edits showed up. That cost a
+ * round trip on every single file on every single launch, which on a phone is
+ * the difference between the app being there and the app arriving — and it is
+ * why the desk picture used to paint itself in halfway down the screen.
+ *
+ * Now a cached copy is served straight away and a fresh one is fetched behind
+ * it for next time, so a new version is still never more than one launch away.
+ * The cache name above is bumped with every release, which throws the whole
+ * old set out at once rather than letting new markup meet stale script.
+ */
 self.addEventListener('fetch', (e) => {
-  if (e.request.method !== 'GET') return;
-  e.respondWith(
-    fetch(e.request)
-      .then((res) => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  if (new URL(req.url).origin !== self.location.origin) return;
+
+  e.respondWith((async () => {
+    const cached = await caches.match(req);
+
+    const fresh = fetch(req).then((res) => {
+      if (res && res.ok) {
         const copy = res.clone();
-        caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
-        return res;
-      })
-      .catch(() => caches.match(e.request).then(hit => hit || caches.match('./index.html')))
-  );
+        caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+      }
+      return res;
+    }).catch(() => null);
+
+    if (cached) return cached;                  // instant, every time after the first
+    return (await fresh) || caches.match('./index.html');
+  })());
 });
 
 // Tapping the daily reminder lands straight in the add-homework sheet.
