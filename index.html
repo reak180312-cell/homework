@@ -60,16 +60,9 @@
       </header>
       <div id="subject-picker" class="picker"></div>
     </div>
-    <div id="ob-step2" hidden>
-      <header class="onboarding-head">
-        <h1>What do you bring<br />to each lesson?</h1>
-        <p>Separate things with commas. Change any of it later.</p>
-      </header>
-      <div id="items-editor"></div>
-    </div>
   </div>
   <div class="onboarding-foot">
-    <button id="onboarding-done" class="btn-primary" disabled>Continue</button>
+    <button id="onboarding-done" class="btn-primary" disabled>Done</button>
   </div>
 </section>
 
@@ -90,7 +83,6 @@
       <h1>Bag</h1>
       <p id="bag-sub" class="head-sub"></p>
     </header>
-    <button id="tt-preview" class="tt-preview" aria-label="Open timetable"></button>
     <div id="bag-days" class="chips chips-scroll"></div>
     <div id="bag-body"></div>
   </section>
@@ -240,23 +232,6 @@
     <div id="subject-picker-2" class="picker"></div>
     <div class="sheet-actions">
       <button id="subjects-done" class="btn-primary">Done</button>
-    </div>
-  </div>
-</div>
-
-<div id="sheet-items" class="sheet" hidden role="dialog" aria-modal="true" aria-label="What to bring">
-  <div class="sheet-grip"></div>
-  <div class="sheet-body">
-    <h2 id="items-title" class="sheet-title">What to bring</h2>
-    <p class="note-hint">Tap what you bring. Already on is already packed.</p>
-    <div id="items-chips" class="item-chips"></div>
-    <div class="items-custom-row">
-      <input id="items-custom" type="text" placeholder="Something else…"
-             autocomplete="off" enterkeyhint="done" />
-      <button id="items-custom-add">Add</button>
-    </div>
-    <div class="sheet-actions">
-      <button id="items-save" class="btn-primary">Save</button>
     </div>
   </div>
 </div>

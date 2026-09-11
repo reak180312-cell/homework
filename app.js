@@ -79,27 +79,6 @@ const LESSONS = (() => {
   return seen;
 })();
 
-// Starting points, not rules — all of it is editable in the app.
-const DEFAULT_ITEMS = {
-  'מתמטיקה':          ['Notebook', 'Textbook', 'Calculator'],
-  'ביולוגיה':          ['Notebook', 'Textbook'],
-  'פיסיקה':            ['Notebook', 'Textbook', 'Calculator'],
-  'אנגלית':            ['Notebook', 'Textbook'],
-  'הסטוריה':           ['Notebook', 'Textbook'],
-  'ספרות':             ['Notebook', 'Book'],
-  'תנ״ך':              ['Notebook', 'Tanach'],
-  'ערבית':             ['Notebook', 'Textbook'],
-  'אזרחות ודמוקרטיה':  ['Notebook'],
-  'חנ״ג':              ['Sports kit', 'Trainers'],
-  'כישורי שפה':        ['Notebook'],
-  'כישורי חיים':       ['Notebook'],
-  'חינוך':             [],
-  'העשרה / מדמ״ח':     ['Laptop', 'Notebook'],
-  'מעבדה':             ['Lab coat', 'Notebook'],
-};
-
-const DEFAULT_EVERYDAY = ['Water bottle', 'Pencil case', 'Lunchbox'];
-
 // Short forms so the whole week fits one screen without scrolling sideways.
 const SHORT_NAME = {
   'אזרחות ודמוקרטיה': 'אזרחות',
@@ -109,55 +88,46 @@ const SHORT_NAME = {
 };
 const shortName = (n) => SHORT_NAME[n] || n;
 
-// Tap-to-pick options, so nobody has to type a packing list.
-const ITEM_CATALOG = [
-  { name: 'Notebook',     emoji: '📓' },
-  { name: 'Textbook',     emoji: '📕' },
-  { name: 'Workbook',     emoji: '📗' },
-  { name: 'Folder',       emoji: '🗂️' },
-  { name: 'Calculator',   emoji: '🧮' },
-  { name: 'Ruler',        emoji: '📏' },
-  { name: 'Geometry kit', emoji: '📐' },
-  { name: 'Laptop',       emoji: '💻' },
-  { name: 'Lab coat',     emoji: '🥼' },
-  { name: 'Sports kit',   emoji: '👕' },
-  { name: 'Trainers',     emoji: '👟' },
-  { name: 'Tanach',       emoji: '📜' },
-  { name: 'Book',         emoji: '📖' },
-  { name: 'Dictionary',   emoji: '📔' },
-  { name: 'Headphones',   emoji: '🎧' },
-  { name: 'Charger',      emoji: '🔌' },
-  { name: 'Water bottle', emoji: '💧' },
-  { name: 'Pencil case',  emoji: '✏️' },
-  { name: 'Lunchbox',     emoji: '🍱' },
-  { name: 'Bus card',     emoji: '🎫' },
-];
+/* ── What goes in the bag ──────────────────────────────────
+   The same few things every day, sports shoes when there is sport, and the
+   day's own subjects named under the notebooks and the books. Deliberately
+   not configurable: a packing list you have to keep up to date is just a
+   second piece of homework. */
 
-const EMOJI = Object.fromEntries(ITEM_CATALOG.map(i => [i.name.toLowerCase(), i.emoji]));
-const emojiFor = (item) => EMOJI[String(item).toLowerCase()] || '🎒';
+const PE = 'חנ״ג';
+const CARRIES_NOTHING = [PE, 'חינוך'];   // sport and homeroom need no book
 
-/** One line per thing, not one line per lesson — "Notebook" said once,
- *  with the lessons that want it. */
-function packListFor(dayIndex) {
-  const map = new Map();
-  for (const it of state.everydayItems) {
-    if (!map.has(it)) map.set(it, { item: it, lessons: [], everyday: true });
+/** That day's subjects, in the words you picked them in. */
+function subjectsOn(dayIndex) {
+  const out = [];
+  for (const lesson of lessonsFor(dayIndex)) {
+    if (CARRIES_NOTHING.includes(lesson.name)) continue;
+    const sub = subjectForLesson(lesson.name);
+    const name = sub ? sub.name : shortName(lesson.name);
+    if (!out.includes(name)) out.push(name);
   }
-  for (const l of lessonsFor(dayIndex)) {
-    for (const it of itemsFor(l.name)) {
-      if (!map.has(it)) map.set(it, { item: it, lessons: [], everyday: false });
-      const entry = map.get(it);
-      if (!entry.everyday && !entry.lessons.includes(l.name)) entry.lessons.push(l.name);
-    }
-  }
-  return [...map.values()];
+  return out;
 }
 
-const itemsFor = (lesson) =>
-  (state.lessonItems && state.lessonItems[lesson]) || [];
+function bagFor(dayIndex) {
+  const list = [
+    { emoji: '✏️', item: 'Pencil bag' },
+    { emoji: '💧', item: 'Bottle' },
+    { emoji: '🍱', item: 'Lunch box' },
+  ];
 
-const parseItems = (text) =>
-  text.split(',').map(s => s.trim()).filter(Boolean);
+  if (lessonsFor(dayIndex).some(l => l.name === PE)) {
+    list.push({ emoji: '👟', item: 'Sports shoes', note: 'sport today' });
+  }
+
+  const subjects = subjectsOn(dayIndex);
+  if (subjects.length) {
+    const named = subjects.join(' · ');
+    list.push({ emoji: '📓', item: 'Notebooks', note: named });
+    list.push({ emoji: '📕', item: 'Books', note: named });
+  }
+  return list;
+}
 
 /** Lessons that day, in order, collapsed to one entry per subject. */
 function lessonsFor(dayIndex) {
@@ -675,8 +645,6 @@ const blank = () => ({
   subjects: [],
   homework: [],
   notes: [],
-  lessonItems: null,      // filled from DEFAULT_ITEMS on first run
-  everydayItems: null,
   progress: { xp: 0, level: 1, shownUpTo: 1 },
   settings: {
     dailyReminderEnabled: false, dailyReminderTime: '15:00',
@@ -694,11 +662,6 @@ function hydrate(saved) {
   const next = Object.assign(base, saved);
   next.settings = Object.assign(blank().settings, (saved && saved.settings) || {});
   next.notes = Array.isArray(next.notes) ? next.notes : [];
-  if (!next.lessonItems || typeof next.lessonItems !== 'object') {
-    next.lessonItems = Object.fromEntries(LESSONS.map(l => [l, (DEFAULT_ITEMS[l] || ['Notebook']).slice()]));
-  }
-  for (const l of LESSONS) if (!Array.isArray(next.lessonItems[l])) next.lessonItems[l] = (DEFAULT_ITEMS[l] || ['Notebook']).slice();
-  if (!Array.isArray(next.everydayItems)) next.everydayItems = DEFAULT_EVERYDAY.slice();
   next.progress = Object.assign({ xp: 0, level: 1, shownUpTo: 1 }, next.progress);
   // Anyone already part way through should not be shown a burst of arrivals.
   if (typeof next.progress.shownUpTo !== 'number') next.progress.shownUpTo = levelFor(next.progress.xp || 0);
@@ -938,74 +901,34 @@ function renderBag() {
       ${esc(d.short)}${i === today ? '<span class="today-dot"></span>' : ''}
     </button>`).join('');
 
-  renderTimetablePreview();
-
-  const lessons = lessonsFor(bagDay);
-  const dayNotes = state.notes.filter(n => n.day === null || n.day === bagDay);
-  const loose = dayNotes.filter(n => !n.lesson);
-
-  if (!lessons.length) {
+  if (!lessonsFor(bagDay).length) {
     $('#bag-body').innerHTML =
       empty('No lessons', `Nothing to pack for ${day.en}.`, { icon: 'i-tab-bag', mood: 'rest' });
     return;
   }
 
-  const pack = packListFor(bagDay);
+  const line = (emoji, item, note) => `
+    <li class="pack-line">
+      <span class="pack-emoji">${emoji}</span>
+      <span class="pack-text">
+        <span class="pack-item">${esc(item)}</span>
+        ${note ? `<span class="pack-for">${esc(note)}</span>` : ''}
+      </span>
+    </li>`;
 
-  const packList = `
-    <div class="bag-section">
-      <div class="bag-section-head">
-        <h2 class="section-title">Pack</h2>
-        <button class="edit-btn" data-act="edit-everyday">
-          <svg class="ico" aria-hidden="true"><use href="#i-edit" /></svg>Every day
-        </button>
-      </div>
-      <ul class="pack-list">
-        ${pack.map(p => `
-          <li class="pack-line">
-            <span class="pack-emoji">${p.everyday ? emojiFor(p.item) : emojiFor(p.item)}</span>
-            <span class="pack-item">${esc(p.item)}</span>
-            <span class="pack-for">${p.everyday ? 'Every day' : p.lessons.map(shortName).map(esc).join(' · ')}</span>
-          </li>`).join('')}
-      </ul>
-    </div>`;
+  const pack = `<ul class="pack-list">
+      ${bagFor(bagDay).map(p => line(p.emoji, p.item, p.note)).join('')}
+    </ul>`;
 
-  const remember = dayNotes.length ? `
-    <div class="bag-section">
-      <h2 class="section-title">Remember</h2>
-      <ul class="pack-list pack-list-note">
-        ${dayNotes.map(n => `
-          <li class="pack-line">
-            <span class="pack-emoji">📌</span>
-            <span class="pack-item">${esc(n.text)}</span>
-            <span class="pack-for">${n.lesson ? esc(shortName(n.lesson)) : ''}</span>
-          </li>`).join('')}
-      </ul>
-    </div>` : '';
+  // Your own notes for the day are things to put in the bag too.
+  const notes = state.notes.filter(n => n.day === null || n.day === bagDay);
+  const remember = notes.length ? `
+    <h2 class="section-title">Also</h2>
+    <ul class="pack-list">
+      ${notes.map(n => line('📌', n.text, n.lesson ? shortName(n.lesson) : '')).join('')}
+    </ul>` : '';
 
-  // Kept compact: a line per lesson, its kit shown as emoji, tap to change.
-  const lessonStrip = `
-    <div class="bag-section">
-      <h2 class="section-title">Lessons</h2>
-      <div class="list">
-        ${lessons.map(l => {
-          const sub = subjectForLesson(l.name);
-          const items = itemsFor(l.name);
-          const due = sub ? activeHw().filter(h => h.subjectId === sub.id).length : 0;
-          return `
-            <button class="lesson-line" data-act="edit-lesson" data-lesson="${esc(l.name)}"
-                    style="--sc:${sub ? sub.color : 'var(--ink-3)'}">
-              <span class="bring-dot"></span>
-              <span class="lesson-name">${esc(shortName(l.name))}</span>
-              <span class="lesson-kit">${items.map(i => emojiFor(i)).join('')}</span>
-              ${due ? `<span class="lesson-due">${due}</span>` : ''}
-              <span class="bring-time">${esc(PERIODS[l.periods[0]].split('–')[0])}</span>
-            </button>`;
-        }).join('')}
-      </div>
-    </div>`;
-
-  $('#bag-body').innerHTML = packList + remember + lessonStrip;
+  $('#bag-body').innerHTML = pack + remember;
 }
 
 /** The corner button is itself a tiny timetable, not a generic glyph. */
@@ -1025,24 +948,6 @@ function renderTtButton() {
       return '<span class="tt-mini-cell" style="--sc:' + (sub ? sub.color : 'var(--ink-3)') + '"></span>';
     }).join('') + '</span>'
   ).join('') + '</span>';
-}
-
-/** A readable miniature of the week that opens the full thing. */
-function renderTimetablePreview() {
-  const today = schoolDayIndex();
-  $('#tt-preview').innerHTML = `
-    <span class="tt-preview-grid">
-      ${SCHOOL_DAYS.map((d, i) => `
-        <span class="tt-preview-col ${i === today ? 'is-today' : ''}">
-          <span class="tt-preview-day">${esc(d.short)}</span>
-          ${SCHEDULE[i].map(name => {
-            if (!name) return '<span class="tt-preview-cell is-free"></span>';
-            const sub = subjectForLesson(name);
-            return `<span class="tt-preview-cell" style="--sc:${sub ? sub.color : 'var(--ink-3)'}"></span>`;
-          }).join('')}
-        </span>`).join('')}
-    </span>
-    <span class="tt-preview-label">Timetable · tap to open</span>`;
 }
 
 
@@ -1199,55 +1104,7 @@ function renderTimetable() {
     </div>`;
 }
 
-/* ── Editing what to bring ─────────────────────────────────── */
 
-let itemsTarget = null;   // a lesson name, or 'everyday'
-let itemsDraft = [];
-
-function openItemsSheet(target) {
-  itemsTarget = target;
-  const everyday = target === 'everyday';
-  $('#items-title').textContent = everyday ? 'Every day' : target;
-  itemsDraft = (everyday ? state.everydayItems : itemsFor(target)).slice();
-  drawItemChips();
-  showSheet('#sheet-items');
-}
-
-/** Everything in the catalogue, plus anything you added yourself, with what
- *  you already bring switched on. Tap to change; no typing needed. */
-function drawItemChips() {
-  const extras = itemsDraft.filter(i => !ITEM_CATALOG.some(c => c.name === i));
-  const all = ITEM_CATALOG.map(c => c.name).concat(extras);
-  $('#items-chips').innerHTML = all.map(name => `
-    <button class="item-chip ${itemsDraft.includes(name) ? 'is-on' : ''}" data-item="${esc(name)}">
-      <span class="item-emoji">${emojiFor(name)}</span>${esc(name)}
-    </button>`).join('');
-}
-
-function toggleItem(name) {
-  const at = itemsDraft.indexOf(name);
-  if (at >= 0) itemsDraft.splice(at, 1); else itemsDraft.push(name);
-  drawItemChips();
-}
-
-function addCustomItem() {
-  const input = $('#items-custom');
-  const name = input ? input.value.trim() : '';
-  if (!name) return;
-  if (!itemsDraft.includes(name)) itemsDraft.push(name);
-  input.value = '';
-  drawItemChips();
-}
-
-function saveItems() {
-  if (!itemsTarget) return;
-  if (itemsTarget === 'everyday') state.everydayItems = itemsDraft.slice();
-  else state.lessonItems[itemsTarget] = itemsDraft.slice();
-  save();
-  closeSheet();
-  if (!$('#onboarding').hidden) renderItemsEditor();   // setup step two
-  else render();
-}
 
 
 function openTimetable() {
@@ -2247,7 +2104,7 @@ function wireApp() {
   on('#tt-btn', 'click', openTimetable);
   on('#tt-close', 'click', closeTimetable);
 
-  // Bag: day switcher, reminders
+  // Bag: the day switcher, and nothing else to press
   on('#bag-days', 'click', (e) => {
     const chip = e.target.closest('[data-day]');
     if (!chip) return;
@@ -2255,23 +2112,6 @@ function wireApp() {
     renderBag();
   });
 
-  on('#bag-body', 'click', (e) => {
-    const act = e.target.closest('[data-act]');
-    if (!act) return;
-    if (act.dataset.act === 'edit-everyday') openItemsSheet('everyday');
-    if (act.dataset.act === 'edit-lesson') openItemsSheet(act.dataset.lesson);
-  });
-
-  on('#tt-preview', 'click', openTimetable);
-  on('#items-save', 'click', saveItems);
-  on('#items-chips', 'click', (e) => {
-    const chip = e.target.closest('[data-item]');
-    if (chip) toggleItem(chip.dataset.item);
-  });
-  on('#items-custom-add', 'click', addCustomItem);
-  on('#items-custom', 'keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); addCustomItem(); }
-  });
 
   // Reminders page
   on('#rem-input', 'keydown', (e) => {
@@ -2401,56 +2241,13 @@ function wireApp() {
   wireLists();
 }
 
-/* Second setup step: what each lesson needs. Pre-filled with sensible
-   guesses so it can be skipped by anyone in a hurry. */
-
-let obStep = 1;
-
-/* Already answered for you — tap a row only if something is wrong. */
-function itemsRow(key, label, list, color) {
-  return `
-    <button class="items-row" data-items="${esc(key)}" style="--sc:${color}">
-      <span class="items-label"><span class="chip-dot"></span>${esc(label)}</span>
-      <span class="items-preview">
-        ${list.length
-          ? list.map(i => `<span class="items-pill">${emojiFor(i)} ${esc(i)}</span>`).join('')
-          : '<span class="items-none">Nothing</span>'}
-      </span>
-    </button>`;
-}
-
-function renderItemsEditor() {
-  const box = $('#items-editor');
-  if (!box) return;
-  box.innerHTML =
-    itemsRow('everyday', 'Every day', state.everydayItems, 'var(--ink-2)') +
-    LESSONS.map(l => {
-      const sub = subjectForLesson(l);
-      return itemsRow(l, shortName(l), itemsFor(l), sub ? sub.color : 'var(--ink-3)');
-    }).join('');
-}
-
 function wireOnboarding() {
-  on('#items-editor', 'click', (e) => {
-    const row = e.target.closest('[data-items]');
-    if (row) openItemsSheet(row.dataset.items === 'everyday' ? 'everyday' : row.dataset.items);
-  });
-
   wirePicker($('#subject-picker'), () => {
     $('#onboarding-done').disabled = !picked.length;
   });
   on('#onboarding-done', 'click', () => {
-    if (obStep === 1) {
-      if (!picked.length) return;
-      commitSubjects();
-      obStep = 2;
-      renderItemsEditor();
-      $('#ob-step1').hidden = true;
-      $('#ob-step2').hidden = false;
-      $('#onboarding-done').textContent = 'Done';
-      window.scrollTo(0, 0);
-      return;
-    }
+    if (!picked.length) return;
+    commitSubjects();
     state.onboarded = true;
     save();
     $('#onboarding').hidden = true;

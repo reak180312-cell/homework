@@ -36,8 +36,10 @@ Choose subjects → Add homework → See it all together → Finish it → Earn 
   (or swipe the card right) to finish it; tap the card to edit or delete it. With nothing
   left the screen clears to one line — *You finished all* — and the + leaves the header to
   sit beside it, over a desk that has been tidied for the day.
-- **Bag** — what to bring each school day: your every-day things, then each lesson with its
-  own kit, and any reminder pinned to that lesson.
+- **Bag** — six things, drawn from the sketch this was specified in: pencil bag, bottle,
+  lunch box, sports shoes on the days there is sport, and notebooks and books naming that
+  day's own subjects. Pick any day along the top. Your own reminders for that day sit under
+  it, because those are things to put in the bag too.
 - **Reminders** — things to remember, each set for a day and optionally a single lesson.
   Opens on today; tap **All** to see the rest.
 - **Subjects** — one page per subject: what's open, and what you've already handed in.
@@ -48,12 +50,12 @@ selected and the due date is optional, so the shortest add is two actions.
 
 ## Timetable
 
-The weekly schedule is built in. A miniature of the week sits on the Bag page, and the button
-in the top-right corner opens the full grid from any screen. Lessons are colour-matched to
-the subjects you picked at setup.
+The weekly schedule is built in. The button in the top-right corner opens the full grid from
+any screen. Lessons are colour-matched to the subjects you picked at setup, and the Bag page
+reads the day's subjects straight off it.
 
-What to bring to each lesson is set during setup and editable any time — tap a lesson on the
-Bag page, or Edit beside "Every day".
+There is nothing to configure. A packing list you have to keep up to date is a second piece
+of homework, so the list is fixed and the only thing that varies is the day.
 
 It lives in `SCHEDULE` in [app.js](app.js) as one row per day, Sunday to Thursday, eight
 periods each — edit that array when the timetable changes. Teacher names, room numbers and

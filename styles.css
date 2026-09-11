@@ -1171,42 +1171,6 @@ input.hw-title::placeholder { color: var(--ink-3); }
   margin-left: 2px;
 }
 
-.bring-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  background: var(--card);
-  border-radius: var(--r-card);
-  box-shadow: var(--shadow);
-}
-
-.bring-dot {
-  width: 9px; height: 9px;
-  border-radius: 50%;
-  background: var(--sc);
-  flex: none;
-}
-
-.bring-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-
-.bring-name {
-  font-size: 16.5px;
-  font-weight: 500;
-  letter-spacing: -.015em;
-  line-height: 1.3;
-  overflow-wrap: anywhere;
-}
-
-.bring-meta { font-size: 13px; color: var(--ink-3); line-height: 1.25; }
-
-.bring-time {
-  font-size: 14px;
-  color: var(--ink-3);
-  font-variant-numeric: tabular-nums;
-  flex: none;
-}
-
 .note-row {
   display: flex;
   align-items: center;
@@ -1269,13 +1233,6 @@ input.hw-title::placeholder { color: var(--ink-3); }
   color: var(--on-ink);
   font-size: 15px;
   font-weight: 600;
-}
-
-.note-hint {
-  margin-top: 4px;
-  padding: 0 4px;
-  font-size: 12.5px;
-  color: var(--ink-3);
 }
 
 
@@ -1422,130 +1379,8 @@ input.hw-title::placeholder { color: var(--ink-3); }
 
 /* ── Packing lists ───────────────────────────────────────── */
 
-.bag-section { margin-bottom: 6px; }
-
-.bag-section-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.edit-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 2px;
-  font-size: 13.5px;
-  font-weight: 550;
-  color: var(--ink-2);
-}
-.edit-btn .ico { width: 15px; height: 15px; }
-.edit-btn:active { color: var(--ink); }
-
-.pack-card {
-  background: var(--card);
-  border-radius: var(--r-card);
-  box-shadow: var(--shadow);
-  padding: 14px 16px;
-  overflow: hidden;
-}
-
-.pack-head {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  width: 100%;
-  margin: -14px -16px 0;
-  padding: 14px 16px 10px;
-  width: calc(100% + 32px);
-  text-align: left;
-}
-
-.pack-items {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.pack-items li {
-  padding: 6px 12px;
-  border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--sc, var(--ink-3)) 10%, var(--line-soft));
-  font-size: 14px;
-  letter-spacing: -.01em;
-  color: var(--ink);
-}
-
-.pack-items-note li { background: var(--line-soft); }
-
-.pack-none {
-  font-size: 14px;
-  color: var(--ink-3);
-}
-
-.pack-note {
-  margin-top: 10px;
-  padding: 9px 12px;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--late) 12%, transparent);
-  color: var(--late);
-  font-size: 14px;
-  line-height: 1.35;
-  letter-spacing: -.01em;
-}
-
 
 /* ── Timetable preview ───────────────────────────────────── */
-
-.tt-preview {
-  display: block;
-  width: 100%;
-  margin-bottom: 18px;
-  padding: 14px 14px 11px;
-  border-radius: var(--r-card);
-  background: var(--card);
-  box-shadow: var(--shadow);
-  transition: transform .2s var(--ease);
-}
-.tt-preview:active { transform: scale(.985); }
-
-.tt-preview-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 5px;
-}
-
-.tt-preview-col { display: flex; flex-direction: column; gap: 3px; }
-
-.tt-preview-day {
-  font-size: 10px;
-  font-weight: 650;
-  letter-spacing: .03em;
-  color: var(--ink-3);
-  text-align: center;
-  margin-bottom: 2px;
-}
-.tt-preview-col.is-today .tt-preview-day { color: var(--ink); }
-
-.tt-preview-cell {
-  height: 9px;
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--sc) 55%, transparent);
-}
-.tt-preview-cell.is-free { background: var(--line-soft); }
-
-.tt-preview-label {
-  display: block;
-  margin-top: 11px;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--ink-3);
-  text-align: center;
-}
 
 
 /* ── Reminders page ──────────────────────────────────────── */
@@ -1596,49 +1431,6 @@ input.hw-title::placeholder { color: var(--ink-3); }
 
 /* ── Items editor (setup step two, and the edit sheet) ───── */
 
-.items-row {
-  display: block;
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  background: var(--card);
-  border-radius: 15px;
-  box-shadow: var(--shadow);
-}
-
-.items-label {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 13.5px;
-  font-weight: 600;
-  letter-spacing: -.01em;
-  color: var(--ink-2);
-  margin-bottom: 6px;
-}
-
-.items-row input {
-  width: 100%;
-  padding: 8px 0 2px;
-  border: 0;
-  background: none;
-  font-size: 15.5px;
-  letter-spacing: -.01em;
-}
-.items-row input:focus { outline: none; }
-.items-row input::placeholder { color: var(--ink-3); }
-
-.items-input {
-  width: 100%;
-  padding: 14px 16px;
-  border: 0;
-  border-radius: var(--r-card);
-  background: var(--card);
-  box-shadow: inset 0 0 0 1.8px var(--ink);
-  font-size: 16.5px;
-  letter-spacing: -.012em;
-}
-.items-input:focus { outline: none; }
-
 /* Five tabs need a little more room for their labels. */
 .tab { font-size: 9.5px; }
 .tab .ico { width: 22px; height: 22px; }
@@ -1659,14 +1451,23 @@ input.hw-title::placeholder { color: var(--ink-3); }
 .pack-line {
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 11px 15px;
-  min-height: 46px;
+  gap: 13px;
+  padding: 13px 15px;
+  min-height: 54px;
+}
+
+/* Name over detail, so "Biology · Arabic · English" has the width to sit on. */
+.pack-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 .pack-line + .pack-line { border-top: 1px solid var(--line-soft); }
 
 .pack-emoji {
-  font-size: 19px;
+  font-size: 21px;
   line-height: 1;
   width: 24px;
   text-align: center;
@@ -1674,153 +1475,26 @@ input.hw-title::placeholder { color: var(--ink-3); }
 }
 
 .pack-item {
-  flex: 1;
-  min-width: 0;
-  font-size: 16px;
+  font-size: 16.5px;
   letter-spacing: -.012em;
   overflow-wrap: anywhere;
 }
 
 .pack-for {
-  flex: none;
-  max-width: 46%;
-  text-align: right;
-  font-size: 12px;
+  font-size: 12.5px;
   line-height: 1.3;
   color: var(--ink-3);
   overflow-wrap: anywhere;
 }
 
-.pack-list-note .pack-item { font-size: 15px; }
-
 
 /* Compact lesson strip: the day at a glance, tap to change its kit. */
-.lesson-line {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 11px 14px;
-  background: var(--card);
-  border-radius: 14px;
-  box-shadow: var(--shadow);
-  text-align: left;
-}
-.lesson-line:active { transform: scale(.985); }
-
-.lesson-name {
-  flex: 1;
-  min-width: 0;
-  font-size: 15.5px;
-  font-weight: 500;
-  letter-spacing: -.012em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.lesson-kit { flex: none; font-size: 14px; letter-spacing: 1px; }
-
-.lesson-due {
-  flex: none;
-  min-width: 19px;
-  height: 19px;
-  padding: 0 5px;
-  border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--sc) 16%, transparent);
-  color: var(--sc);
-  font-size: 11.5px;
-  font-weight: 650;
-  display: grid;
-  place-items: center;
-}
 
 
 /* ── Item picker ─────────────────────────────────────────── */
 
-.item-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  max-height: 44dvh;
-  overflow-y: auto;
-  margin-bottom: 12px;
-}
-
-.item-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 13px;
-  border-radius: var(--r-pill);
-  background: var(--card);
-  box-shadow: inset 0 0 0 1.5px var(--line);
-  font-size: 14.5px;
-  letter-spacing: -.01em;
-  color: var(--ink-2);
-  transition: box-shadow .15s var(--ease), background-color .15s ease,
-              color .15s ease, transform .15s var(--spring);
-}
-.item-chip:active { transform: scale(.95); }
-
-.item-chip.is-on {
-  background: var(--ink);
-  color: var(--on-ink);
-  box-shadow: none;
-}
-
-.item-emoji { font-size: 15px; line-height: 1; }
-
-.items-custom-row { display: flex; gap: 8px; }
-
-.items-custom-row input {
-  flex: 1;
-  min-width: 0;
-  padding: 12px 14px;
-  border: 0;
-  border-radius: 14px;
-  background: var(--card);
-  box-shadow: inset 0 0 0 1.5px var(--line);
-  font-size: 15px;
-}
-.items-custom-row input:focus { outline: none; box-shadow: inset 0 0 0 1.8px var(--ink); }
-
-.items-custom-row button {
-  flex: none;
-  padding: 0 18px;
-  border-radius: 14px;
-  background: var(--line-soft);
-  color: var(--ink);
-  font-size: 14.5px;
-  font-weight: 600;
-}
-
 
 /* Setup step two: answered already, tap only to change. */
-.items-row {
-  display: block;
-  width: 100%;
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  background: var(--card);
-  border-radius: 15px;
-  box-shadow: var(--shadow);
-  text-align: left;
-}
-.items-row:active { transform: scale(.99); }
-
-.items-preview { display: flex; flex-wrap: wrap; gap: 5px; }
-
-.items-pill {
-  padding: 5px 10px;
-  border-radius: var(--r-pill);
-  background: var(--line-soft);
-  font-size: 13px;
-  letter-spacing: -.01em;
-  color: var(--ink);
-}
-
-.items-none { font-size: 13.5px; color: var(--ink-3); }
 
 
 /* ── Mini timetable inside the corner button ─────────────── */
@@ -2049,8 +1723,6 @@ input.hw-title::placeholder { color: var(--ink-3); }
 .dv-body .bar { margin-top: 12px; }
 
 
-
-
 /* ── The journey: a full screen, a plane, a new memory ─────── */
 
 .journey {
@@ -2062,7 +1734,6 @@ input.hw-title::placeholder { color: var(--ink-3); }
   animation: jn-in .4s var(--ease);
 }
 .journey.is-leaving { animation: jn-out .42s var(--ease) forwards; }
-
 
 
 /* ── Travel dress ────────────────────────────────────────────
@@ -2103,8 +1774,8 @@ input.hw-title::placeholder { color: var(--ink-3); }
 .done-subject { letter-spacing: .08em; }
 
 /* Cards sit on parchment, so they need an edge as well as a shadow. */
-.card, .subject-row, .level-card, .pack-card, .done-row, .note-row,
-.pack-list, .lesson-line, .rem-compose, .items-row, .passport, .dv-facts span {
+.card, .subject-row, .level-card, .done-row, .note-row,
+.pack-list, .rem-compose {
   border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
 }
 
@@ -2123,10 +1794,8 @@ body {
 :root[data-theme="dark"] body { background-image: none; }
 
 /* Primary actions take the passport's ink rather than plain black. */
-.btn-primary, .fab, .toast, .chip-day.is-on, .chip-due.is-on, .item-chip.is-on,
+.btn-primary, .fab, .toast, .chip-day.is-on, .chip-due.is-on,
 .pick-input button { background: var(--ink); color: var(--on-ink); }
-
-
 
 
 /* ── The collection ──────────────────────────────────────────
