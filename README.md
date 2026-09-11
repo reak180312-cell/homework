@@ -138,7 +138,12 @@ app.js        all behaviour, one file, sectioned
 sw.js         offline cache + notification clicks
 server.js     dependency-free static server
 art/          the desk the homework screen clears to when nothing is left
-icons/        app icons, generated from the supplied logo
+icons/        app icons, built from the supplied logo. The tab, launcher and 512px
+              icons keep the artwork’s rounded tile and its transparent corners; the
+              iOS one is opaque edge to edge, because iOS fills transparency with
+              black before rounding the corners itself; the maskable one sits on a
+              matching blue so Android can crop it to a circle without losing the
+              cards. Rebuild them with scratchpad/make-icons.js.
 ```
 
 ## Speed

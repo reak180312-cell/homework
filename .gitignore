@@ -15,3 +15,7 @@ WhatsApp Image*
 
 # ...except the app's own artwork, which is part of the build
 !art/desk.jpg
+
+# Source artwork dropped in the project root. The built icons in icons/ ship;
+# the big originals they were made from don't need to be in a public repo.
+/*.png

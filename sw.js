@@ -2,7 +2,11 @@
 
 // Bump this whenever the shell changes shape: it drops every older cache on
 // activate, so a page can never be served new markup with stale script.
-const CACHE = 'homework-v7';
+const CACHE = 'homework-v8';
+
+// Only what the app needs to run. The 512px icon is for the installer and the
+// splash screen, which nobody reaches offline, so it is fetched if it is ever
+// actually wanted rather than downloaded by everyone on their first visit.
 const SHELL = [
   './index.html',
   './styles.css',
@@ -11,7 +15,6 @@ const SHELL = [
   './art/desk.jpg',
   './icons/favicon-64.png',
   './icons/icon-192.png',
-  './icons/icon-512.png',
 ];
 
 // Cache each file on its own: one bad response shouldn't cost us offline support.
