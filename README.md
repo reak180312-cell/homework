@@ -28,7 +28,7 @@ Once installed it opens full screen, works offline, and keeps its own data.
 ## The loop
 
 ```
-Choose subjects → Add homework → See it all together → Finish it → Earn XP → Repeat tomorrow
+Open it → Add homework → See it all together → Finish it → Earn XP → Repeat tomorrow
 ```
 
 - **Homework** — everything unfinished, soonest first. Each card wears its subject's colour
@@ -42,11 +42,21 @@ Choose subjects → Add homework → See it all together → Finish it → Earn 
   are things to put in the bag too.
 - **Reminders** — things to remember, each set for a day and optionally a single lesson.
   Opens on today; tap **All** to see the rest.
-- **Subjects** — one page per subject: what's open, and what you've already handed in.
+- **Subjects** — one page per subject: what's open, and what you've already handed in. The
+  subjects are the timetable's own lessons, so there is no list to keep and nothing to pick.
 - **Profile** — level, XP, and the book of creatures you have collected.
 
 Adding is the fast path: press **+**, type, press Enter. The subject you used last is already
 selected and the due date is optional, so the shortest add is two actions.
+
+**There is no setup.** The app opens straight onto your homework the first time, because the
+timetable already knows every subject you have — one per distinct lesson, in the order the week
+first meets them, each with its own colour and mark. `SUBJECT_LOOK` in [app.js](app.js) is only
+how they look; which ones exist comes from `SCHEDULE`.
+
+Homework saved by an older version, when subjects were picked by hand, is moved onto the lesson
+it was meant for — Math onto מתמטיקה, Hebrew onto שפה. Anything that matches no lesson keeps the
+subject it had rather than losing it.
 
 ## Timetable
 
@@ -132,7 +142,7 @@ read as one family and nothing has to be downloaded.
 Stored under the `homework.v1` key in local storage:
 
 ```js
-Subject      { id, name, icon, glyph, color }
+Subject      — not stored: taken from the timetable, keyed by the lesson's own name
 Homework     { id, subjectId, title, dueDate, createdAt, completed, completedAt }
 Note         { id, text, day, lesson, createdAt }  // day 0-4 = Sun-Thu, null = every day
 UserProgress { xp, level, shownUpTo,    // +10 XP per homework, 100 XP per level, twelve levels

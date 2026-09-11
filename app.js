@@ -7,23 +7,6 @@
 
 /* ── Data ──────────────────────────────────────────────────── */
 
-const PRESETS = [
-  { name: 'Math',             icon: 'i-math',      color: '#3E63DD' },
-  { name: 'English',          icon: 'i-pencil',    color: '#C2456A' },
-  { name: 'Science',          icon: 'i-flask',     color: '#12A594' },
-  { name: 'Physics',          icon: 'i-atom',      color: '#7C5CD6' },
-  { name: 'Chemistry',        icon: 'i-tube',      color: '#D08A2E' },
-  { name: 'Biology',          icon: 'i-leaf',      color: '#4FA83D' },
-  { name: 'History',          icon: 'i-hourglass', color: '#A0704A' },
-  { name: 'Geography',        icon: 'i-globe',     color: '#2F8FD0' },
-  { name: 'Computer Science', icon: 'i-code',      color: '#5B6B7C' },
-  { name: 'Literature',       icon: 'i-book',      color: '#B04FA0' },
-  // No line icon reads as "Hebrew" at 19px, so it wears an aleph the way
-  // custom subjects wear their initials.
-  { name: 'Hebrew',           icon: null, glyph: 'א', color: '#C0553D' },
-  { name: 'Other',            icon: 'i-bookmark',  color: '#7C7A76' },
-];
-
 /* ── Timetable ─────────────────────────────────────────────
    The weekly schedule, taken from the printed timetable. Lesson names are
    kept as the school writes them. Teacher names, room numbers and the
@@ -52,9 +35,9 @@ const SCHEDULE = [
   ['חינוך', 'ביולוגיה', 'ספורט', 'ספרות', 'ספרות', 'אנגלית', 'אנגלית', null],
 ];
 
-// Ties a lesson to a subject you picked at setup, so the bag list can show
-// its colour and any homework riding on it. Matched loosely, both languages.
-const LESSON_ALIASES = {
+// Only used to move homework saved before subjects came from the timetable:
+// it matches the name you had picked onto the lesson it clearly meant.
+const OLD_SUBJECT_ALIASES = {
   'מתמטיקה':  ['math', 'מתמטיקה'],
   'הנדסה':    ['geometry', 'engineering', 'הנדסה'],
   'ביולוגיה': ['biology', 'ביולוגיה', 'bio'],
@@ -83,6 +66,52 @@ const LESSONS = (() => {
 // the seam stays: a longer one would go here.
 const SHORT_NAME = {};
 const shortName = (n) => SHORT_NAME[n] || n;
+
+
+/* ── Subjects ──────────────────────────────────────────────
+   There is nothing to answer here. The timetable already knows every subject
+   you have, so the app takes them straight off it — one per distinct lesson,
+   in the order the week first meets them. A lesson's name is also its id:
+   stable, and readable if you ever look in storage. */
+
+const SUBJECT_LOOK = {
+  'מתמטיקה':  { icon: 'i-math',      color: '#3E63DD' },
+  'הנדסה':    { icon: 'i-shapes',    color: '#2F7BC4' },
+  'אזרחות':   { icon: 'i-scales',    color: '#8A6D3B' },
+  'חינוך':    { icon: 'i-people',    color: '#7C7A76' },
+  'שפה':      { icon: null, glyph: 'א', color: '#C0553D' },
+  'מעבדה':    { icon: 'i-flask',     color: '#12A594' },
+  'ביולוגיה': { icon: 'i-leaf',      color: '#4FA83D' },
+  'ספורט':    { icon: 'i-ball',      color: '#D9772E' },
+  'ערבית':    { icon: 'i-globe',     color: '#C97B1E' },
+  'אנגלית':   { icon: 'i-pencil',    color: '#C2456A' },
+  'תנ״ך':     { icon: 'i-bookmark',  color: '#9A7B2E' },
+  'פיסיקה':   { icon: 'i-atom',      color: '#7C5CD6' },
+  'הסטוריה':  { icon: 'i-hourglass', color: '#A0704A' },
+  'תכנות':    { icon: 'i-code',      color: '#5B6B7C' },
+  'ספרות':    { icon: 'i-book',      color: '#B04FA0' },
+};
+
+const SUBJECTS = LESSONS.map((name) => {
+  const look = SUBJECT_LOOK[name] || {};
+  return {
+    id: name,
+    name,
+    icon: 'icon' in look ? look.icon : 'i-bookmark',
+    glyph: look.glyph || null,
+    color: look.color || '#7C7A76',
+  };
+});
+
+const PALETTE = SUBJECTS.map(s => s.color);
+
+/** The timetable's subjects, plus anything older data left behind. */
+const allSubjects = () => SUBJECTS.concat(state.extraSubjects || []);
+
+const subjectById = (id) => allSubjects().find(s => s.id === id) || null;
+
+/** A lesson is a subject now, so this is just a lookup. */
+const subjectForLesson = (name) => subjectById(name);
 
 /* ── What goes in the bag ──────────────────────────────────
    Worked out from the timetable, not from anything you have to keep up to
@@ -318,30 +347,6 @@ function lessonsFor(dayIndex) {
   return [...seen.values()];
 }
 
-/** The subject you picked that this lesson belongs to, if any. */
-/* Drawing a week asks this once per cell — forty times for the Bag page alone,
-   and again for the miniature and the full grid. The answer only changes when
-   the subjects do, and those are replaced wholesale rather than edited in
-   place, so the array itself tells us when to start over. */
-let lessonSubjectsFor = null;
-let lessonSubjectCache = new Map();
-
-function subjectForLesson(name) {
-  if (lessonSubjectsFor !== state.subjects) {
-    lessonSubjectsFor = state.subjects;
-    lessonSubjectCache = new Map();
-  }
-  if (lessonSubjectCache.has(name)) return lessonSubjectCache.get(name);
-
-  const aliases = LESSON_ALIASES[name] || [name];
-  const found = state.subjects.find(s => {
-    const n = s.name.toLowerCase();
-    return aliases.some(a => n.includes(a.toLowerCase()) || a.toLowerCase().includes(n));
-  }) || null;
-
-  lessonSubjectCache.set(name, found);
-  return found;
-}
 
 /** Weekday index into SCHOOL_DAYS, or -1 at the weekend. */
 function schoolDayIndex(d = new Date()) {
@@ -728,7 +733,6 @@ function eggSvg(m, { split = false } = {}) {
 }
 
 
-const PALETTE = PRESETS.map(p => p.color);
 const XP_PER_HOMEWORK = 10;
 const XP_PER_LEVEL = 100;
 const STORAGE_KEY = 'homework.v1';
@@ -818,10 +822,10 @@ const timeLabel = (ts) =>
 const blank = () => ({
   version: 1,
   updatedAt: 0,
-  onboarded: false,
-  subjects: [],
   homework: [],
   notes: [],
+  extraSubjects: [],     // anything older data filed under a subject not on the timetable
+
   progress: { xp: 0, level: 1, shownUpTo: 1 },
   settings: {
     dailyReminderEnabled: false, dailyReminderTime: '15:00',
@@ -834,11 +838,53 @@ let state = blank();
 
 /** Fold saved data onto current defaults, so data written by an older
  *  version still picks up settings added since. */
+/** The lesson an older, hand-picked subject name was clearly meant to be. */
+function lessonForOldName(name) {
+  const n = String(name || '').toLowerCase();
+  if (!n) return null;
+  for (const lesson of LESSONS) {
+    const aliases = OLD_SUBJECT_ALIASES[lesson] || [lesson];
+    if (aliases.some(a => n.includes(a.toLowerCase()) || a.toLowerCase().includes(n))) return lesson;
+  }
+  return null;
+}
+
+/**
+ * Subjects used to be picked by hand and stored with made-up ids. They come
+ * from the timetable now, so homework saved against an old id is moved onto
+ * the lesson it was meant for. Anything that matches nothing on the timetable
+ * keeps its subject rather than losing it — the work is yours either way.
+ */
+function adoptOldSubjects(next, saved) {
+  const old = (saved && Array.isArray(saved.subjects)) ? saved.subjects : [];
+  if (!old.length) return;
+
+  const moved = new Map();
+  const orphans = [];
+  for (const s of old) {
+    const lesson = lessonForOldName(s.name);
+    if (lesson) moved.set(s.id, lesson);
+    else orphans.push(s);
+  }
+
+  for (const hw of next.homework) {
+    if (moved.has(hw.subjectId)) hw.subjectId = moved.get(hw.subjectId);
+  }
+  if (moved.has(next.lastSubjectId)) next.lastSubjectId = moved.get(next.lastSubjectId);
+
+  const inUse = new Set(next.homework.map(h => h.subjectId));
+  next.extraSubjects = orphans.filter(s => inUse.has(s.id));
+}
+
 function hydrate(saved) {
   const base = blank();
   const next = Object.assign(base, saved);
   next.settings = Object.assign(blank().settings, (saved && saved.settings) || {});
   next.notes = Array.isArray(next.notes) ? next.notes : [];
+  next.extraSubjects = Array.isArray(next.extraSubjects) ? next.extraSubjects : [];
+  adoptOldSubjects(next, saved);
+  delete next.subjects;
+  delete next.onboarded;
   next.progress = Object.assign({ xp: 0, level: 1, shownUpTo: 1 }, next.progress);
   // Anyone already part way through should not be shown a burst of arrivals.
   if (typeof next.progress.shownUpTo !== 'number') next.progress.shownUpTo = levelFor(next.progress.xp || 0);
@@ -919,15 +965,11 @@ async function connectSync() {
 
 /** Remote data arrived — show the right screen and redraw. */
 function adoptRemoteState() {
-  if (state.onboarded && state.subjects.length) {
-    $('#onboarding').hidden = true;
-    $('#main').hidden = false;
-    render();
-  }
+  $('#main').hidden = false;
+  render();
   scheduleReminder();
 }
 
-const subjectById = (id) => state.subjects.find(s => s.id === id) || null;
 const activeHw = () => state.homework.filter(h => !h.completed);
 
 /** Soonest first; undated homework sinks to the bottom. */
@@ -947,12 +989,6 @@ function monogram(name) {
   const words = name.trim().split(/\s+/);
   if (words.length > 1) return (words[0][0] + words[1][0]).toUpperCase();
   return name.trim().slice(0, 1).toUpperCase();
-}
-
-/** Spread custom subjects across the palette instead of repeating one colour. */
-function nextColor() {
-  const used = new Set(state.subjects.map(s => s.color));
-  return PALETTE.find(c => !used.has(c)) || PALETTE[state.subjects.length % PALETTE.length];
 }
 
 
@@ -1109,9 +1145,7 @@ function renderTtButton() {
   const btn = $('#tt-btn');
   if (!btn) return;
   // Redrawn only when the subjects behind its colours change, not every render.
-  const key = state.subjects.map(x => x.id + x.color + x.name).join('|');
-  if (key === ttButtonKey && btn.firstChild) return;
-  ttButtonKey = key;
+  if (btn.firstChild) return;                      // the week never changes
   btn.innerHTML = '<span class="tt-mini">' + SCHOOL_DAYS.map((d, i) =>
     '<span class="tt-mini-col">' + SCHEDULE[i].slice(0, 6).map(name => {
       if (!name) return '<span class="tt-mini-cell is-free"></span>';
@@ -1295,7 +1329,7 @@ function closeTimetable() {
 
 function renderSubjects() {
   const box = $('#subject-list');
-  box.innerHTML = state.subjects.map(sub => {
+  box.innerHTML = allSubjects().map(sub => {
     const n = activeHw().filter(h => h.subjectId === sub.id).length;
     return `
       <button class="subject-row" data-id="${sub.id}" style="--sc:${sub.color}">
@@ -1717,17 +1751,17 @@ function closeSubjectPage() {
 let draft = null;
 
 function openHwSheet({ id = null, subjectId = null } = {}) {
-  if (!state.subjects.length) return;
+
 
   const editing = id ? state.homework.find(h => h.id === id) : null;
   draft = {
     id,
     subjectId: editing ? editing.subjectId
-      : (subjectId || state.lastSubjectId || state.subjects[0].id),
+      : (subjectId || state.lastSubjectId || SUBJECTS[0].id),
     title: editing ? editing.title : '',
     dueDate: editing ? editing.dueDate : null,
   };
-  if (!subjectById(draft.subjectId)) draft.subjectId = state.subjects[0].id;
+  if (!subjectById(draft.subjectId)) draft.subjectId = SUBJECTS[0].id;
 
   $('#hw-delete').hidden = !editing;
   const input = $('#hw-title');
@@ -1743,7 +1777,7 @@ function openHwSheet({ id = null, subjectId = null } = {}) {
 }
 
 function drawSheetChips() {
-  $('#hw-subjects').innerHTML = state.subjects.map(s => `
+  $('#hw-subjects').innerHTML = allSubjects().map(s => `
     <button class="chip ${s.id === draft.subjectId ? 'is-on' : ''}" data-sub="${s.id}" style="--sc:${s.color}">
       <span class="chip-dot"></span>${esc(s.name)}
     </button>`).join('');
@@ -2017,107 +2051,6 @@ function wireSwipe(root) {
 }
 
 
-/* ── Onboarding & subject editing ──────────────────────────── */
-
-let picked = [];      // {name, icon, color, id?}
-let showingNewInput = false;
-
-function renderPicker(container) {
-  const rows = PRESETS.map(p => {
-    const on = picked.find(s => s.name === p.name);
-    return `
-      <button class="pick ${on ? 'is-on' : ''}" data-preset="${esc(p.name)}" style="--sc:${p.color}">
-        ${tile(p)}<span class="pick-name">${esc(p.name)}</span>
-      </button>`;
-  });
-
-  const customs = picked.filter(s => !PRESETS.some(p => p.name === s.name));
-  for (const c of customs) {
-    rows.push(`
-      <button class="pick is-on" data-custom="${esc(c.name)}" style="--sc:${c.color}">
-        ${tile(c)}<span class="pick-name">${esc(c.name)}</span>
-      </button>`);
-  }
-
-  rows.push(showingNewInput
-    ? `<div class="pick-input">
-         <input id="new-subject" type="text" placeholder="Subject name" autocomplete="off" enterkeyhint="done" />
-         <button data-act="add-subject">Add</button>
-       </div>`
-    : `<button class="pick pick-new" data-act="new-subject">
-         <svg class="ico" aria-hidden="true"><use href="#i-plus" /></svg><span class="pick-name">Add your own</span>
-       </button>`);
-
-  container.innerHTML = rows.join('');
-  if (showingNewInput) $('#new-subject', container).focus();
-}
-
-function wirePicker(container, onChange) {
-  container.addEventListener('click', (e) => {
-    const preset = e.target.closest('[data-preset]');
-    const custom = e.target.closest('[data-custom]');
-    const act = e.target.closest('[data-act]');
-
-    if (preset) {
-      const name = preset.dataset.preset;
-      const at = picked.findIndex(s => s.name === name);
-      if (at >= 0) { if (!confirmRemove(picked[at])) return; picked.splice(at, 1); }
-      else picked.push({ ...PRESETS.find(p => p.name === name) });
-    } else if (custom) {
-      const at = picked.findIndex(s => s.name === custom.dataset.custom);
-      if (at >= 0) { if (!confirmRemove(picked[at])) return; picked.splice(at, 1); }
-    } else if (act && act.dataset.act === 'new-subject') {
-      showingNewInput = true;
-    } else if (act && act.dataset.act === 'add-subject') {
-      if (!addTypedSubject(container)) return;
-    } else {
-      return;
-    }
-    renderPicker(container);
-    onChange();
-  });
-
-  container.addEventListener('keydown', (e) => {
-    if (e.target.id === 'new-subject' && e.key === 'Enter') {
-      e.preventDefault();
-      if (addTypedSubject(container)) { renderPicker(container); onChange(); }
-    }
-  });
-}
-
-function addTypedSubject(container) {
-  const input = $('#new-subject', container);
-  const name = input ? input.value.trim() : '';
-  if (!name) { showingNewInput = false; return true; }
-  if (picked.some(s => s.name.toLowerCase() === name.toLowerCase())) { input.value = ''; return false; }
-  picked.push({ name, icon: null, color: nextColorFor(picked) });
-  showingNewInput = false;
-  return true;
-}
-
-function nextColorFor(list) {
-  const used = new Set(list.map(s => s.color));
-  return PALETTE.find(c => !used.has(c)) || PALETTE[list.length % PALETTE.length];
-}
-
-/** Removing a subject takes its homework with it, so ask first. */
-function confirmRemove(sub) {
-  if (!sub.id) return true;
-  const n = state.homework.filter(h => h.subjectId === sub.id).length;
-  if (!n) return true;
-  return confirm(`Remove ${sub.name}? Its ${n} homework item${n === 1 ? '' : 's'} will be deleted too.`);
-}
-
-function commitSubjects() {
-  const keptIds = new Set(picked.filter(s => s.id).map(s => s.id));
-  state.homework = state.homework.filter(h => keptIds.has(h.subjectId) || !state.subjects.some(s => s.id === h.subjectId));
-  state.subjects = picked.map(s => s.id ? s
-    : { id: uid(), name: s.name, icon: s.icon, glyph: s.glyph || null, color: s.color });
-  if (!subjectById(state.lastSubjectId)) state.lastSubjectId = state.subjects[0] ? state.subjects[0].id : null;
-  save();
-}
-
-
 /* ── Daily reminder ────────────────────────────────────────── */
 
 const timers = { daily: null, bag: null };
@@ -2350,23 +2283,6 @@ function wireApp() {
     drawSheetChips();
   });
 
-  // Subject editing from the Subjects tab
-  on('#edit-subjects', 'click', () => {
-    picked = state.subjects.map(s => ({ ...s }));
-    showingNewInput = false;
-    renderPicker($('#subject-picker-2'));
-    showSheet('#sheet-subjects');
-  });
-  on('#subjects-done', 'click', () => {
-    if (!picked.length) return;
-    commitSubjects();
-    closeSheet();
-    render();
-  });
-  wirePicker($('#subject-picker-2'), () => {
-    $('#subjects-done').disabled = !picked.length;
-  });
-
   // Settings
   on('#reminder-toggle', 'change', (e) => toggleReminder('dailyReminderEnabled', e.target.checked));
   on('#bag-toggle', 'change', (e) => toggleReminder('bagReminderEnabled', e.target.checked));
@@ -2412,23 +2328,6 @@ function wireApp() {
   wireLists();
 }
 
-function wireOnboarding() {
-  wirePicker($('#subject-picker'), () => {
-    $('#onboarding-done').disabled = !picked.length;
-  });
-  on('#onboarding-done', 'click', () => {
-    if (!picked.length) return;
-    commitSubjects();
-    state.onboarded = true;
-    save();
-    $('#onboarding').hidden = true;
-    $('#main').hidden = false;
-    showTab('home');
-    setTimeout(() => openHwSheet(), 420);   // straight into the first entry
-  });
-}
-
-
 /* ── Boot ──────────────────────────────────────────────────── */
 
 /**
@@ -2451,23 +2350,15 @@ function boot() {
   load();
   saveLocal();      // write the migrated shape back, without bumping the sync clock
   wireApp();
-  wireOnboarding();
 
-  if (state.onboarded && state.subjects.length) {
-    $('#main').hidden = false;
-    showTab('home');
-  } else {
-    picked = state.subjects.map(s => ({ ...s }));
-    renderPicker($('#subject-picker'));
-    $('#onboarding-done').disabled = !picked.length;
-    $('#onboarding').hidden = false;
-  }
+  $('#main').hidden = false;
+  showTab('home');
 
   scheduleReminder();
   warmArt();
 
   // Opened from the notification or the home-screen shortcut.
-  if (new URLSearchParams(location.search).get('add') === '1' && state.onboarded) {
+  if (new URLSearchParams(location.search).get('add') === '1') {
     setTimeout(() => openHwSheet(), 300);
     history.replaceState(null, '', location.pathname);
   }
@@ -2482,7 +2373,7 @@ function boot() {
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     navigator.serviceWorker.register('sw.js').catch(() => { /* offline support is a bonus */ });
     navigator.serviceWorker.addEventListener('message', (e) => {
-      if (e.data && e.data.type === 'add-homework' && state.onboarded) openHwSheet();
+      if (e.data && e.data.type === 'add-homework') openHwSheet();
     });
   }
 }
