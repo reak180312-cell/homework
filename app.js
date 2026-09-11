@@ -45,31 +45,31 @@ const PERIODS = [
 
 // [day index][period index] — null is a free period.
 const SCHEDULE = [
-  ['מתמטיקה', 'מתמטיקה', 'אזרחות ודמוקרטיה', 'כישורי חיים', 'כישורי שפה', 'כישורי שפה', 'מעבדה', 'מעבדה'],
-  ['ביולוגיה', 'חנ״ג', 'ערבית', 'ערבית', 'אנגלית', 'אנגלית', null, null],
-  ['תנ״ך', 'תנ״ך', 'מתמטיקה', 'מתמטיקה', 'פיסיקה', 'הסטוריה', null, null],
-  ['העשרה / מדמ״ח', 'העשרה / מדמ״ח', 'אזרחות ודמוקרטיה', 'פיסיקה', 'הסטוריה', 'ערבית', 'מתמטיקה', null],
-  ['חינוך', 'ביולוגיה', 'חנ״ג', 'ספרות', 'ספרות', 'אנגלית', 'אנגלית', null],
+  ['מתמטיקה', 'מתמטיקה', 'אזרחות', 'חינוך', 'שפה', 'שפה', 'מעבדה', 'מעבדה'],
+  ['ביולוגיה', 'ספורט', 'ערבית', 'ערבית', 'אנגלית', 'אנגלית', null, null],
+  ['תנ״ך', 'תנ״ך', 'הנדסה', 'הנדסה', 'פיסיקה', 'הסטוריה', null, null],
+  ['תכנות', 'תכנות', 'אזרחות', 'פיסיקה', 'הסטוריה', 'ערבית', 'מתמטיקה', null],
+  ['חינוך', 'ביולוגיה', 'ספורט', 'ספרות', 'ספרות', 'אנגלית', 'אנגלית', null],
 ];
 
 // Ties a lesson to a subject you picked at setup, so the bag list can show
 // its colour and any homework riding on it. Matched loosely, both languages.
 const LESSON_ALIASES = {
-  'מתמטיקה':           ['math', 'מתמטיקה'],
-  'ביולוגיה':          ['biology', 'ביולוגיה', 'bio'],
-  'פיסיקה':            ['physics', 'פיסיקה', 'פיזיקה'],
-  'אנגלית':            ['english', 'אנגלית'],
-  'הסטוריה':           ['history', 'הסטוריה', 'היסטוריה'],
-  'ספרות':             ['literature', 'ספרות'],
-  'תנ״ך':              ['tanach', 'bible', 'תנך', 'תנ״ך'],
-  'ערבית':             ['arabic', 'ערבית'],
-  'אזרחות ודמוקרטיה':  ['civics', 'אזרחות'],
-  'חנ״ג':              ['pe', 'sport', 'חנג', 'חנ״ג'],
-  'כישורי שפה':        ['hebrew', 'לשון', 'כישורי שפה'],
-  'כישורי חיים':       ['כישורי חיים', 'life skills'],
-  'חינוך':             ['חינוך', 'homeroom'],
-  'העשרה / מדמ״ח':     ['computer', 'מדמ״ח', 'מדמח', 'העשרה'],
-  'מעבדה':             ['lab', 'מעבדה', 'science'],
+  'מתמטיקה':  ['math', 'מתמטיקה'],
+  'הנדסה':    ['geometry', 'engineering', 'הנדסה'],
+  'ביולוגיה': ['biology', 'ביולוגיה', 'bio'],
+  'פיסיקה':   ['physics', 'פיסיקה', 'פיזיקה'],
+  'אנגלית':   ['english', 'אנגלית'],
+  'הסטוריה':  ['history', 'הסטוריה', 'היסטוריה'],
+  'ספרות':    ['literature', 'ספרות'],
+  'תנ״ך':     ['tanach', 'bible', 'תנך', 'תנ״ך'],
+  'ערבית':    ['arabic', 'ערבית'],
+  'אזרחות':   ['civics', 'אזרחות'],
+  'ספורט':    ['pe', 'sport', 'ספורט', 'חנג', 'חנ״ג'],
+  'שפה':      ['hebrew', 'לשון', 'שפה'],
+  'חינוך':    ['homeroom', 'חינוך'],
+  'תכנות':    ['computer', 'programming', 'code', 'תכנות', 'מדמ״ח', 'מדמח'],
+  'מעבדה':    ['lab', 'מעבדה', 'science'],
 };
 
 /** Every distinct lesson in the week, in the order it first appears. */
@@ -79,93 +79,173 @@ const LESSONS = (() => {
   return seen;
 })();
 
-// Short forms so the whole week fits one screen without scrolling sideways.
-const SHORT_NAME = {
-  'אזרחות ודמוקרטיה': 'אזרחות',
-  'העשרה / מדמ״ח': 'מדמ״ח',
-  'כישורי שפה': 'כ. שפה',
-  'כישורי חיים': 'כ. חיים',
-};
+// Every lesson name is short enough for the week to fit one screen now, but
+// the seam stays: a longer one would go here.
+const SHORT_NAME = {};
 const shortName = (n) => SHORT_NAME[n] || n;
 
 /* ── What goes in the bag ──────────────────────────────────
-   The same few things every day, sports shoes when there is sport, and the
-   day's own subjects named under the notebooks and the books. Deliberately
-   not configurable: a packing list you have to keep up to date is just a
-   second piece of homework. */
+   Worked out from the timetable, not from anything you have to keep up to
+   date: every lesson wants a notebook except חינוך, five of them want a book
+   as well, and three have something of their own. */
 
-const PE = 'חנ״ג';
-const CARRIES_NOTHING = [PE, 'חינוך'];   // sport and homeroom need no book
+const SPORT = 'ספורט';
+const NO_NOTEBOOK = ['חינוך'];
+const NEEDS_BOOK = ['מתמטיקה', 'הנדסה', 'ערבית', 'ספרות', 'שפה'];
+const SPECIAL = {
+  'תכנות': [{ key: 'laptop', label: 'MacBook' }, { key: 'airpods', label: 'AirPods' }],
+  'תנ״ך':  [{ key: 'tanach', label: 'ספר תנ״ך' }],
+};
 
-/** That day's subjects, in the words you picked them in. */
-function subjectsOn(dayIndex) {
-  const out = [];
-  for (const lesson of lessonsFor(dayIndex)) {
-    if (CARRIES_NOTHING.includes(lesson.name)) continue;
-    const sub = subjectForLesson(lesson.name);
-    const name = sub ? sub.name : shortName(lesson.name);
-    if (!out.includes(name)) out.push(name);
-  }
-  return out;
+/** A lesson in the words you picked it in, falling back to the timetable's. */
+function lessonLabel(name) {
+  const sub = subjectForLesson(name);
+  return sub ? sub.name : shortName(name);
 }
 
-/* The Bag page as the drawing it was specified in: the backpack in the middle,
-   everything that goes in it around the outside, an arrow from each one in.
+/** Everything that goes in the bag on one day, in the order it is drawn. */
+function bagThings(dayIndex) {
+  const names = lessonsFor(dayIndex).map(l => l.name);
+  const list = (only) => {
+    const out = [];
+    for (const n of names.filter(only)) {
+      const label = lessonLabel(n);
+      if (!out.includes(label)) out.push(label);
+    }
+    return out;
+  };
 
-   The drawings live in one SVG so they scale together and the arrows can be
-   aimed exactly; the words sit in HTML on top of it, so they stay real text at
-   a real size and wrap when a day has a lot of subjects. */
+  const things = [
+    { key: 'pencil', label: 'Pencil bag' },
+    { key: 'bottle', label: 'Bottle' },
+    { key: 'lunch',  label: 'Lunch box' },
+  ];
 
-const BAG_SCENE = { w: 400, h: 520 };
+  if (names.includes(SPORT)) things.push({ key: 'shoes', label: 'Sports shoes' });
+
+  const notebooks = list(n => !NO_NOTEBOOK.includes(n));
+  if (notebooks.length) {
+    things.push({ key: 'notebook', label: 'Notebooks', detail: notebooks.join(' · ') });
+  }
+  const books = list(n => NEEDS_BOOK.includes(n));
+  if (books.length) {
+    things.push({ key: 'books', label: 'Books', detail: books.join(' · ') });
+  }
+
+  // Sport and the special lessons never fall on the same day, so the one slot
+  // beside the bag is enough for whichever of them turns up.
+  for (const name of names) {
+    for (const extra of SPECIAL[name] || []) {
+      things.push({ ...extra, detail: lessonLabel(name) });
+    }
+  }
+  return things;
+}
+
+
+/* ── The bag, drawn ────────────────────────────────────────
+   The backpack in the middle and everything that goes in it around the
+   outside, one arrow each. Every shape carries its own fill, so the stylesheet
+   never has to fight a presentation attribute for the colours. */
+
+const BAG_SCENE = { w: 400, short: 520, tall: 580 };
+
+const INK = '#2C3A48';
+const PAPER = '#FBF6EA';
 
 /* Each thing is drawn around its own origin, so moving one means changing one
-   pair of numbers below rather than every coordinate in its path. */
+   pair of numbers in BAG_PLACES rather than every coordinate in its path. */
 const BAG_ART = {
   pencil: `
-    <g class="bag-pens">
-      <path d="M-17-13l-7-21" /><path d="M-1-13l-2-25" /><path d="M15-13l7-21" />
+    <g transform="translate(-17 -14) rotate(-13)">
+      <rect x="-4" y="-24" width="8" height="28" rx="2.5" fill="#E8836F" />
+      <path d="M-4-24 0-31 4-24z" fill="${INK}" />
     </g>
-    <rect x="-31" y="-13" width="62" height="27" rx="13" />
-    <path d="M-31 1h62" />`,
+    <g transform="translate(0 -17) rotate(2)">
+      <rect x="-4" y="-24" width="8" height="28" rx="2.5" fill="#F2CE63" />
+      <path d="M-4-24 0-31 4-24z" fill="${INK}" />
+    </g>
+    <g transform="translate(17 -14) rotate(15)">
+      <rect x="-4" y="-24" width="8" height="28" rx="2.5" fill="#7FB069" />
+      <path d="M-4-24 0-31 4-24z" fill="${INK}" />
+    </g>
+    <rect x="-32" y="-13" width="64" height="29" rx="14" fill="#4E7CA8" />
+    <path d="M-32 0h64" fill="none" />
+    <circle cx="21" cy="0" r="3.4" fill="${PAPER}" />`,
 
   bottle: `
-    <rect x="-7" y="-32" width="14" height="10" rx="3" />
-    <path d="M-5-22v5c0 3-7 5-7 13v23c0 5 3 9 8 9h8c5 0 8-4 8-9v-23c0-8-7-10-7-13v-5z" />
-    <path d="M-12-3h24" />`,
+    <rect x="-7" y="-34" width="14" height="11" rx="3" fill="#3E6A93" />
+    <path d="M-5-23v4c0 4-8 6-8 15v22c0 6 4 10 9 10h8c5 0 9-4 9-10v-22c0-9-8-11-8-15v-4z" fill="#A9CFE6" />
+    <path d="M-13-4h26" fill="none" />`,
 
   lunch: `
-    <path d="M-16-19v-5q0-5 5-5h22q5 0 5 5v5" />
-    <rect x="-29" y="-19" width="58" height="40" rx="7" />
-    <path d="M-29-4h58" />
-    <rect x="-7" y="-10" width="14" height="12" rx="3" />`,
+    <path d="M-13-23v-4q0-5 5-5h16q5 0 5 5v4" fill="none" />
+    <rect x="-31" y="-23" width="62" height="45" rx="9" fill="#EFDFC0" />
+    <path d="M-31-23h62v14a9 9 0 0 1-9 9h-44a9 9 0 0 1-9-9z" fill="#7FB069" />
+    <path d="M-31 0h62" fill="none" />
+    <rect x="-8" y="-6" width="16" height="13" rx="3.5" fill="#7FB069" />`,
 
   shoes: `
-    <path d="M-31 9c0-6 3-10 7-12l10-5 7 6 8-4c7 0 13 4 19 9 3 2 7 4 11 5 4 1 6 3 6 6 0 3-2 5-6 5h-55c-4 0-7-3-7-10z" />
-    <path d="M-14-6l7 7M-3-10l7 7M8-12l7 7" />
-    <path d="M-31 13h62" />`,
+    <path d="M-31 6c0-6 3-10 7-12l10-5 7 6 8-4c7 0 13 4 19 9 3 2 7 4 11 5 4 1 6 3 6 6 0 3-2 5-6 5h-55c-4 0-7-3-7-10z" fill="${PAPER}" />
+    <path d="M-14-8l7 7M-3-12l7 7M8-14l7 7" fill="none" />
+    <path d="M-31 9h62v3a4 4 0 0 1-4 4h-54a4 4 0 0 1-4-4z" fill="#4E7CA8" />`,
 
   notebook: `
-    <rect x="-19" y="-30" width="44" height="60" rx="4" />
-    <path d="M-12-19h30M-12-8h30M-12 3h30M-12 14h19" />
-    <g class="bag-rings">
-      <path d="M-19-25c-7 0-7 7 0 7M-19-12c-7 0-7 7 0 7M-19 1c-7 0-7 7 0 7M-19 14c-7 0-7 7 0 7" />
+    <rect x="-19" y="-31" width="45" height="62" rx="4" fill="#F2CE63" />
+    <rect x="-11" y="-31" width="37" height="62" rx="3" fill="${PAPER}" />
+    <path d="M-5-19h24M-5-8h24M-5 3h24M-5 14h15" fill="none" />
+    <g stroke-width="2">
+      <path d="M-19-25c-8 0-8 8 0 8M-19-11c-8 0-8 8 0 8M-19 3c-8 0-8 8 0 8M-19 17c-8 0-8 8 0 8" fill="none" />
     </g>`,
 
   books: `
-    <rect x="-31" y="-23" width="29" height="46" rx="3" />
-    <rect x="2" y="-23" width="29" height="46" rx="3" />
-    <path d="M-25-12h17M-25-3h17M-25 6h11M8-12h17M8-3h17M8 6h11" />`,
+    <rect x="-29" y="6" width="58" height="16" rx="3.5" fill="#4E7CA8" />
+    <rect x="-25" y="-9" width="54" height="15" rx="3.5" fill="#C98A6B" />
+    <rect x="-27" y="-24" width="52" height="15" rx="3.5" fill="#7FB069" />
+    <path d="M-20 14h9M-16-1h9M-18-16h9" fill="none" />`,
+
+  laptop: `
+    <path d="M-25-22h50a4 4 0 0 1 4 4v24h-58v-24a4 4 0 0 1 4-4z" fill="#C6CBD3" />
+    <rect x="-21" y="-18" width="42" height="22" rx="1.5" fill="#33404F" />
+    <path d="M-32 6h64l5 8a3 3 0 0 1-3 4h-68a3 3 0 0 1-3-4z" fill="#C6CBD3" />
+    <path d="M-7 10h14" fill="none" />`,
+
+  airpods: `
+    <g transform="translate(-11 0) rotate(-9)">
+      <rect x="-4" y="-7" width="8" height="24" rx="4" fill="${PAPER}" />
+      <circle cx="0" cy="-11" r="8.5" fill="${PAPER}" />
+    </g>
+    <g transform="translate(11 0) rotate(9)">
+      <rect x="-4" y="-7" width="8" height="24" rx="4" fill="${PAPER}" />
+      <circle cx="0" cy="-11" r="8.5" fill="${PAPER}" />
+    </g>`,
+
+  tanach: `
+    <rect x="-21" y="-28" width="42" height="56" rx="4" fill="#9A4A38" />
+    <rect x="14" y="-25" width="8" height="50" rx="2" fill="${PAPER}" />
+    <g stroke="#D9A94A" stroke-width="2.4">
+      <path d="M-14-19h22M-14 19h22" fill="none" />
+      <path d="M-3-6 3-6 6 0 3 6-3 6-6 0z" fill="none" />
+    </g>`,
 };
 
-/* Where each thing sits, where its arrow leaves it, and where it lands. */
+/* Where each thing sits, where its arrow leaves it, and where it lands.
+   Sport, the MacBook and the Tanach share the slot beside the bag: they never
+   fall on the same day as each other. */
 const BAG_PLACES = {
-  pencil:   { x: 88,  y: 64,  from: [124, 78],  via: [140, 122], to: [162, 182] },
-  bottle:   { x: 312, y: 60,  from: [296, 86],  via: [284, 130], to: [240, 184] },
-  lunch:    { x: 56,  y: 210, from: [90, 214],  via: [110, 228], to: [130, 244] },
-  shoes:    { x: 344, y: 208, from: [306, 212], via: [288, 228], to: [270, 244] },
-  notebook: { x: 76,  y: 414, from: [108, 386], via: [130, 356], to: [160, 324] },
-  books:    { x: 320, y: 410, from: [288, 384], via: [268, 356], to: [242, 324] },
+  pencil:   { x: 88,  y: 64,  from: [124, 80],  via: [142, 122], to: [162, 182] },
+  bottle:   { x: 312, y: 60,  from: [296, 88],  via: [284, 132], to: [240, 184] },
+  lunch:    { x: 56,  y: 208, from: [92, 212],  via: [111, 227], to: [130, 244] },
+  shoes:    { x: 344, y: 206, from: [306, 210], via: [288, 227], to: [270, 244] },
+  laptop:   { x: 342, y: 204, from: [302, 210], via: [286, 227], to: [270, 244] },
+  tanach:   { x: 344, y: 204, from: [306, 208], via: [288, 226], to: [270, 244] },
+  notebook: { x: 76,  y: 400, from: [110, 372], via: [134, 348], to: [162, 322] },
+  books:    { x: 320, y: 396, from: [288, 370], via: [266, 348], to: [242, 322] },
+  airpods:  { x: 200, y: 466, from: [200, 432], via: [194, 384], to: [200, 332] },
 };
+
+/** Which things push the scene taller, because they sit under the bag. */
+const BAG_LOW = ['airpods'];
 
 /** A curve with a head on the end, aimed along the curve's own last direction. */
 function bagArrow(from, via, to) {
@@ -179,34 +259,22 @@ function bagArrow(from, via, to) {
 /** The backpack itself, and the biggest thing on the page. */
 const BACKPACK = `
   <g class="bag-pack">
-    <path d="M178 164q22-30 44 0" />
-    <rect x="136" y="164" width="128" height="164" rx="34" />
-    <path d="M136 220q64-27 128 0" />
-    <rect x="166" y="212" width="16" height="42" rx="5" />
-    <rect x="218" y="212" width="16" height="42" rx="5" />
-    <rect x="157" y="258" width="86" height="58" rx="15" />
-    <path d="M264 228q20 7 20 31v26q0 24-20 31" />
+    <path d="M178 164q22-30 44 0" fill="none" />
+    <rect x="136" y="164" width="128" height="164" rx="34" fill="#5B7FA6" />
+    <path d="M136 220q64-27 128 0v74q0 34-34 34h-60q-34 0-34-34z" fill="#7396BC" />
+    <rect x="166" y="212" width="16" height="42" rx="5" fill="#EFDFC0" />
+    <rect x="218" y="212" width="16" height="42" rx="5" fill="#EFDFC0" />
+    <rect x="157" y="258" width="86" height="58" rx="15" fill="#EFDFC0" />
+    <path d="M264 228q20 7 20 31v26q0 24-20 31" fill="none" />
   </g>`;
 
 /**
- * The scene for one day. Sports shoes only turn up when there is sport, and
- * the notebooks and the books carry that day's own subjects.
+ * The scene for one day. Everything on it is worked out from the timetable,
+ * so there is never anything to answer.
  */
 function bagScene(dayIndex) {
-  const subjects = subjectsOn(dayIndex);
-  const named = subjects.join(' · ');
-  const sport = lessonsFor(dayIndex).some(l => l.name === PE);
-
-  const things = [
-    { key: 'pencil', label: 'Pencil bag' },
-    { key: 'bottle', label: 'Bottle' },
-    { key: 'lunch', label: 'Lunch box' },
-  ];
-  if (sport) things.push({ key: 'shoes', label: 'Sports shoes' });
-  if (subjects.length) {
-    things.push({ key: 'notebook', label: 'Notebooks', detail: named });
-    things.push({ key: 'books', label: 'Books', detail: named });
-  }
+  const things = bagThings(dayIndex).filter(t => BAG_PLACES[t.key]);
+  const height = things.some(t => BAG_LOW.includes(t.key)) ? BAG_SCENE.tall : BAG_SCENE.short;
 
   const drawings = things.map(t => {
     const p = BAG_PLACES[t.key];
@@ -221,7 +289,7 @@ function bagScene(dayIndex) {
   const labels = things.map(t => {
     const p = BAG_PLACES[t.key];
     const left = (p.x / BAG_SCENE.w) * 100;
-    const top = ((p.y + 44) / BAG_SCENE.h) * 100;
+    const top = ((p.y + 44) / height) * 100;
     return `
       <span class="bag-label ${t.detail ? 'is-wide' : ''}" style="left:${left}%; top:${top}%">
         <b>${esc(t.label)}</b>
@@ -230,32 +298,12 @@ function bagScene(dayIndex) {
   }).join('');
 
   return `
-    <div class="bag-scene">
-      <svg viewBox="0 0 ${BAG_SCENE.w} ${BAG_SCENE.h}" aria-hidden="true">
+    <div class="bag-scene" style="aspect-ratio:${BAG_SCENE.w}/${height}">
+      <svg viewBox="0 0 ${BAG_SCENE.w} ${height}" aria-hidden="true">
         ${arrows}${BACKPACK}${drawings}
       </svg>
       ${labels}
     </div>`;
-}
-
-function bagFor(dayIndex) {
-  const list = [
-    { emoji: '✏️', item: 'Pencil bag' },
-    { emoji: '💧', item: 'Bottle' },
-    { emoji: '🍱', item: 'Lunch box' },
-  ];
-
-  if (lessonsFor(dayIndex).some(l => l.name === PE)) {
-    list.push({ emoji: '👟', item: 'Sports shoes', note: 'sport today' });
-  }
-
-  const subjects = subjectsOn(dayIndex);
-  if (subjects.length) {
-    const named = subjects.join(' · ');
-    list.push({ emoji: '📓', item: 'Notebooks', note: named });
-    list.push({ emoji: '📕', item: 'Books', note: named });
-  }
-  return list;
 }
 
 /** Lessons that day, in order, collapsed to one entry per subject. */

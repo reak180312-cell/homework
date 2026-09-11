@@ -37,10 +37,9 @@ Choose subjects → Add homework → See it all together → Finish it → Earn 
   left the screen clears to one line — *You finished all* — and the + leaves the header to
   sit beside it, over a desk that has been tidied for the day.
 - **Bag** — the drawing this was specified in: a backpack in the middle with everything that
-  goes into it around the outside, an arrow from each one in. Pencil bag, bottle, lunch box,
-  sports shoes on the days there is sport, and notebooks and books naming that day's own
-  subjects. Pick any day along the top; everything changes with it. Your own reminders for
-  that day sit underneath, because those are things to put in the bag too.
+  goes into it around the outside, an arrow from each one in. Pick any day along the top;
+  everything changes with it. Your own reminders for that day sit underneath, because those
+  are things to put in the bag too.
 - **Reminders** — things to remember, each set for a day and optionally a single lesson.
   Opens on today; tap **All** to see the rest.
 - **Subjects** — one page per subject: what's open, and what you've already handed in.
@@ -55,8 +54,18 @@ The weekly schedule is built in. The button in the top-right corner opens the fu
 any screen. Lessons are colour-matched to the subjects you picked at setup, and the Bag page
 reads the day's subjects straight off it.
 
-There is nothing to configure. A packing list you have to keep up to date is a second piece
-of homework, so what goes in the bag is fixed and the only thing that varies is the day.
+What goes in the bag is worked out from the timetable, and there is nothing to answer:
+
+- pencil bag, bottle and lunch box, every day
+- sports shoes on the days there is ספורט
+- a notebook for every lesson that day **except חינוך**
+- a book only for מתמטיקה, הנדסה, ערבית, ספרות and שפה
+- a MacBook and AirPods for תכנות, and a ספר תנ״ך for תנ״ך
+
+Sport, תכנות and תנ״ך never fall on the same day, so the one slot beside the bag holds
+whichever of them turns up; a second special item drops in below. `NO_NOTEBOOK`,
+`NEEDS_BOOK` and `SPECIAL` in [app.js](app.js) are the whole of it — change a rule there and
+every day follows.
 
 The scene is one SVG — the pictures and the arrows together, so they scale as a unit and each
 arrow can be aimed exactly at the bag — with the words laid over it in HTML, so they stay real

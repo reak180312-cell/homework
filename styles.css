@@ -1455,12 +1455,13 @@ input.hw-title::placeholder { color: var(--ink-3); }
   overflow: visible;
 }
 
-/* One line weight across the whole scene, the way the icons are drawn. */
+/* One line weight across the whole scene, the way the icons are drawn. The
+   colours are fill attributes on the shapes themselves — a rule here would
+   beat them, so this sets the line and leaves fill alone. */
 .bag-scene path,
 .bag-scene rect,
 .bag-scene circle {
-  fill: none;
-  stroke: var(--ink);
+  stroke: #2C3A48;
   stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -1468,20 +1469,11 @@ input.hw-title::placeholder { color: var(--ink-3); }
 
 .bag-pack rect,
 .bag-pack path { stroke-width: 2.6; }
-.bag-pack > rect:first-of-type { fill: color-mix(in srgb, var(--ink) 7%, transparent); }
-
-/* Filled so an arrow passing behind a thing does not show through it. */
-.bag-thing rect,
-.bag-thing path,
-.bag-thing circle { fill: color-mix(in srgb, var(--card) 92%, var(--paper)); }
-
-/* Pens poke out of the case; rings hold the pad. Strokes, not shapes. */
-.bag-pens path { stroke-width: 4.6; stroke-linecap: round; }
-.bag-rings path { stroke-width: 2; }
 
 /* The arrows are the quiet part: they say which way, not look at me. */
 .bag-arrow {
   stroke: var(--ink-3) !important;
+  fill: none !important;
   stroke-width: 1.8 !important;
   stroke-dasharray: 4 5;
   fill: none !important;
