@@ -1361,6 +1361,17 @@ function renderProfile() {
     box.innerHTML = html;
   }
 
+  const avail = reminderAvailability();
+  const blocked = $('#reminder-blocked');
+  if (blocked) {
+    blocked.hidden = avail.ok;
+    blocked.innerHTML = avail.ok ? ''
+      : `<strong>${esc(avail.why)}</strong><span>${esc(avail.how)}</span>`;
+  }
+  $('#reminder-card').classList.toggle('is-unavailable', !avail.ok);
+  $('#reminder-toggle').disabled = !avail.ok;
+  $('#bag-toggle').disabled = !avail.ok;
+
   $('#reminder-toggle').checked = state.settings.dailyReminderEnabled;
   $('#reminder-time').value = state.settings.dailyReminderTime;
   $('#reminder-time-row').hidden = !state.settings.dailyReminderEnabled;
@@ -1642,6 +1653,12 @@ function showTab(tab) {
     btn.setAttribute('aria-selected', String(on));
   }
   render();
+  // The one-after-another entrance belongs to a screen arriving. Left on every
+  // redraw, it fires again each time a single row changes.
+  for (const list of $$(`[data-view="${tab}"] .list`)) {
+    list.classList.add('is-entering');
+    setTimeout(() => list.classList.remove('is-entering'), 700);
+  }
   window.scrollTo(0, 0);
 }
 
@@ -1820,7 +1837,7 @@ function completeHw(id, node) {
       void slot.offsetHeight;
       slot.classList.add('is-leaving');
       slot.style.height = '0px';
-      setTimeout(() => { render(); }, 190);
+      setTimeout(() => dropRow(slot), 190);
     }, 215);
   } else {
     render();
@@ -1828,6 +1845,28 @@ function completeHw(id, node) {
 
   showToast(`Completed  ·  +${XP_PER_HOMEWORK} XP`, () => undoComplete(id));
   if (after > before) setTimeout(() => showLevelUp(after, before), 520);
+}
+
+/**
+ * Take the finished row out of the list without rebuilding the list around it.
+ * Rebuilding replaces every other row too, which re-runs their entrance and
+ * reads as the whole screen refreshing — for something that happened to one
+ * line. So the row goes, the count changes, and nothing else moves.
+ */
+function dropRow(slot) {
+  const list = slot.parentElement;
+  slot.remove();
+
+  // A subject's own page is the exception: what you finished moves from its
+  // open list into its handed-in list, on the same screen, so it has to redraw.
+  if (!list || list.closest('#subject-page-body')) { render(); return; }
+
+  if (!list.querySelector('.hw-slot')) { renderHome(); return; }   // that was the last one
+
+  const left = activeHw().length;
+  const count = $('#home-count');
+  if (count) count.textContent = left ? `${left} left` : '';
+  syncFab();
 }
 
 function undoComplete(id) {
@@ -2055,13 +2094,35 @@ function commitSubjects() {
 
 const timers = { daily: null, bag: null };
 
-const notifySupported = () => 'Notification' in window;
+const notifySupported = () => typeof window.Notification === 'function';
+
+/* Reminders only exist where the browser actually has them. On an iPhone that
+   means the app has to be on the Home Screen — in a Safari tab, or inside
+   another app's browser, there is no such thing as a notification. Saying that
+   plainly beats a switch that springs back to off with no explanation. */
+function reminderAvailability() {
+  if (!notifySupported()) {
+    const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    return ios
+      ? { ok: false,
+          why: 'Reminders need the app on your Home Screen.',
+          how: 'Tap Share, then Add to Home Screen, and open it from there.' }
+      : { ok: false,
+          why: 'This browser can’t show notifications.',
+          how: 'Install the app, or open it in its own tab.' };
+  }
+  if (Notification.permission === 'denied') {
+    return { ok: false,
+             why: 'Notifications are switched off for this app.',
+             how: 'Turn them back on in your phone’s settings, under Notifications.' };
+  }
+  return { ok: true, why: '', how: '' };
+}
 
 function reminderNote() {
-  if (!notifySupported()) return 'This browser can’t show notifications.';
-  if (Notification.permission === 'denied') {
-    return 'Notifications are turned off for this page. Open it in its own tab, or allow notifications in your browser settings.';
-  }
+  // Why they can't be used is said on the card itself, not down here.
+  if (!reminderAvailability().ok) return '';
   if (state.settings.dailyReminderEnabled || state.settings.bagReminderEnabled) {
     return 'Add the app to your home screen so it can still reach you after school.';
   }

@@ -67,9 +67,14 @@ Two, both off by default, both set in Profile:
 - **Daily reminder** (3:00 PM) asks "Any homework today?" and opens straight into the add screen.
 - **Pack your bag** (8:00 PM) lists tomorrow's lessons and any reminders you saved for that day.
 
-One honest caveat: a web app can only run its timer while it's open or installed in the
-background. Adding it to your home screen makes this far more reliable — a browser tab you
-closed hours ago can't wake itself up. This is a limitation of web apps, not a bug.
+**On an iPhone, reminders need the app on the Home Screen.** In a Safari tab — or inside
+another app's browser, which is where a link from WhatsApp opens — notifications do not
+exist at all, and the switches say so and stay off rather than springing back with no
+explanation. Share → Add to Home Screen, then open it from there.
+
+One honest caveat even then: a web app can only run its timer while it's open or installed
+in the background. A browser tab you closed hours ago can't wake itself up. This is a
+limitation of web apps, not a bug.
 
 ## The collection
 
@@ -148,6 +153,10 @@ attention.
   more than one launch away, because the cache name changes with every release.
 - Ticking something off clears the row in about **0.4s**, down from 0.9s. The tick
   is still drawn; it just isn't admired for half a second first.
+- Finishing a row **removes that row** rather than rebuilding the list around it. Rebuilding
+  replaced every other row too, which re-ran their entrance animation and read as the whole
+  screen refreshing because one line changed. The one-at-a-time entrance now belongs to a
+  screen arriving, not to every redraw inside it.
 - The tab icon is a 8 KB file rather than the 51 KB app icon, which the browser
   used to fetch twice on every load.
 - The desk picture waits until it has decoded and then fades in, instead of

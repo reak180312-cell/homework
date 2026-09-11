@@ -999,6 +999,26 @@ input.hw-title::placeholder { color: var(--ink-3); }
   box-shadow: 0 1px 3px rgba(0,0,0,.22);
   transition: transform .26s var(--spring);
 }
+.switch:disabled { opacity: .4; cursor: default; }
+
+/* Why the reminders can't be switched on, said where the switches are. */
+.blocked {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px 16px;
+  background: color-mix(in srgb, var(--late) 11%, transparent);
+  border-bottom: 1px solid var(--line-soft);
+}
+.blocked strong {
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -.01em;
+  color: color-mix(in srgb, var(--late) 72%, var(--ink));
+}
+.blocked span { font-size: 13px; line-height: 1.4; color: var(--ink-2); }
+.is-unavailable .setting-label { opacity: .55; }
+
 .switch:checked { background: var(--done); }
 .switch:checked::after { transform: translateX(20px); }
 
@@ -1984,14 +2004,19 @@ input.hw-title::placeholder { color: var(--ink-3); }
 .empty p  { animation: rise .45s var(--ease) .13s backwards; }
 @keyframes rise { from { opacity: 0; transform: translateY(7px); } }
 
-/* Lists arrive one after another rather than all at once. */
-.list > * { animation: rise .38s var(--ease) backwards; }
-.list > *:nth-child(1) { animation-delay: 0ms; }
-.list > *:nth-child(2) { animation-delay: 40ms; }
-.list > *:nth-child(3) { animation-delay: 80ms; }
-.list > *:nth-child(4) { animation-delay: 120ms; }
-.list > *:nth-child(5) { animation-delay: 160ms; }
-.list > *:nth-child(n+6) { animation-delay: 200ms; }
+/* Lists arrive one after another rather than all at once — but only when the
+   screen itself is arriving. Running this on every redraw made finishing one
+   row look like the whole page reloading. */
+.list.is-entering > * { animation: rise .38s var(--ease) backwards; }
+.list.is-entering > *:nth-child(1) { animation-delay: 0ms; }
+.list.is-entering > *:nth-child(2) { animation-delay: 40ms; }
+.list.is-entering > *:nth-child(3) { animation-delay: 80ms; }
+.list.is-entering > *:nth-child(4) { animation-delay: 120ms; }
+.list.is-entering > *:nth-child(5) { animation-delay: 160ms; }
+.list.is-entering > *:nth-child(n+6) { animation-delay: 200ms; }
+
+/* The cleared screen still arrives, whenever it turns up. */
+.empty-home { animation: rise .42s var(--ease) backwards; }
 
 .pack-line { animation: rise .38s var(--ease) backwards; }
 .pack-line:nth-child(1) { animation-delay: 0ms; }
