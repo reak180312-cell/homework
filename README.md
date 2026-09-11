@@ -157,6 +157,13 @@ attention.
   replaced every other row too, which re-ran their entrance animation and read as the whole
   screen refreshing because one line changed. The one-at-a-time entrance now belongs to a
   screen arriving, not to every redraw inside it.
+- **No frosted panels.** The tab bar and the timetable button used to blur whatever was
+  behind them. A phone recomputes that blur every frame that anything underneath moves, and
+  those two are on screen permanently — so every row that collapsed and every scroll paid for
+  two full-width blurs. On parchment the difference was barely visible.
+- The desk picture is fetched and decoded **while the app is idle just after opening**, not at
+  the moment the last thing is ticked off, which is when it is wanted and the worst time to
+  start downloading it.
 - The tab icon is a 8 KB file rather than the 51 KB app icon, which the browser
   used to fetch twice on every load.
 - The desk picture waits until it has decoded and then fades in, instead of

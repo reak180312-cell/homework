@@ -2463,6 +2463,22 @@ function wireOnboarding() {
 
 /* ── Boot ──────────────────────────────────────────────────── */
 
+/**
+ * The desk picture is needed the instant the last thing is ticked off, which is
+ * the worst moment to start downloading it — the screen has just cleared and is
+ * waiting on it. So it is fetched and decoded quietly once the app is up and
+ * nothing else is happening, and by the time it is wanted it is already in hand.
+ */
+function warmArt() {
+  const start = () => {
+    const img = new Image();
+    img.src = 'art/desk.jpg';
+    if (img.decode) img.decode().catch(() => {});   // decode off the main thread too
+  };
+  if (typeof requestIdleCallback === 'function') requestIdleCallback(start, { timeout: 3000 });
+  else setTimeout(start, 1200);
+}
+
 function boot() {
   load();
   saveLocal();      // write the migrated shape back, without bumping the sync clock
@@ -2480,6 +2496,7 @@ function boot() {
   }
 
   scheduleReminder();
+  warmArt();
 
   // Opened from the notification or the home-screen shortcut.
   if (new URLSearchParams(location.search).get('add') === '1' && state.onboarded) {

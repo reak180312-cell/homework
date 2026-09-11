@@ -510,8 +510,7 @@ button { border: 0; background: none; cursor: pointer; }
   margin: calc(env(safe-area-inset-top) + 10px) 0 0 max(calc((100% - 540px)/2 + 12px), 12px);
   border-radius: 50%;
   color: var(--ink);
-  background: color-mix(in srgb, var(--paper) 82%, transparent);
-  backdrop-filter: blur(12px);
+  background: var(--paper);
 }
 .back-btn .ico { width: 20px; height: 20px; stroke-width: 2; }
 
@@ -703,9 +702,7 @@ button { border: 0; background: none; cursor: pointer; }
   /* Bar spans the screen; the tabs stay over the content column. */
   padding-inline: max(calc((100% - 540px) / 2), 0px);
   padding-bottom: env(safe-area-inset-bottom);
-  background: color-mix(in srgb, var(--paper) 78%, transparent);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  background: var(--paper);
   border-top: 1px solid var(--line);
 }
 
@@ -733,8 +730,7 @@ button { border: 0; background: none; cursor: pointer; }
   position: fixed;
   inset: 0;
   z-index: 40;
-  background: rgba(20,19,17,.34);
-  backdrop-filter: blur(2px);
+  background: rgba(20,19,17,.38);
   animation: fade-in .26s ease;
 }
 .scrim.is-leaving { animation: fade-out .22s ease forwards; }
@@ -1102,8 +1098,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
   z-index: 60;
   display: grid;
   place-items: center;
-  background: color-mix(in srgb, var(--paper) 72%, transparent);
-  backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
   animation: fade-in .3s ease;
 }
 .levelup.is-leaving { animation: fade-out .3s ease forwards; }
@@ -1296,9 +1291,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
   width: 42px; height: 42px;
   border-radius: 50%;
   color: var(--ink);
-  background: color-mix(in srgb, var(--card) 78%, transparent);
-  backdrop-filter: saturate(180%) blur(14px);
-  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  background: var(--card);
   box-shadow: var(--shadow);
   transition: transform .2s var(--spring);
 }
@@ -2042,8 +2035,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
           max(calc((100% - 540px) / 2 + var(--gutter)), var(--gutter));
   border-radius: 50%;
   color: var(--ink);
-  background: color-mix(in srgb, var(--card) 86%, transparent);
-  backdrop-filter: blur(10px);
+  background: var(--card);
   box-shadow: var(--shadow);
 }
 .dv-close .ico { width: 17px; height: 17px; stroke-width: 2; }
