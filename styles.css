@@ -1129,6 +1129,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
   }
@@ -2165,68 +2166,312 @@ button.mon-slot:active { transform: scale(.93); }
 .mon-slot.is-locked .mon, .mon-slot.is-empty .mon { animation: none; }
 
 
-/* ── One creature's page ─────────────────────────────────── */
+/* ── Eggs ────────────────────────────────────────────────── */
 
-.album {
+.egg { width: 46px; height: 46px; display: block; overflow: visible; }
+
+
+/* ── The book, closed ────────────────────────────────────────
+   On Profile the collection is a book you can see before you open it,
+   because a shelf of small drawings was too easy to walk past. */
+
+.book-cover {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 14px 16px 24px;
+  margin-bottom: 10px;
+  border-radius: 5px 16px 16px 5px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ink) 88%, #000), var(--ink) 60%);
+  color: var(--on-ink);
+  box-shadow: var(--shadow-lift);
+  text-align: left;
+  transition: transform .22s var(--spring);
+}
+.book-cover:active { transform: scale(.985); }
+
+/* The spine, and the edge of the pages showing past the cover. */
+.bc-spine {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 11px;
+  border-radius: 5px 0 0 5px;
+  background: color-mix(in srgb, #000 26%, transparent);
+  box-shadow: inset -1px 0 0 color-mix(in srgb, var(--on-ink) 24%, transparent);
+}
+
+.bc-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bc-title {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+.bc-count {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  opacity: .7;
+}
+
+/* Whoever turned up most recently peeks over the cover. */
+.bc-peek-row { display: flex; align-items: center; margin-left: auto; }
+.bc-peek {
+  width: 34px; height: 34px;
+  display: grid;
+  place-items: center;
+  margin-left: -9px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--mc) 82%, var(--on-ink));
+  box-shadow: 0 0 0 2px var(--ink);
+}
+.bc-peek .mon { width: 78%; height: 78%; }
+
+.bc-go {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: -.01em;
+  opacity: .85;
+}
+.bc-go .ico { width: 15px; height: 15px; stroke-width: 2.4; }
+
+
+/* ── The book, open ──────────────────────────────────────────
+   Two facing pages at a time: who they are on the left, everything else
+   about them on the right. */
+
+.book {
   position: fixed;
   inset: 0;
   z-index: 55;
+  display: flex;
+  flex-direction: column;
   background: var(--paper);
-  overflow-y: auto;
   overscroll-behavior: contain;
   animation: dv-in .34s var(--ease);
 }
-.album.is-leaving { animation: dv-out .26s var(--ease) forwards; }
+.book.is-leaving { animation: dv-out .26s var(--ease) forwards; }
 
-.album-hero {
+.book .dv-close {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 12px);
+  right: 14px;
+  z-index: 4;
+}
+
+.book-frame {
+  flex: 1;
+  min-height: 0;
   display: grid;
   place-items: center;
-  margin-top: 10px;
-  padding: 30px 0;
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--mc) 13%, var(--card));
-  box-shadow: var(--shadow);
+  padding: calc(env(safe-area-inset-top) + 64px) 12px 4px;
+  touch-action: none;
 }
 
-.album-name {
-  margin-top: 22px;
-  font-family: var(--font-display);
-  font-size: 36px;
-  font-weight: 600;
-  letter-spacing: -.016em;
-}
-
-.album-facts { margin: 18px 0 0; display: flex; flex-direction: column; gap: 1px; }
-.album-facts > div {
-  display: flex;
-  gap: 14px;
-  padding: 14px 16px;
+.spread {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: min(100%, 520px);
+  height: 100%;
+  max-height: 680px;
+  perspective: 1500px;
+  border-radius: 4px 10px 10px 4px;
   background: var(--card);
-  border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  box-shadow: 0 2px 5px rgba(56, 44, 28, .10), 0 26px 48px -26px rgba(56, 44, 28, .55);
+  overflow: hidden;
 }
-.album-facts > div:first-child { border-radius: var(--r-card) var(--r-card) 0 0; }
-.album-facts > div:last-child { border-radius: 0 0 var(--r-card) var(--r-card); }
 
-.album-facts dt {
+/* Where the two pages meet, the paper dips into the binding. */
+.spread::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 0; bottom: 0;
+  width: 26px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: linear-gradient(to right,
+    transparent,
+    rgba(0, 0, 0, .07) 42%,
+    rgba(0, 0, 0, .13) 50%,
+    rgba(0, 0, 0, .07) 58%,
+    transparent);
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 20px 12px 16px;
+  backface-visibility: hidden;
+}
+.page-l { align-items: center; text-align: center; padding-right: 20px; }
+.page-r { padding-left: 20px; }
+
+.portrait {
+  width: min(29vw, 122px);
+  height: min(29vw, 122px);
   flex: none;
-  width: 76px;
-  font-size: 12px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--mc) 15%, transparent);
+}
+.portrait .mon { width: 80%; height: 80%; animation: mon-bob 4s ease-in-out infinite; }
+.portrait-egg .egg { width: 84%; height: 84%; }
+
+.page-name {
+  margin-top: 13px;
+  font-family: var(--font-display);
+  font-size: clamp(18px, 5.4vw, 25px);
+  font-weight: 600;
+  letter-spacing: -.014em;
+  line-height: 1.12;
+}
+
+.page-sub {
+  margin-top: 4px;
+  font-size: 9.5px;
   font-weight: 700;
-  letter-spacing: .1em;
+  letter-spacing: .09em;
   text-transform: uppercase;
   color: var(--ink-3);
-  padding-top: 3px;
 }
-.album-facts dd {
-  margin: 0;
+
+.page-facts {
+  width: 100%;
+  margin: 15px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  text-align: left;
+}
+.page-facts dt {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.page-facts dd {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  line-height: 1.33;
+  letter-spacing: -.004em;
+  overflow-wrap: anywhere;
+}
+
+/* The shell they came out of, kept at the bottom of their own page. */
+.page-egg {
+  margin-top: auto;
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.page-egg .egg { width: 38px; height: 38px; }
+.page-egg span {
+  font-size: 8.5px;
+  font-weight: 650;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.page-fact {
+  margin-top: auto;
+  padding-top: 13px;
+  border-top: 1px solid var(--line-soft);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 12.5px;
+  line-height: 1.42;
+  color: var(--ink-2);
+}
+
+/* The page of whoever is still in their egg. */
+.page-wait {
+  font-family: var(--font-display);
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+.page-rules {
   flex: 1;
-  font-size: 16.5px;
-  line-height: 1.35;
-  letter-spacing: -.012em;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  margin-top: 16px;
+}
+.page-rules i { display: block; height: 1px; background: var(--line); }
+
+.page-hint {
+  margin-top: 14px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ink-3);
+}
+.page-l.is-waiting .portrait { background: color-mix(in srgb, var(--mc) 10%, transparent); }
+
+/* Turning a page: the arriving page swings in off the spine. */
+.turn-next .page-r { transform-origin: left center;  animation: pg-flip-r .46s var(--ease) both; }
+.turn-next .page-l { animation: pg-soft .32s ease both; }
+.turn-prev .page-l { transform-origin: right center; animation: pg-flip-l .46s var(--ease) both; }
+.turn-prev .page-r { animation: pg-soft .32s ease both; }
+@keyframes pg-flip-r { from { transform: rotateY(-74deg); opacity: .2; } }
+@keyframes pg-flip-l { from { transform: rotateY(74deg);  opacity: .2; } }
+@keyframes pg-soft   { from { opacity: 0; } }
+
+.book-nav {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 12px var(--gutter) calc(env(safe-area-inset-bottom) + 20px);
 }
 
+.page-btn {
+  width: 46px; height: 46px;
+  flex: none;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  transition: transform .2s var(--spring), opacity .2s ease;
+}
+.page-btn .ico { width: 19px; height: 19px; stroke-width: 2.2; }
+.page-btn.is-next .ico { transform: rotate(180deg); }
+.page-btn:disabled { opacity: .28; box-shadow: none; }
+.page-btn:not(:disabled):active { transform: scale(.89); }
 
-/* ── Someone new turning up ──────────────────────────────── */
+.book-dots { display: flex; align-items: center; gap: 6px; }
+.bd {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--line);
+  transition: background-color .2s ease, transform .2s var(--spring);
+}
+.bd.is-on { background: var(--ink); transform: scale(1.35); }
+.bd.is-egg { background: transparent; box-shadow: inset 0 0 0 1.2px var(--ink-3); }
+.bd.is-egg.is-on { background: var(--ink-3); }
+
+
+/* ── Someone new hatching ────────────────────────────────────
+   The egg drops in, wobbles, cracks along its middle and breaks open.
+   One fixed CSS timeline start to finish, so there is nothing to drift. */
 
 .arrival-screen {
   position: fixed;
@@ -2251,27 +2496,115 @@ button.mon-slot:active { transform: scale(.93); }
   letter-spacing: .18em;
   text-transform: uppercase;
   color: var(--ink-3);
-  animation: rise .5s var(--ease) .1s backwards;
+  animation: rise .5s var(--ease) .15s backwards;
 }
 
-.ar-mon {
+.hatch {
+  position: relative;
   display: grid;
   place-items: center;
-  margin: 20px auto 0;
-  width: min(64vw, 260px);
-  height: min(64vw, 260px);
+  margin: 22px auto 0;
+  width: min(62vw, 250px);
+  height: min(62vw, 250px);
+}
+
+.hatch-glow {
+  position: absolute;
+  inset: 3%;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--mc) 15%, transparent);
+  background: radial-gradient(circle, color-mix(in srgb, var(--mc) 30%, transparent) 0%,
+                              color-mix(in srgb, var(--mc) 16%, transparent) 52%, transparent 72%);
+  animation: h-glow 1s var(--ease) 2.35s both;
 }
-.ar-mon .mon {
-  width: 78%;
-  height: 78%;
-  animation: ar-pop .85s var(--spring) .15s backwards, mon-bob 3.6s ease-in-out 1.1s infinite;
+@keyframes h-glow {
+  0%   { opacity: 0; transform: scale(.45); }
+  45%  { opacity: 1; }
+  100% { opacity: 1; transform: scale(1); }
 }
-@keyframes ar-pop {
-  0%   { opacity: 0; transform: scale(.3) translateY(24px) rotate(-12deg); }
-  60%  { opacity: 1; transform: scale(1.12) translateY(0) rotate(4deg); }
-  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+
+.hatch-egg, .hatch-mon {
+  position: absolute;
+  inset: 9%;
+  display: grid;
+  place-items: center;
+}
+.hatch-egg .egg, .hatch-mon .mon { width: 100%; height: 100%; }
+
+/* Drops in, then rocks — the second animation waits out the first. */
+.hatch-egg {
+  z-index: 2;
+  animation: h-drop .55s var(--spring) both, h-wobble 1.45s ease-in-out .62s forwards;
+}
+@keyframes h-drop {
+  from { opacity: 0; transform: translateY(-42px) scale(.5); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes h-wobble {
+  0%, 100% { transform: rotate(0deg); }
+  12% { transform: rotate(-5deg); }
+  26% { transform: rotate(4.5deg); }
+  40% { transform: rotate(-7deg); }
+  54% { transform: rotate(6deg); }
+  68% { transform: rotate(-9.5deg); }
+  84% { transform: rotate(7deg); }
+}
+
+/* The crack draws itself, then the two halves go their separate ways. */
+.egg-crack {
+  stroke-dasharray: 130;
+  stroke-dashoffset: 130;
+  animation: h-crack .68s ease-out 1.5s both, h-vanish .2s linear 2.3s both;
+}
+@keyframes h-crack  { to { stroke-dashoffset: 0; } }
+@keyframes h-vanish { to { opacity: 0; } }
+
+.egg-top, .egg-bot { transform-box: fill-box; transform-origin: center; }
+.egg-top { animation: h-top .8s var(--ease) 2.3s both; }
+.egg-bot { animation: h-bot .8s var(--ease) 2.3s both; }
+@keyframes h-top {
+  0%   { transform: none; opacity: 1; }
+  62%  { opacity: 1; }
+  100% { transform: translate(-26px, -46px) rotate(-38deg); opacity: 0; }
+}
+@keyframes h-bot {
+  0%   { transform: none; opacity: 1; }
+  62%  { opacity: 1; }
+  100% { transform: translate(7px, 30px) rotate(18deg); opacity: 0; }
+}
+
+/* Bits of shell, thrown outwards. */
+.hatch-shards { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.hatch-shards i {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 9px; height: 11px;
+  margin: -5px 0 0 -4px;
+  border-radius: 3px 3px 2px 2px;
+  background: var(--shell);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mc) 45%, transparent);
+  animation: h-shard .85s var(--ease) 2.32s both;
+}
+@keyframes h-shard {
+  0%   { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(.7); }
+  12%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(.6); }
+}
+.hatch-shards i:nth-child(1) { --dx: -86px; --dy: -40px; --r: -120deg; }
+.hatch-shards i:nth-child(2) { --dx: -54px; --dy: -78px; --r:  -60deg; }
+.hatch-shards i:nth-child(3) { --dx:  -8px; --dy: -92px; --r:   30deg; }
+.hatch-shards i:nth-child(4) { --dx:  52px; --dy: -76px; --r:   84deg; }
+.hatch-shards i:nth-child(5) { --dx:  88px; --dy: -34px; --r:  130deg; }
+.hatch-shards i:nth-child(6) { --dx:  74px; --dy:  36px; --r:  168deg; }
+.hatch-shards i:nth-child(7) { --dx:   4px; --dy:  74px; --r:  -20deg; }
+.hatch-shards i:nth-child(8) { --dx: -70px; --dy:  44px; --r: -150deg; }
+
+/* And out they come. */
+.hatch-mon { z-index: 3; animation: h-out .95s var(--spring) 2.45s both; }
+.hatch-mon .mon { animation: mon-bob 3.6s ease-in-out 3.5s infinite; }
+@keyframes h-out {
+  0%   { opacity: 0; transform: translateY(16px) scale(.2); }
+  50%  { opacity: 1; transform: translateY(-12px) scale(1.14); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .ar-name {
@@ -2280,25 +2613,18 @@ button.mon-slot:active { transform: scale(.93); }
   font-size: 34px;
   font-weight: 600;
   letter-spacing: -.018em;
-  animation: rise .5s var(--ease) .55s backwards;
+  animation: rise .5s var(--ease) 3.05s backwards;
 }
 
 .ar-line {
   margin-top: 6px;
   font-size: 16px;
   color: var(--ink-2);
-  animation: rise .5s var(--ease) .68s backwards;
+  animation: rise .5s var(--ease) 3.2s backwards;
 }
 
 .ar-continue {
   width: min(72vw, 280px);
-  margin-top: 30px;
-  animation: rise .5s var(--ease) .9s backwards;
-}
-
-/* The hero on a creature's page is the whole point of the page. */
-.album-hero .mon {
-  width: min(52vw, 210px);
-  height: min(52vw, 210px);
-  animation: mon-bob 4s ease-in-out infinite;
+  margin-top: 28px;
+  animation: rise .5s var(--ease) 3.4s backwards;
 }

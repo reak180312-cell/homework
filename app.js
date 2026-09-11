@@ -191,41 +191,149 @@ function schoolDayIndex(d = new Date()) {
    so twelve of them sit together as one family. */
 
 const MONSTERS = [
-  { level: 1,  id: 'blip',   name: 'Blip',   colour: '#5FB89C', shape: 'round',  eyes: 1, top: 'antennae', mark: 'none',
-    age: 'Three weeks old', hobbies: ['Blinking slowly', 'Rolling downhill'] },
+  { level: 1, id: 'blip', name: 'Blip', colour: '#5FB89C', shape: 'round', eyes: 1, top: 'antennae', mark: 'none',
+    egg: 'dots', shell: '#DFF1EA',
+    age: 'Three weeks old',
+    size: 'Fits in a cupped hand',
+    lives: 'In the pencil case, under the rulers',
+    eats: 'Pencil shavings, apparently',
+    says: 'A soft blip, about once an hour',
+    hobbies: ['Blinking slowly', 'Rolling downhill'],
+    best: 'Finding things you dropped',
+    worst: 'Staying awake past nine',
+    fact: 'Blip has one eye and has never once complained about it.' },
 
-  { level: 2,  id: 'pom',    name: 'Pom',    colour: '#E08BA6', shape: 'cloud',  eyes: 2, top: 'none',     mark: 'none',
-    age: 'Half a year',    hobbies: ['Napping in socks', 'Being carried'] },
+  { level: 2, id: 'pom', name: 'Pom', colour: '#E08BA6', shape: 'cloud', eyes: 2, top: 'none', mark: 'none',
+    egg: 'hearts', shell: '#FBE4EA',
+    age: 'Half a year',
+    size: 'About the size of a plum',
+    lives: 'In the hood of your coat',
+    eats: 'Anything warm',
+    says: 'Nothing at all, ever',
+    hobbies: ['Napping in socks', 'Being carried'],
+    best: 'Being comfortable anywhere',
+    worst: 'Walking',
+    fact: 'Pom has never walked anywhere by itself and does not intend to start.' },
 
-  { level: 3,  id: 'nib',    name: 'Nib',    colour: '#9186D4', shape: 'tall',   eyes: 3, top: 'none',     mark: 'none',
-    age: 'Four months',    hobbies: ['Watching everything at once', 'Tidying'] },
+  { level: 3, id: 'nib', name: 'Nib', colour: '#9186D4', shape: 'tall', eyes: 3, top: 'none', mark: 'none',
+    egg: 'triangles', shell: '#E8E5F6',
+    age: 'Four months',
+    size: 'As tall as a glue stick',
+    lives: 'Behind the books on the shelf',
+    eats: 'Crumbs, in a very tidy way',
+    says: 'Mm.',
+    hobbies: ['Watching everything at once', 'Tidying'],
+    best: 'Noticing what moved',
+    worst: 'Surprises',
+    fact: 'With three eyes Nib can watch the door, the window and you at the same time.' },
 
-  { level: 4,  id: 'tuft',   name: 'Tuft',   colour: '#EC9A72', shape: 'round',  eyes: 2, top: 'ears',     mark: 'none',
-    age: 'One year',       hobbies: ['Listening to rain', 'Hiding in bags'] },
+  { level: 4, id: 'tuft', name: 'Tuft', colour: '#EC9A72', shape: 'round', eyes: 2, top: 'ears', mark: 'none',
+    egg: 'stripes', shell: '#FBE8DC',
+    age: 'One year',
+    size: 'A grapefruit with ears',
+    lives: 'At the bottom of your school bag',
+    eats: 'Half a biscuit, saved for later',
+    says: 'A small hum when it rains',
+    hobbies: ['Listening to rain', 'Hiding in bags'],
+    best: 'Hearing things a room away',
+    worst: 'Loud rooms',
+    fact: 'Tuft can hear a packet being opened from the next room.' },
 
-  { level: 5,  id: 'glim',   name: 'Glim',   colour: '#E3B655', shape: 'drop',   eyes: 2, top: 'none',     mark: 'glow',
-    age: 'Nobody knows',   hobbies: ['Glowing gently', 'Reading past bedtime'] },
+  { level: 5, id: 'glim', name: 'Glim', colour: '#E3B655', shape: 'drop', eyes: 2, top: 'none', mark: 'glow',
+    egg: 'stars', shell: '#F9EED2',
+    age: 'Nobody knows',
+    size: 'Roughly a lamp',
+    lives: 'On the desk, after dark',
+    eats: 'Does not. Just glows.',
+    says: 'A faint buzz, like a bulb',
+    hobbies: ['Glowing gently', 'Reading past bedtime'],
+    best: 'Being the last light on',
+    worst: 'Mornings',
+    fact: 'Glim has finished more books than anyone else here.' },
 
-  { level: 6,  id: 'moss',   name: 'Moss',   colour: '#6BA155', shape: 'round',  eyes: 2, top: 'sprout',   mark: 'none',
-    age: 'Two springs',    hobbies: ['Growing things', 'Sitting in the sun'] },
+  { level: 6, id: 'moss', name: 'Moss', colour: '#6BA155', shape: 'round', eyes: 2, top: 'sprout', mark: 'none',
+    egg: 'leaves', shell: '#E4F0DC',
+    age: 'Two springs',
+    size: 'A flowerpot',
+    lives: 'On the windowsill',
+    eats: 'Sunlight and a little water',
+    says: 'A creak, like a growing branch',
+    hobbies: ['Growing things', 'Sitting in the sun'],
+    best: 'Keeping plants alive',
+    worst: 'Being indoors too long',
+    fact: 'The sprout on Moss’s head is a different plant every spring.' },
 
-  { level: 7,  id: 'wisp',   name: 'Wisp',   colour: '#7BAED6', shape: 'wisp',   eyes: 2, top: 'none',     mark: 'none',
-    age: 'Older than it looks', hobbies: ['Drifting', 'Turning up quietly'] },
+  { level: 7, id: 'wisp', name: 'Wisp', colour: '#7BAED6', shape: 'wisp', eyes: 2, top: 'none', mark: 'none',
+    egg: 'waves', shell: '#E2EEF7',
+    age: 'Older than it looks',
+    size: 'Hard to say — it keeps changing',
+    lives: 'Wherever the draught is',
+    eats: 'Nothing anyone has seen',
+    says: 'A long sigh',
+    hobbies: ['Drifting', 'Turning up quietly'],
+    best: 'Appearing behind you',
+    worst: 'Staying in one place',
+    fact: 'Nobody has ever seen Wisp arrive. It is simply there.' },
 
-  { level: 8,  id: 'cinder', name: 'Cinder', colour: '#DB7F52', shape: 'round',  eyes: 2, top: 'horns',    mark: 'none',
-    age: 'Eight months',   hobbies: ['Warming cold hands', 'Small mischief'] },
+  { level: 8, id: 'cinder', name: 'Cinder', colour: '#DB7F52', shape: 'round', eyes: 2, top: 'horns', mark: 'none',
+    egg: 'zigzag', shell: '#FAE3D5',
+    age: 'Eight months',
+    size: 'A big mug',
+    lives: 'Next to the radiator',
+    eats: 'Toast crusts',
+    says: 'A crackle, like a fire',
+    hobbies: ['Warming cold hands', 'Small mischief'],
+    best: 'Warming cold hands',
+    worst: 'Keeping a secret',
+    fact: 'Cinder is exactly as warm as a fresh cup of tea.' },
 
-  { level: 9,  id: 'pebble', name: 'Pebble', colour: '#7F92A6', shape: 'square', eyes: 2, top: 'none',     mark: 'spots',
-    age: 'Very old',       hobbies: ['Staying put', 'Collecting smaller pebbles'] },
+  { level: 9, id: 'pebble', name: 'Pebble', colour: '#7F92A6', shape: 'square', eyes: 2, top: 'none', mark: 'spots',
+    egg: 'speckles', shell: '#E6EAEF',
+    age: 'Very old',
+    size: 'A paperweight',
+    lives: 'Exactly where you left it',
+    eats: 'Once a month, quietly',
+    says: 'Nothing you would notice',
+    hobbies: ['Staying put', 'Collecting smaller pebbles'],
+    best: 'Not moving',
+    worst: 'Hurrying',
+    fact: 'Pebble has been in the same spot since Tuesday and is very pleased about it.' },
 
-  { level: 10, id: 'fizz',   name: 'Fizz',   colour: '#49A9A8', shape: 'round',  eyes: 2, top: 'antennae', mark: 'bubbles',
-    age: 'Two months',     hobbies: ['Fizzing', 'Asking questions'] },
+  { level: 10, id: 'fizz', name: 'Fizz', colour: '#49A9A8', shape: 'round', eyes: 2, top: 'antennae', mark: 'bubbles',
+    egg: 'bubbles', shell: '#DCEFEF',
+    age: 'Two months',
+    size: 'A fizzy drink can',
+    lives: 'In the water bottle pocket',
+    eats: 'Bubbles, mostly',
+    says: 'A steady stream of questions',
+    hobbies: ['Fizzing', 'Asking questions'],
+    best: 'Asking but why',
+    worst: 'Sitting still',
+    fact: 'Fizz has asked about four thousand questions and is not finished.' },
 
-  { level: 11, id: 'snug',   name: 'Snug',   colour: '#AC825E', shape: 'cloud',  eyes: 2, top: 'fringe',   mark: 'none',
-    age: 'Three years',    hobbies: ['Blanket forts', 'Long breakfasts'] },
+  { level: 11, id: 'snug', name: 'Snug', colour: '#AC825E', shape: 'cloud', eyes: 2, top: 'fringe', mark: 'none',
+    egg: 'checks', shell: '#F1E6D8',
+    age: 'Three years',
+    size: 'A folded jumper',
+    lives: 'Under the duvet',
+    eats: 'Breakfast, at length',
+    says: 'A long, contented sound',
+    hobbies: ['Blanket forts', 'Long breakfasts'],
+    best: 'Building a fort out of anything',
+    worst: 'Getting up',
+    fact: 'Snug once stayed in bed for a Sunday and most of a Monday.' },
 
-  { level: 12, id: 'luna',   name: 'Luna',   colour: '#6A78C0', shape: 'tall',   eyes: 2, top: 'none',     mark: 'stars',
-    age: 'One whole moon', hobbies: ['Staying up late', 'Naming the stars'] },
+  { level: 12, id: 'luna', name: 'Luna', colour: '#6A78C0', shape: 'tall', eyes: 2, top: 'none', mark: 'stars',
+    egg: 'moons', shell: '#E4E6F5',
+    age: 'One whole moon',
+    size: 'As tall as a bedside lamp',
+    lives: 'On the windowsill at night',
+    eats: 'Nothing. Watches instead.',
+    says: 'The names of stars, quietly',
+    hobbies: ['Staying up late', 'Naming the stars'],
+    best: 'Knowing which star is which',
+    worst: 'Being awake before noon',
+    fact: 'Luna has named every star it can see, and a few it cannot.' },
 ];
 
 const MAX_LEVEL = MONSTERS.length;
@@ -337,6 +445,125 @@ function monsterSvg(m, { locked = false } = {}) {
           stroke-width="2.6" stroke-linecap="round" />
   </svg>`;
 }
+
+/* ── Eggs ──────────────────────────────────────────────────
+   Everyone arrives in one. Same shape every time, but the shell and its
+   markings belong to the creature inside, so twelve hatchings never look
+   like the same hatching twice. */
+
+const EGG_PATH = 'M50 12c15 0 29 21 29 42a29 32 0 0 1-58 0c0-21 14-42 29-42z';
+
+/* The line the shell breaks along. Both halves are the same drawing clipped
+   either side of it, so the broken edges always match. */
+const EGG_CRACK = 'M17 55 28 47 36 57 45 48 54 58 63 48 72 57 83 49';
+const EGG_ABOVE = 'M2 0H98V49L83 49 72 57 63 48 54 58 45 48 36 57 28 47 17 55 2 49Z';
+const EGG_BELOW = 'M2 49 17 55 28 47 36 57 45 48 54 58 63 48 72 57 83 49 98 49V100H2Z';
+
+/** The markings on a shell. Drawn once, then clipped to the egg's outline. */
+function eggPattern(kind, colour, shell) {
+  const g = (body, opacity = '.55') => `<g fill="${colour}" opacity="${opacity}">${body}</g>`;
+  const at = (x, y, s, d) => `<path transform="translate(${x} ${y}) scale(${s})" d="${d}" />`;
+  const HEART = 'M0 6C-8 -1 -4 -8 0 -3 4 -8 8 -1 0 6Z';
+  const STAR  = 'M0 -7 2 -2 7 0 2 2 0 7 -2 2 -7 0 -2 -2Z';
+  const LEAF  = 'M0 0c5-6 11-6 13-5-1 6-8 10-13 5z';
+  const TRI   = 'M0 -6 6 5H-6Z';
+
+  switch (kind) {
+    case 'dots':
+      return g(`<circle cx="36" cy="32" r="4"/><circle cx="58" cy="26" r="3"/>
+                <circle cx="30" cy="52" r="3.4"/><circle cx="52" cy="46" r="4.6"/>
+                <circle cx="70" cy="44" r="3.2"/><circle cx="40" cy="68" r="4"/>
+                <circle cx="62" cy="66" r="3.4"/><circle cx="50" cy="80" r="3"/>`);
+    case 'hearts':
+      return g(at(38, 30, 0.9, HEART) + at(60, 40, 0.75, HEART) + at(32, 54, 0.7, HEART) +
+               at(53, 62, 0.95, HEART) + at(70, 62, 0.6, HEART) + at(42, 78, 0.7, HEART));
+    case 'triangles':
+      return g(at(36, 30, 0.9, TRI) + at(58, 34, 0.7, TRI) + at(30, 52, 0.8, TRI) +
+               at(52, 56, 1, TRI) + at(72, 56, 0.7, TRI) + at(42, 76, 0.8, TRI));
+    case 'stripes':
+      return g(`<rect x="0" y="28" width="100" height="6"/><rect x="0" y="44" width="100" height="8"/>
+                <rect x="0" y="62" width="100" height="6"/><rect x="0" y="76" width="100" height="8"/>`, '.42');
+    case 'stars':
+      return g(at(38, 32, 1, STAR) + at(60, 40, 0.75, STAR) + at(30, 56, 0.7, STAR) +
+               at(54, 60, 1.1, STAR) + at(72, 62, 0.65, STAR) + at(44, 78, 0.8, STAR), '.6');
+    case 'leaves':
+      return g(`<g transform="translate(32 32) rotate(-20)">${at(0, 0, 0.9, LEAF)}</g>
+                <g transform="translate(58 40) rotate(18)">${at(0, 0, 0.75, LEAF)}</g>
+                <g transform="translate(30 58) rotate(-8)">${at(0, 0, 0.8, LEAF)}</g>
+                <g transform="translate(56 68) rotate(24)">${at(0, 0, 0.9, LEAF)}</g>
+                <g transform="translate(38 78) rotate(-30)">${at(0, 0, 0.7, LEAF)}</g>`);
+    case 'waves':
+      return `<g fill="none" stroke="${colour}" stroke-width="3" stroke-linecap="round" opacity=".5">
+                <path d="M8 34q9-7 18 0t18 0 18 0 18 0"/><path d="M8 50q9-7 18 0t18 0 18 0 18 0"/>
+                <path d="M8 66q9-7 18 0t18 0 18 0 18 0"/><path d="M8 82q9-7 18 0t18 0 18 0 18 0"/>
+              </g>`;
+    case 'zigzag':
+      return `<g fill="none" stroke="${colour}" stroke-width="3.4" stroke-linejoin="round" opacity=".5">
+                <path d="M12 36 24 28 36 36 48 28 60 36 72 28 84 36"/>
+                <path d="M12 56 24 48 36 56 48 48 60 56 72 48 84 56"/>
+                <path d="M12 76 24 68 36 76 48 68 60 76 72 68 84 76"/>
+              </g>`;
+    case 'speckles':
+      return g(`<circle cx="34" cy="28" r="2"/><circle cx="47" cy="34" r="1.4"/><circle cx="60" cy="27" r="2.2"/>
+                <circle cx="28" cy="44" r="1.6"/><circle cx="41" cy="49" r="2.4"/><circle cx="56" cy="45" r="1.5"/>
+                <circle cx="69" cy="50" r="2.1"/><circle cx="33" cy="62" r="2.3"/><circle cx="48" cy="66" r="1.5"/>
+                <circle cx="63" cy="63" r="2"/><circle cx="40" cy="79" r="1.8"/><circle cx="57" cy="78" r="2.2"/>`, '.6');
+    case 'bubbles':
+      return `<g fill="none" stroke="${colour}" stroke-width="2.4" opacity=".55">
+                <circle cx="36" cy="32" r="6"/><circle cx="58" cy="40" r="4"/><circle cx="30" cy="54" r="4.6"/>
+                <circle cx="52" cy="58" r="7.5"/><circle cx="70" cy="60" r="3.4"/><circle cx="42" cy="78" r="5"/>
+              </g>`;
+    case 'checks':
+      return g(`<rect x="22" y="26" width="11" height="11"/><rect x="44" y="26" width="11" height="11"/>
+                <rect x="66" y="26" width="11" height="11"/><rect x="33" y="48" width="11" height="11"/>
+                <rect x="55" y="48" width="11" height="11"/><rect x="22" y="70" width="11" height="11"/>
+                <rect x="44" y="70" width="11" height="11"/><rect x="66" y="70" width="11" height="11"/>`, '.4');
+    case 'moons':
+      // Each crescent is the shell colour biting a circle out of the mark.
+      return `<g opacity=".62">
+                <circle cx="36" cy="32" r="7" fill="${colour}"/><circle cx="40" cy="29" r="6" fill="${shell}"/>
+                <circle cx="60" cy="48" r="8" fill="${colour}"/><circle cx="64" cy="44" r="7" fill="${shell}"/>
+                <circle cx="34" cy="64" r="6" fill="${colour}"/><circle cx="37" cy="61" r="5" fill="${shell}"/>
+                <circle cx="56" cy="78" r="5.5" fill="${colour}"/><circle cx="59" cy="76" r="4.6" fill="${shell}"/>
+              </g>`;
+    default:
+      return '';
+  }
+}
+
+/* Clip paths need ids, and two eggs can be on screen at once. */
+let eggSeq = 0;
+
+/**
+ * One egg. `split` gives back the same drawing cut into a top and a bottom
+ * half along the crack, which is what the hatching animation pulls apart.
+ */
+function eggSvg(m, { split = false } = {}) {
+  const n = ++eggSeq;
+  const face = `
+    <path d="${EGG_PATH}" fill="${m.shell}" />
+    <g clip-path="url(#eggc${n})">${eggPattern(m.egg, m.colour, m.shell)}</g>
+    <ellipse cx="37" cy="33" rx="8" ry="12" fill="#FFFFFF" opacity=".4" transform="rotate(-20 37 33)" />
+    <path d="${EGG_PATH}" fill="none" stroke="${m.colour}" stroke-width="2" opacity=".4" />`;
+
+  const defs = `<defs><clipPath id="eggc${n}"><path d="${EGG_PATH}" /></clipPath>${split ? `
+      <clipPath id="eggt${n}"><path d="${EGG_ABOVE}" /></clipPath>
+      <clipPath id="eggb${n}"><path d="${EGG_BELOW}" /></clipPath>` : ''}</defs>`;
+
+  if (!split) {
+    return `<svg class="egg" viewBox="0 0 100 100" aria-hidden="true">${defs}${face}</svg>`;
+  }
+
+  return `<svg class="egg" viewBox="0 0 100 100" aria-hidden="true">${defs}
+    <g class="egg-top" clip-path="url(#eggt${n})">${face}</g>
+    <g class="egg-bot" clip-path="url(#eggb${n})">${face}</g>
+    <g clip-path="url(#eggc${n})">
+      <path class="egg-crack" d="${EGG_CRACK}" fill="none" stroke="#3A332C" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round" opacity=".5" />
+    </g>
+  </svg>`;
+}
+
 
 const PALETTE = PRESETS.map(p => p.color);
 const XP_PER_HOMEWORK = 10;
@@ -1113,10 +1340,23 @@ function renderProfile() {
 
 /** The shelf of everyone you have met, with the next one waiting. */
 function renderCollection(level) {
-  const box = $('#collection');
-  if (!box) return;
   const have = collected(level);
   const next = MONSTERS[level] || null;
+
+  const cover = $('#book-count');
+  if (cover) {
+    cover.textContent = have.length >= MAX_LEVEL
+      ? `All ${MAX_LEVEL} found`
+      : `${have.length} of ${MAX_LEVEL} found`;
+  }
+  const peek = $('#book-peek');
+  if (peek) {
+    peek.innerHTML = have.slice(-3).map(m =>
+      `<span class="bc-peek" style="--mc:${m.colour}">${monsterSvg(m)}</span>`).join('');
+  }
+
+  const box = $('#collection');
+  if (!box) return;
 
   box.innerHTML = MONSTERS.map(m => {
     const got = m.level <= level;
@@ -1139,40 +1379,159 @@ function renderCollection(level) {
   const note = $('#collection-note');
   if (note) {
     note.textContent = have.length >= MAX_LEVEL
-      ? `All ${MAX_LEVEL} found. That is everyone.`
-      : `${have.length} of ${MAX_LEVEL} found · next one at level ${next ? next.level : MAX_LEVEL}`;
+      ? 'That is everyone. Tap any of them to read their page.'
+      : `Next one at level ${next ? next.level : MAX_LEVEL}. Tap a creature to open their page.`;
   }
 }
 
-/** One creature's page: who they are, and not much else. */
-function openMonster(id) {
-  const m = MONSTERS.find(x => x.id === id);
-  if (!m || m.level > levelFor(state.progress.xp)) return;
+
+/* ── The book ──────────────────────────────────────────────
+   Every creature gets a spread of two facing pages: the left one is who
+   they are, the right one is everything else about them. One creature you
+   have not met yet sits at the back as an egg, so there is always a next
+   page to reach. */
+
+let bookAt = 0;
+
+/** One spread per creature met, then the egg of the one still coming. */
+function bookPages() {
+  const level = levelFor(state.progress.xp);
+  const pages = collected(level).map(m => ({ kind: 'found', m }));
+  const next = MONSTERS[level] || null;
+  if (next) pages.push({ kind: 'egg', m: next });
+  return pages;
+}
+
+function foundSpread(m) {
   const met = (state.progress.metAt || {})[m.id];
+  const found = met
+    ? new Date(met).toLocaleDateString([], { day: 'numeric', month: 'long' })
+    : `when you reached level ${m.level}`;
+  return `
+    <div class="page page-l" style="--mc:${m.colour}">
+      <div class="portrait">${monsterSvg(m)}</div>
+      <h2 class="page-name">${esc(m.name)}</h2>
+      <p class="page-sub">Level ${m.level}</p>
+      <dl class="page-facts">
+        <div><dt>Age</dt><dd>${esc(m.age)}</dd></div>
+        <div><dt>Size</dt><dd>${esc(m.size)}</dd></div>
+        <div><dt>Hobbies</dt><dd>${m.hobbies.map(esc).join(', ')}</dd></div>
+        <div><dt>Found</dt><dd>${esc(found)}</dd></div>
+      </dl>
+      <div class="page-egg">
+        ${eggSvg(m)}
+        <span>came out of this</span>
+      </div>
+    </div>
+    <div class="page page-r">
+      <dl class="page-facts">
+        <div><dt>Lives</dt><dd>${esc(m.lives)}</dd></div>
+        <div><dt>Eats</dt><dd>${esc(m.eats)}</dd></div>
+        <div><dt>Says</dt><dd>${esc(m.says)}</dd></div>
+        <div><dt>Best at</dt><dd>${esc(m.best)}</dd></div>
+        <div><dt>Not so good at</dt><dd>${esc(m.worst)}</dd></div>
+      </dl>
+      <p class="page-fact">${esc(m.fact)}</p>
+    </div>`;
+}
 
-  $('#album-body').innerHTML = `
-    <div class="album-hero" style="--mc:${m.colour}">${monsterSvg(m)}</div>
-    <h2 class="album-name">${esc(m.name)}</h2>
-    <dl class="album-facts">
-      <div><dt>Age</dt><dd>${esc(m.age)}</dd></div>
-      <div><dt>Hobbies</dt><dd>${m.hobbies.map(esc).join(', ')}</dd></div>
-      <div><dt>Found</dt><dd>at level ${m.level}${met
-        ? ` · ${esc(new Date(met).toLocaleDateString([], { day: 'numeric', month: 'long' }))}` : ''}</dd></div>
-    </dl>`;
+/** The last spread: an egg, and how far off it is. */
+function eggSpread(m) {
+  const into = state.progress.xp % XP_PER_LEVEL;
+  const togo = XP_PER_LEVEL - into;
+  return `
+    <div class="page page-l is-waiting" style="--mc:${m.colour}">
+      <div class="portrait portrait-egg">${eggSvg(m)}</div>
+      <h2 class="page-name">Still in the egg</h2>
+      <p class="page-sub">Hatches at level ${m.level}</p>
+      <p class="page-hint">Whoever is in there is not saying.</p>
+    </div>
+    <div class="page page-r is-waiting">
+      <p class="page-wait">Nobody has met this one yet.</p>
+      <span class="page-rules">${'<i></i>'.repeat(8)}</span>
+      <p class="page-fact">${togo} XP to go — about ${Math.ceil(togo / XP_PER_HOMEWORK)} more
+        ${Math.ceil(togo / XP_PER_HOMEWORK) === 1 ? 'piece' : 'pieces'} of homework.</p>
+    </div>`;
+}
 
-  const view = $('#album');
+function renderBook(dir = 0) {
+  const pages = bookPages();
+  if (!pages.length) return;
+  bookAt = Math.max(0, Math.min(bookAt, pages.length - 1));
+  const page = pages[bookAt];
+
+  const spread = $('#book-spread');
+  // The class goes on before the new pages do, so they animate in as they arrive.
+  spread.classList.toggle('turn-next', dir > 0);
+  spread.classList.toggle('turn-prev', dir < 0);
+  spread.innerHTML = page.kind === 'found' ? foundSpread(page.m) : eggSpread(page.m);
+
+  $('#book-prev').disabled = bookAt === 0;
+  $('#book-next').disabled = bookAt === pages.length - 1;
+  $('#book-dots').innerHTML = pages
+    .map((p, i) => `<span class="bd ${i === bookAt ? 'is-on' : ''} ${p.kind === 'egg' ? 'is-egg' : ''}"></span>`)
+    .join('');
+}
+
+function turnPage(dir) {
+  const pages = bookPages();
+  const to = bookAt + dir;
+  if (to < 0 || to >= pages.length) return;
+  bookAt = to;
+  renderBook(dir);
+}
+
+/** Opens at a creature if one is named, otherwise at the first page. */
+function openBook(id) {
+  const pages = bookPages();
+  if (!pages.length) return;
+  const i = id ? pages.findIndex(p => p.m.id === id) : 0;
+  bookAt = i >= 0 ? i : 0;
+  renderBook(0);
+
+  const view = $('#book');
   view.hidden = false;
   view.classList.remove('is-leaving');
 }
 
-function closeMonster() {
-  const view = $('#album');
+function closeBook() {
+  const view = $('#book');
   if (!view || view.hidden) return;
   view.classList.add('is-leaving');
   setTimeout(() => { view.hidden = true; view.classList.remove('is-leaving'); }, 260);
 }
 
-/** Meeting someone new: full screen, brief, and quiet about it. */
+/* A book turns by being pushed, so this one turns by being swiped too. */
+function wireBookSwipe() {
+  const frame = $('#book-frame');
+  if (!frame) return;
+  let x0 = null, y0 = 0;
+  frame.addEventListener('pointerdown', (e) => { x0 = e.clientX; y0 = e.clientY; });
+  frame.addEventListener('pointercancel', () => { x0 = null; });
+  frame.addEventListener('pointerup', (e) => {
+    if (x0 === null) return;
+    const dx = e.clientX - x0;
+    const dy = e.clientY - y0;
+    x0 = null;
+    // Sideways, and clearly meant: anything else is a tap or a scroll.
+    if (Math.abs(dx) < 48 || Math.abs(dy) > Math.abs(dx)) return;
+    turnPage(dx < 0 ? 1 : -1);
+  });
+}
+
+/* When the shell is off and the creature is out. A tap before this would
+   skip the one thing worth watching, so it is ignored until then. Matches
+   the CSS timeline in styles.css. */
+const HATCH_OPEN_MS = 3000;
+
+/**
+ * Meeting someone new. The egg turns up, wobbles, cracks along its middle,
+ * breaks open, and whoever was inside pops out. Every creature has its own
+ * shell, so the same thing never hatches twice.
+ *
+ * The whole sequence is CSS keyframes on a fixed timeline — nothing here
+ * measures or animates by hand, so there is nothing to drift out of step.
+ */
 function showArrival(m, fromLevel) {
   const box = $('#arrival');
   if (!box) return;
@@ -1180,8 +1539,13 @@ function showArrival(m, fromLevel) {
   box.innerHTML = `
     <div class="ar-stage">
       <p class="ar-kicker">Level ${fromLevel} → ${m.level}</p>
-      <div class="ar-mon" style="--mc:${m.colour}">${monsterSvg(m)}</div>
-      <h2 class="ar-name">${esc(m.name)} found you</h2>
+      <div class="hatch" style="--mc:${m.colour}; --shell:${m.shell}">
+        <span class="hatch-glow"></span>
+        <div class="hatch-mon">${monsterSvg(m)}</div>
+        <div class="hatch-egg">${eggSvg(m, { split: true })}</div>
+        <span class="hatch-shards">${'<i></i>'.repeat(8)}</span>
+      </div>
+      <h2 class="ar-name">${esc(m.name)} hatched</h2>
       <p class="ar-line">${esc(m.age)} · ${esc(m.hobbies[0].toLowerCase())}</p>
       <button class="ar-continue btn-primary">Say hello</button>
     </div>`;
@@ -1190,7 +1554,12 @@ function showArrival(m, fromLevel) {
   box.classList.remove('is-leaving');
   requestAnimationFrame(() => box.classList.add('is-in'));
 
+  let armed, auto, gone = false;
   const close = () => {
+    if (gone) return;
+    gone = true;
+    clearTimeout(armed);
+    clearTimeout(auto);
     box.classList.add('is-leaving');
     setTimeout(() => {
       box.hidden = true;
@@ -1199,8 +1568,9 @@ function showArrival(m, fromLevel) {
       if (currentTab === 'profile') renderProfile();
     }, 340);
   };
-  box.addEventListener('click', close);
-  setTimeout(close, 6000);
+
+  armed = setTimeout(() => box.addEventListener('click', close), HATCH_OPEN_MS);
+  auto = setTimeout(close, HATCH_OPEN_MS + 6500);
 }
 
 /** Called after a level lands. Each creature turns up once, ever. */
@@ -1909,7 +2279,7 @@ function wireApp() {
 
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (!$('#album').hidden) closeMonster();
+    if (!$('#book').hidden) closeBook();
     else if (!$('#timetable').hidden) closeTimetable();
     else if (openSheetSel) closeSheet();
     else if (!$('#subject-page').hidden) closeSubjectPage();
@@ -1926,9 +2296,13 @@ function wireApp() {
 
   on('#collection', 'click', (e) => {
     const slot = e.target.closest('[data-monster]');
-    if (slot) openMonster(slot.dataset.monster);
+    if (slot) openBook(slot.dataset.monster);
   });
-  on('#album-close', 'click', closeMonster);
+  on('#book-open', 'click', () => openBook());
+  on('#book-close', 'click', closeBook);
+  on('#book-prev', 'click', () => turnPage(-1));
+  on('#book-next', 'click', () => turnPage(1));
+  wireBookSwipe();
 
   wireLists();
 }

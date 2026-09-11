@@ -121,7 +121,16 @@
     <header class="head"><h1>Profile</h1></header>
     <div id="level-card" class="level-card"></div>
 
-    <h2 class="section-title">Your collection</h2>
+    <h2 class="section-title">Your creature book</h2>
+    <button id="book-open" class="book-cover">
+      <span class="bc-spine"></span>
+      <span class="bc-text">
+        <span class="bc-title">Creatures</span>
+        <span id="book-count" class="bc-count"></span>
+      </span>
+      <span id="book-peek" class="bc-peek-row" aria-hidden="true"></span>
+      <span class="bc-go">Open<svg class="ico" aria-hidden="true"><use href="#i-chevron" /></svg></span>
+    </button>
     <div id="collection" class="collection"></div>
     <p id="collection-note" class="foot-note"></p>
 
@@ -251,11 +260,23 @@
   </div>
 </div>
 
-<section id="album" class="album" hidden role="dialog" aria-modal="true" aria-label="Creature">
-  <button id="album-close" class="dv-close" aria-label="Close">
+<!-- The book of creatures: two facing pages at a time. -->
+<section id="book" class="book" hidden role="dialog" aria-modal="true" aria-label="Creature book">
+  <button id="book-close" class="dv-close" aria-label="Close">
     <svg class="ico" aria-hidden="true"><use href="#i-close" /></svg>
   </button>
-  <div id="album-body" class="dv-body"></div>
+  <div id="book-frame" class="book-frame">
+    <div id="book-spread" class="spread"></div>
+  </div>
+  <div class="book-nav">
+    <button id="book-prev" class="page-btn" aria-label="Page back">
+      <svg class="ico" aria-hidden="true"><use href="#i-back" /></svg>
+    </button>
+    <span id="book-dots" class="book-dots" aria-hidden="true"></span>
+    <button id="book-next" class="page-btn is-next" aria-label="Page on">
+      <svg class="ico" aria-hidden="true"><use href="#i-back" /></svg>
+    </button>
+  </div>
 </section>
 
 <div id="toast" class="toast" hidden>

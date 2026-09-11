@@ -41,7 +41,7 @@ Choose subjects → Add homework → See it all together → Finish it → Earn 
 - **Reminders** — things to remember, each set for a day and optionally a single lesson.
   Opens on today; tap **All** to see the rest.
 - **Subjects** — one page per subject: what's open, and what you've already handed in.
-- **Profile** — level, XP, and the creatures you have collected. Tap one to read about it.
+- **Profile** — level, XP, and the book of creatures you have collected.
 
 Adding is the fast path: press **+**, type, press Enter. The subject you used last is already
 selected and the due date is optional, so the shortest add is two actions.
@@ -73,20 +73,36 @@ closed hours ago can't wake itself up. This is a limitation of web apps, not a b
 
 ## The collection
 
-Twelve little creatures, one per level. Blip turns up at level 1, Luna at level 12, and each
-one stays on the shelf on your Profile once it has found you.
+Twelve little creatures, one per level. Blip turns up at level 1, Luna at level 12.
 
-Reaching a level takes over the screen: the new creature pops in, introduces itself, and
-joins the shelf. It happens once, the first time you reach that level. Tap any of them to
-read their page - name, age, hobbies, and when they turned up.
+### Hatching
 
-Only the very next one is hinted at, as a grey silhouette with a question mark; the rest are
-blank slots, so the shelf genuinely fills up.
+Reaching a level takes over the screen. An egg drops in, rocks, cracks along its middle,
+breaks open, and whoever was inside pops out. Every creature has its own shell — twelve
+patterns and twelve colours — so the same thing never hatches twice. It happens once, the
+first time you reach that level, and a tap is ignored until the egg has actually opened,
+so a stray touch can't skip the one thing worth watching.
+
+The whole sequence is CSS keyframes on one fixed timeline. Nothing is measured or stepped
+in script, so there is nothing to drift out of step.
+
+### The book
+
+The collection is a book, opened from its cover on Profile. Each creature gets a spread of
+two facing pages: who they are on the left — portrait, age, size, hobbies, when you found
+them, and the egg they came out of — and everything else on the right: where they live,
+what they eat, what they say, what they are best at, what they are not, and one line about
+them at the foot of the page. Nine facts each.
+
+Turn pages with the arrows or by swiping. Whoever is coming next sits at the back as an
+egg, with how much XP is still to go; the ones after that are not in the book yet. The
+shelf under the cover still shows everyone at a glance, and tapping a creature opens the
+book at their page.
 
 MONSTERS in [app.js](app.js) holds all twelve. They are drawn, not pictures: monsterSvg()
 composes a body shape, one to three eyes, something on top and a marking, over a shared set
-of big eyes, blush and a smile - so twelve of them read as one family and nothing has to be
-downloaded.
+of big eyes, blush and a smile, and eggSvg() does the same for shells — so twelve of them
+read as one family and nothing has to be downloaded.
 
 ## Data
 
@@ -97,7 +113,7 @@ Subject      { id, name, icon, glyph, color }
 Homework     { id, subjectId, title, dueDate, createdAt, completed, completedAt }
 Note         { id, text, day, lesson, createdAt }  // day 0-4 = Sun-Thu, null = every day
 UserProgress { xp, level, shownUpTo,    // +10 XP per homework, 100 XP per level, twelve levels
-               metAt }                  // shownUpTo stops an arrival replaying
+               metAt }                  // shownUpTo stops a hatching replaying
 Settings     { dailyReminderEnabled, dailyReminderTime,
                bagReminderEnabled, bagReminderTime }
 ```
