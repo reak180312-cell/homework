@@ -36,10 +36,11 @@ Choose subjects → Add homework → See it all together → Finish it → Earn 
   (or swipe the card right) to finish it; tap the card to edit or delete it. With nothing
   left the screen clears to one line — *You finished all* — and the + leaves the header to
   sit beside it, over a desk that has been tidied for the day.
-- **Bag** — six things, drawn from the sketch this was specified in: pencil bag, bottle,
-  lunch box, sports shoes on the days there is sport, and notebooks and books naming that
-  day's own subjects. Pick any day along the top. Your own reminders for that day sit under
-  it, because those are things to put in the bag too.
+- **Bag** — the drawing this was specified in: a backpack in the middle with everything that
+  goes into it around the outside, an arrow from each one in. Pencil bag, bottle, lunch box,
+  sports shoes on the days there is sport, and notebooks and books naming that day's own
+  subjects. Pick any day along the top; everything changes with it. Your own reminders for
+  that day sit underneath, because those are things to put in the bag too.
 - **Reminders** — things to remember, each set for a day and optionally a single lesson.
   Opens on today; tap **All** to see the rest.
 - **Subjects** — one page per subject: what's open, and what you've already handed in.
@@ -55,7 +56,13 @@ any screen. Lessons are colour-matched to the subjects you picked at setup, and 
 reads the day's subjects straight off it.
 
 There is nothing to configure. A packing list you have to keep up to date is a second piece
-of homework, so the list is fixed and the only thing that varies is the day.
+of homework, so what goes in the bag is fixed and the only thing that varies is the day.
+
+The scene is one SVG — the pictures and the arrows together, so they scale as a unit and each
+arrow can be aimed exactly at the bag — with the words laid over it in HTML, so they stay real
+text at a real size and wrap when a day has six subjects in two alphabets. `BAG_ART` holds the
+drawings, each one around its own origin, and `BAG_PLACES` says where each sits and where its
+arrow leaves and lands: moving something is changing one pair of numbers.
 
 It lives in `SCHEDULE` in [app.js](app.js) as one row per day, Sunday to Thursday, eight
 periods each — edit that array when the timetable changes. Teacher names, room numbers and

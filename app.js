@@ -109,6 +109,135 @@ function subjectsOn(dayIndex) {
   return out;
 }
 
+/* The Bag page as the drawing it was specified in: the backpack in the middle,
+   everything that goes in it around the outside, an arrow from each one in.
+
+   The drawings live in one SVG so they scale together and the arrows can be
+   aimed exactly; the words sit in HTML on top of it, so they stay real text at
+   a real size and wrap when a day has a lot of subjects. */
+
+const BAG_SCENE = { w: 400, h: 520 };
+
+/* Each thing is drawn around its own origin, so moving one means changing one
+   pair of numbers below rather than every coordinate in its path. */
+const BAG_ART = {
+  pencil: `
+    <g class="bag-pens">
+      <path d="M-17-13l-7-21" /><path d="M-1-13l-2-25" /><path d="M15-13l7-21" />
+    </g>
+    <rect x="-31" y="-13" width="62" height="27" rx="13" />
+    <path d="M-31 1h62" />`,
+
+  bottle: `
+    <rect x="-7" y="-32" width="14" height="10" rx="3" />
+    <path d="M-5-22v5c0 3-7 5-7 13v23c0 5 3 9 8 9h8c5 0 8-4 8-9v-23c0-8-7-10-7-13v-5z" />
+    <path d="M-12-3h24" />`,
+
+  lunch: `
+    <path d="M-16-19v-5q0-5 5-5h22q5 0 5 5v5" />
+    <rect x="-29" y="-19" width="58" height="40" rx="7" />
+    <path d="M-29-4h58" />
+    <rect x="-7" y="-10" width="14" height="12" rx="3" />`,
+
+  shoes: `
+    <path d="M-31 9c0-6 3-10 7-12l10-5 7 6 8-4c7 0 13 4 19 9 3 2 7 4 11 5 4 1 6 3 6 6 0 3-2 5-6 5h-55c-4 0-7-3-7-10z" />
+    <path d="M-14-6l7 7M-3-10l7 7M8-12l7 7" />
+    <path d="M-31 13h62" />`,
+
+  notebook: `
+    <rect x="-19" y="-30" width="44" height="60" rx="4" />
+    <path d="M-12-19h30M-12-8h30M-12 3h30M-12 14h19" />
+    <g class="bag-rings">
+      <path d="M-19-25c-7 0-7 7 0 7M-19-12c-7 0-7 7 0 7M-19 1c-7 0-7 7 0 7M-19 14c-7 0-7 7 0 7" />
+    </g>`,
+
+  books: `
+    <rect x="-31" y="-23" width="29" height="46" rx="3" />
+    <rect x="2" y="-23" width="29" height="46" rx="3" />
+    <path d="M-25-12h17M-25-3h17M-25 6h11M8-12h17M8-3h17M8 6h11" />`,
+};
+
+/* Where each thing sits, where its arrow leaves it, and where it lands. */
+const BAG_PLACES = {
+  pencil:   { x: 88,  y: 64,  from: [124, 78],  via: [140, 122], to: [162, 182] },
+  bottle:   { x: 312, y: 60,  from: [296, 86],  via: [284, 130], to: [240, 184] },
+  lunch:    { x: 56,  y: 210, from: [90, 214],  via: [110, 228], to: [130, 244] },
+  shoes:    { x: 344, y: 208, from: [306, 212], via: [288, 228], to: [270, 244] },
+  notebook: { x: 76,  y: 414, from: [108, 386], via: [130, 356], to: [160, 324] },
+  books:    { x: 320, y: 410, from: [288, 384], via: [268, 356], to: [242, 324] },
+};
+
+/** A curve with a head on the end, aimed along the curve's own last direction. */
+function bagArrow(from, via, to) {
+  const [x0, y0] = from, [cx, cy] = via, [x1, y1] = to;
+  const angle = Math.atan2(y1 - cy, x1 - cx) * 180 / Math.PI;
+  return `
+    <path class="bag-arrow" d="M${x0} ${y0} Q${cx} ${cy} ${x1} ${y1}" />
+    <path class="bag-head" d="M0 0-10-5-10 5Z" transform="translate(${x1} ${y1}) rotate(${angle})" />`;
+}
+
+/** The backpack itself, and the biggest thing on the page. */
+const BACKPACK = `
+  <g class="bag-pack">
+    <path d="M178 164q22-30 44 0" />
+    <rect x="136" y="164" width="128" height="164" rx="34" />
+    <path d="M136 220q64-27 128 0" />
+    <rect x="166" y="212" width="16" height="42" rx="5" />
+    <rect x="218" y="212" width="16" height="42" rx="5" />
+    <rect x="157" y="258" width="86" height="58" rx="15" />
+    <path d="M264 228q20 7 20 31v26q0 24-20 31" />
+  </g>`;
+
+/**
+ * The scene for one day. Sports shoes only turn up when there is sport, and
+ * the notebooks and the books carry that day's own subjects.
+ */
+function bagScene(dayIndex) {
+  const subjects = subjectsOn(dayIndex);
+  const named = subjects.join(' · ');
+  const sport = lessonsFor(dayIndex).some(l => l.name === PE);
+
+  const things = [
+    { key: 'pencil', label: 'Pencil bag' },
+    { key: 'bottle', label: 'Bottle' },
+    { key: 'lunch', label: 'Lunch box' },
+  ];
+  if (sport) things.push({ key: 'shoes', label: 'Sports shoes' });
+  if (subjects.length) {
+    things.push({ key: 'notebook', label: 'Notebooks', detail: named });
+    things.push({ key: 'books', label: 'Books', detail: named });
+  }
+
+  const drawings = things.map(t => {
+    const p = BAG_PLACES[t.key];
+    return `<g class="bag-thing" transform="translate(${p.x} ${p.y})">${BAG_ART[t.key]}</g>`;
+  }).join('');
+
+  const arrows = things.map(t => {
+    const p = BAG_PLACES[t.key];
+    return bagArrow(p.from, p.via, p.to);
+  }).join('');
+
+  const labels = things.map(t => {
+    const p = BAG_PLACES[t.key];
+    const left = (p.x / BAG_SCENE.w) * 100;
+    const top = ((p.y + 44) / BAG_SCENE.h) * 100;
+    return `
+      <span class="bag-label ${t.detail ? 'is-wide' : ''}" style="left:${left}%; top:${top}%">
+        <b>${esc(t.label)}</b>
+        ${t.detail ? `<i>${esc(t.detail)}</i>` : ''}
+      </span>`;
+  }).join('');
+
+  return `
+    <div class="bag-scene">
+      <svg viewBox="0 0 ${BAG_SCENE.w} ${BAG_SCENE.h}" aria-hidden="true">
+        ${arrows}${BACKPACK}${drawings}
+      </svg>
+      ${labels}
+    </div>`;
+}
+
 function bagFor(dayIndex) {
   const list = [
     { emoji: '✏️', item: 'Pencil bag' },
@@ -907,28 +1036,22 @@ function renderBag() {
     return;
   }
 
-  const line = (emoji, item, note) => `
-    <li class="pack-line">
-      <span class="pack-emoji">${emoji}</span>
-      <span class="pack-text">
-        <span class="pack-item">${esc(item)}</span>
-        ${note ? `<span class="pack-for">${esc(note)}</span>` : ''}
-      </span>
-    </li>`;
-
-  const pack = `<ul class="pack-list">
-      ${bagFor(bagDay).map(p => line(p.emoji, p.item, p.note)).join('')}
-    </ul>`;
-
   // Your own notes for the day are things to put in the bag too.
   const notes = state.notes.filter(n => n.day === null || n.day === bagDay);
   const remember = notes.length ? `
     <h2 class="section-title">Also</h2>
     <ul class="pack-list">
-      ${notes.map(n => line('📌', n.text, n.lesson ? shortName(n.lesson) : '')).join('')}
+      ${notes.map(n => `
+        <li class="pack-line">
+          <span class="pack-emoji">📌</span>
+          <span class="pack-text">
+            <span class="pack-item">${esc(n.text)}</span>
+            ${n.lesson ? `<span class="pack-for">${esc(shortName(n.lesson))}</span>` : ''}
+          </span>
+        </li>`).join('')}
     </ul>` : '';
 
-  $('#bag-body').innerHTML = pack + remember;
+  $('#bag-body').innerHTML = bagScene(bagDay) + remember;
 }
 
 /** The corner button is itself a tiny timetable, not a generic glyph. */
