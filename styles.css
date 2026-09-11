@@ -338,6 +338,71 @@ button { border: 0; background: none; cursor: pointer; }
 }
 
 
+/* Nothing left to do. The homework screen clears down to one sentence, one
+   button, and a desk that has been tidied for the day. The picture bleeds to
+   both edges and fades into the paper, so nothing frames it. */
+
+.empty-home {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+  /* Fill exactly what the header and the tab bar leave, so the picture lands
+     just above the tabs rather than floating in the middle of the page. */
+  min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+                   - var(--tabbar-h) - 134px);
+  margin-inline: calc(var(--gutter) * -1);
+}
+
+.empty-home-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding-inline: var(--gutter);
+  text-align: center;
+  color: var(--ink);
+}
+
+/* The only move worth making, drawn as a target rather than a glyph. */
+.empty-add {
+  width: 52px; height: 52px;
+  flex: none;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 1.6px solid color-mix(in srgb, var(--done) 44%, transparent);
+  color: color-mix(in srgb, var(--done) 82%, var(--ink));
+  transition: transform .24s var(--spring), background-color .2s var(--ease);
+}
+.empty-add .ico { width: 24px; height: 24px; stroke-width: 1.7; }
+.empty-add:active {
+  transform: scale(.9);
+  background: color-mix(in srgb, var(--done) 12%, transparent);
+}
+
+.empty-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  -webkit-user-drag: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 86%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 86%, transparent 100%);
+}
+
+/* The scene is lit for a bright room; at night it dims down to the paper. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .empty-art {
+    filter: brightness(.5) saturate(.78) contrast(1.06) opacity(.92);
+  }
+}
+:root[data-theme="dark"] .empty-art {
+  filter: brightness(.5) saturate(.78) contrast(1.06) opacity(.92);
+}
+
+
 /* ── Subjects ────────────────────────────────────────────── */
 
 .subject-row {
@@ -1903,6 +1968,13 @@ input.hw-title::placeholder { color: var(--ink-3); }
   50%     { transform: scale(1.05) translateY(-3px); }
 }
 
+/* The light on the desk moves, slowly enough that you only notice if you look. */
+.empty-art { animation: desk-light 18s ease-in-out infinite; }
+@keyframes desk-light {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50%      { transform: scale(1.018) translateY(-3px); }
+}
+
 .empty h2 { animation: rise .45s var(--ease) .06s backwards; }
 .empty p  { animation: rise .45s var(--ease) .13s backwards; }
 @keyframes rise { from { opacity: 0; transform: translateY(7px); } }
@@ -1979,6 +2051,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
 .onboarding-head h1,
 .sheet-title,
 .empty h2,
+.empty-home-line,
 .level-name,
 .subject-hero h1 {
   font-family: var(--font-display);
@@ -1991,6 +2064,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
 .head h1 { font-size: 36px; letter-spacing: -.015em; }
 .onboarding-head h1 { font-size: 35px; letter-spacing: -.015em; line-height: 1.14; }
 .empty h2 { font-size: 23px; letter-spacing: -.01em; }
+.empty-home-line { font-size: clamp(24px, 7.1vw, 30px); letter-spacing: -.015em; }
 .level-name { font-size: 26px; letter-spacing: -.012em; }
 .sheet-title { font-size: 22px; letter-spacing: -.008em; }
 .subject-hero h1 { font-size: 31px; letter-spacing: -.014em; }

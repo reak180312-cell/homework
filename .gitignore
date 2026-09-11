@@ -12,3 +12,6 @@ timetable-private/
 ChatGPT Image*.png
 WhatsApp Image*
 
+
+# ...except the app's own artwork, which is part of the build
+!art/desk.jpg

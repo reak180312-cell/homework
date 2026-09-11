@@ -623,6 +623,20 @@ const empty = (title, line, opts = {}) => {
     </${tag}>`;
 };
 
+/* Nothing left to do. The screen clears down to one line and one button — the
+   + leaves the header and comes to sit beside the sentence, so there is only
+   ever one of it — over a desk that has been tidied for the day. */
+const emptyHome = (title) => `
+  <div class="empty-home">
+    <h2 class="empty-home-line">
+      <span>${esc(title)}</span>
+      <button class="empty-add" data-act="add-first" aria-label="Add homework">
+        <svg class="ico" aria-hidden="true"><use href="#i-plus" /></svg>
+      </button>
+    </h2>
+    <img class="empty-art" src="art/desk.jpg" alt="" draggable="false" />
+  </div>`;
+
 
 /* ── Render ────────────────────────────────────────────────── */
 
@@ -630,6 +644,7 @@ let currentTab = 'home';
 
 function render() {
   renderTtButton();
+  syncFab();
   if (currentTab === 'home') renderHome();
   if (currentTab === 'bag') renderBag();
   if (currentTab === 'reminders') renderReminders();
@@ -646,10 +661,8 @@ function renderHome() {
   box.classList.add('list-hw');
   box.innerHTML = list.length
     ? list.map(hwRow).join('')
-    : (state.homework.length
-        ? empty('All done', 'No homework left.', { mood: 'done' })
-        : empty('Nothing here yet', 'Tap here to add your first homework.',
-                { icon: 'i-plus', mood: 'invite', act: 'add-first' }));
+    : emptyHome(state.homework.length ? 'You finished all' : 'Nothing here yet');
+  syncFab();
 }
 
 /* ── Bag: what to bring, and your own reminders ───────────── */
@@ -1208,6 +1221,15 @@ function maybeArrival(level, fromLevel) {
 
 /* ── Navigation ────────────────────────────────────────────── */
 
+/* The + adds homework, so it only belongs on the homework screens — on Bag it
+   would sit on top of the reminder's own Add button. A cleared homework screen
+   is the other exception: the empty state is already holding one. */
+function syncFab() {
+  const belongs = currentTab === 'home' || currentTab === 'subjects';
+  const cleared = currentTab === 'home' && !activeHw().length;
+  $('#fab').hidden = !belongs || cleared;
+}
+
 function showTab(tab) {
   currentTab = tab;
   for (const view of $$('.view')) view.hidden = view.dataset.view !== tab;
@@ -1216,9 +1238,6 @@ function showTab(tab) {
     btn.classList.toggle('is-active', on);
     btn.setAttribute('aria-selected', String(on));
   }
-  // The + adds homework, so it only belongs on the homework screens — and on
-  // Bag it would sit on top of the reminder's own Add button.
-  $('#fab').hidden = tab !== 'home' && tab !== 'subjects';
   render();
   window.scrollTo(0, 0);
 }

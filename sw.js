@@ -2,12 +2,13 @@
 
 // Bump this whenever the shell changes shape: it drops every older cache on
 // activate, so a page can never be served new markup with stale script.
-const CACHE = 'homework-v3';
+const CACHE = 'homework-v4';
 const SHELL = [
   './index.html',
   './styles.css',
   './app.js',
   './manifest.webmanifest',
+  './art/desk.jpg',
   './icons/icon-192.png',
   './icons/icon-512.png',
 ];
