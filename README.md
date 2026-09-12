@@ -83,6 +83,11 @@ text at a real size and wrap when a day has six subjects. `BAG_ART` holds the dr
 around its own origin, and `BAG_PLACES` says where each sits and where its lead leaves and
 lands: moving something is changing one pair of numbers.
 
+The layout is measured off that drawing rather than judged by eye: the scene is 400 by 492,
+the bag spans 161 of it and sits centred, and every thing has its own place, size and lead in
+`BAG_PLACES`. Sport, the MacBook and the Tanach share the slot beside the bag and the AirPods
+take the one above it, so no day needs a taller picture than any other.
+
 Nothing is outlined. Every shape is a fill, depth comes from a darker tone beside a lighter one,
 and each thing stands on a soft shadow. Each name sits in a pill washed with its own thing's
 colour — `BAG_TINT` — mixed against the card, so it is a pale tint on parchment and a deep one

@@ -164,9 +164,10 @@ function bagThings(dayIndex) {
   // Sport and the special lessons never fall on the same day, so the one slot
   // beside the bag is enough for whichever of them turns up.
   for (const name of names) {
-    for (const extra of SPECIAL[name] || []) {
-      things.push({ ...extra, detail: lessonLabel(name) });
-    }
+    // Two things for one lesson only need to say so once.
+    (SPECIAL[name] || []).forEach((extra, i) => {
+      things.push({ ...extra, detail: i === 0 ? lessonLabel(name) : '' });
+    });
   }
   return things;
 }
@@ -177,7 +178,7 @@ function bagThings(dayIndex) {
    outside, one arrow each. Every shape carries its own fill, so the stylesheet
    never has to fight a presentation attribute for the colours. */
 
-const BAG_SCENE = { w: 400, short: 520, tall: 580 };
+const BAG_SCENE = { w: 400, h: 492 };
 
 /* Flat illustration rather than line art: every shape is a fill, depth comes
    from a darker tone beside a lighter one, and each thing sits on a soft
@@ -210,12 +211,13 @@ const BAG_ART = {
     <circle cx="-28" cy="-1.5" r="4" fill="${NAVY}" opacity=".75" />`,
 
   bottle: `
-    ${shade(17, 36)}
-    <rect x="-8" y="-46" width="16" height="10" rx="4" fill="${NAVY}" />
-    <path d="M6-44h4a4 4 0 0 1 0 8H6z" fill="${NAVY}" />
-    <path d="M-11-36h22a3 3 0 0 1 3 3v56a9 9 0 0 1-9 9h-10a9 9 0 0 1-9-9v-56a3 3 0 0 1 3-3z" fill="${SAGE}" />
-    <path d="M4-36h7a3 3 0 0 1 3 3v56a9 9 0 0 1-9 9H4z" fill="${SAGE_D}" />
-    <rect x="-7" y="-30" width="4" height="40" rx="2" fill="#FFFFFF" opacity=".3" />`,
+    ${shade(15, 27)}
+    <rect x="-8" y="-26" width="16" height="8" rx="3" fill="${NAVY}" />
+    <path d="M7-25h4a4 4 0 0 1 0 8h-4" fill="none" stroke="${NAVY}" stroke-width="3.4" />
+    <path d="M-13-18h26a2 2 0 0 1 2 2v30a9 9 0 0 1-9 9h-12a9 9 0 0 1-9-9v-30a2 2 0 0 1 2-2z" fill="${SAGE}" />
+    <path d="M5-18h8a2 2 0 0 1 2 2v30a9 9 0 0 1-9 9h-1z" fill="${SAGE_D}" />
+    <rect x="-9" y="-13" width="3.5" height="24" rx="1.75" fill="#FFFFFF" opacity=".32" />
+  `,
 
   lunch: `
     ${shade(33, 25)}
@@ -233,18 +235,18 @@ const BAG_ART = {
     <path d="M-32 10h69v3a5 5 0 0 1-5 5h-59a5 5 0 0 1-5-5z" fill="${BLUE}" />`,
 
   notebook: `
-    ${shade(28, 33)}
-    <rect x="-10" y="-32" width="38" height="64" rx="4" fill="${PAGE}" />
-    <rect x="-20" y="-34" width="38" height="64" rx="4" fill="${CORAL}" />
-    <path d="M8-34h10v64H8z" fill="${CORAL_D}" />
-    <rect x="-12" y="-24" width="20" height="11" rx="2.5" fill="${PAGE}" />
+    ${shade(30, 31)}
+    <rect x="-6" y="-26" width="44" height="54" rx="4" fill="${PAGE}" />
+    <rect x="-16" y="-28" width="44" height="56" rx="4" fill="${CORAL}" />
+    <path d="M14-28h10a4 4 0 0 1 4 4v48a4 4 0 0 1-4 4H14z" fill="${CORAL_D}" />
+    <rect x="-8" y="-19" width="22" height="11" rx="2.5" fill="${PAGE}" />
     <g fill="${NAVY}">
-      <rect x="-25" y="-28" width="11" height="5" rx="2.5" />
-      <rect x="-25" y="-15" width="11" height="5" rx="2.5" />
-      <rect x="-25" y="-2" width="11" height="5" rx="2.5" />
-      <rect x="-25" y="11" width="11" height="5" rx="2.5" />
-      <rect x="-25" y="24" width="11" height="5" rx="2.5" />
-    </g>`,
+      <rect x="-23" y="-23" width="13" height="5" rx="2.5" />
+      <rect x="-23" y="-11" width="13" height="5" rx="2.5" />
+      <rect x="-23" y="1" width="13" height="5" rx="2.5" />
+      <rect x="-23" y="13" width="13" height="5" rx="2.5" />
+    </g>
+  `,
 
   books: `
     ${shade(33, 28)}
@@ -295,23 +297,23 @@ const BAG_ART = {
     </g>`,
 };
 
-/* Where each thing sits, where its arrow leaves it, and where it lands.
-   Sport, the MacBook and the Tanach share the slot beside the bag: they never
-   fall on the same day as each other. */
-const BAG_PLACES = {
-  pencil:   { x: 88,  y: 64,  from: [124, 80],  via: [142, 122], to: [162, 182] },
-  bottle:   { x: 312, y: 60,  from: [296, 88],  via: [284, 132], to: [240, 184] },
-  lunch:    { x: 56,  y: 208, from: [92, 212],  via: [111, 227], to: [130, 244] },
-  shoes:    { x: 344, y: 206, from: [306, 210], via: [288, 227], to: [270, 244] },
-  laptop:   { x: 342, y: 204, from: [302, 210], via: [286, 227], to: [270, 244] },
-  tanach:   { x: 344, y: 204, from: [306, 208], via: [288, 226], to: [270, 244] },
-  notebook: { x: 76,  y: 400, from: [110, 372], via: [134, 348], to: [162, 322] },
-  books:    { x: 320, y: 396, from: [288, 370], via: [266, 348], to: [242, 322] },
-  airpods:  { x: 200, y: 466, from: [200, 432], via: [194, 384], to: [200, 332] },
-};
+/* Where each thing sits, how big it is drawn, where its name goes, and where
+   its lead leaves and lands — all measured off the drawing this copies, so the
+   scene keeps its proportions at any size.
 
-/** Which things push the scene taller, because they sit under the bag. */
-const BAG_LOW = ['airpods'];
+   Sport, the MacBook and the Tanach share the slot beside the bag: they never
+   fall on the same day. The AirPods take the one above it. */
+const BAG_PLACES = {
+  pencil:   { x: 89,  y: 56,  s: 1.3,  label: 50, from: [142, 114], to: [164, 140] },
+  bottle:   { x: 332, y: 66,  s: 1.5,  label: 44, from: [290, 116], to: [262, 150] },
+  airpods:  { x: 200, y: 52,  s: 1.2,  label: 44, from: [200, 76],  to: [200, 110] },
+  lunch:    { x: 68,  y: 185, s: 1.3,  label: 50, from: [114, 190], to: [132, 208] },
+  shoes:    { x: 340, y: 185, s: 1.3,  label: 46, from: [292, 190], to: [268, 208] },
+  laptop:   { x: 340, y: 183, s: 1.1,  label: 46, from: [292, 190], to: [268, 208] },
+  tanach:   { x: 340, y: 183, s: 1.5,  label: 52, from: [292, 190], to: [268, 208] },
+  notebook: { x: 84,  y: 342, s: 1.45, label: 54, from: [127, 311], to: [148, 290] },
+  books:    { x: 317, y: 331, s: 1.5,  label: 54, from: [276, 311], to: [263, 292] },
+};
 
 /** The wash behind each name, taken from the thing it belongs to. */
 const BAG_TINT = {
@@ -319,39 +321,42 @@ const BAG_TINT = {
   notebook: CORAL, books: BLUE, laptop: '#9AA3AE', airpods: '#9AA3AE', tanach: '#A8544A',
 };
 
-/** A dotted lead that stops at a small open ring, the way the drawing does —
- *  it points without jabbing. */
-function bagArrow(from, via, to) {
-  const [x0, y0] = from, [cx, cy] = via, [x1, y1] = to;
+/** A dashed lead that stops at a small open ring just short of the bag. */
+function bagArrow(from, to) {
   return `
-    <path class="bag-arrow" d="M${x0} ${y0} Q${cx} ${cy} ${x1} ${y1}" />
-    <circle class="bag-head" cx="${x1}" cy="${y1}" r="5" />`;
+    <path class="bag-arrow" d="M${from[0]} ${from[1]}L${to[0]} ${to[1]}" />
+    <circle class="bag-head" cx="${to[0]}" cy="${to[1]}" r="7" />`;
 }
 
-/** The backpack itself, and the biggest thing on the page. Drawn back to
- *  front: shadow, handle, side pockets, body, then everything on the body. */
+/** The backpack: the biggest thing on the page, drawn back to front. */
 const BACKPACK = `
   <g class="bag-pack">
-    <ellipse cx="200" cy="330" rx="78" ry="13" fill="#6B5B45" opacity=".13" />
+    <ellipse cx="202" cy="288" rx="80" ry="11" fill="#6B5B45" opacity=".13" />
 
-    <path d="M184 190q16-46 32 0" fill="none" stroke="${NAVY}" stroke-width="8.5" stroke-linecap="round" />
+    <path d="M189 145v-10a8 8 0 0 1 8-8h8a8 8 0 0 1 8 8v10"
+          fill="none" stroke="${NAVY}" stroke-width="7.5" stroke-linecap="round" />
 
-    <path d="M154 242h-12a14 14 0 0 0-14 14v32a14 14 0 0 0 14 14h12z" fill="${BLUE_D}" />
-    <path d="M246 242h12a14 14 0 0 1 14 14v32a14 14 0 0 1-14 14h-12z" fill="${BLUE_D}" />
+    <path d="M136 192c0-36 29-65 64.5-65s64.5 29 64.5 65v60a36 36 0 0 1-36 36h-57a36 36 0 0 1-36-36z"
+          fill="${NAVY}" />
 
-    <path d="M200 176c32 0 58 26 58 58v56a32 32 0 0 1-32 32h-52a32 32 0 0 1-32-32v-56c0-32 26-58 58-58z" fill="${BLUE}" />
-    <path d="M200 176c32 0 58 26 58 58v56a32 32 0 0 1-32 32h-24V176z" fill="${BLUE_D}" opacity=".4" />
+    <path d="M150 212h-10a12 12 0 0 0-12 12v28a16 16 0 0 0 16 16h6z" fill="${BLUE_D}" />
+    <path d="M252 212h10a12 12 0 0 1 12 12v28a16 16 0 0 1-16 16h-6z" fill="${BLUE_D}" />
 
-    <path d="M162 234q0-28 20-42" fill="none" stroke="${CREAM}" stroke-width="4" stroke-linecap="round" />
-    <circle cx="162" cy="238" r="5" fill="${CREAM}" />
+    <path d="M142 188c0-32 26-59 58.5-59s58.5 27 58.5 59v66a30 30 0 0 1-30 30h-57a30 30 0 0 1-30-30z"
+          fill="${BLUE}" />
+    <path d="M142 188c0-32 26-59 58.5-59v155h-28.5a30 30 0 0 1-30-30z"
+          fill="#83A7D2" opacity=".5" />
 
-    <path d="M200 199l15 15-15 15-15-15z" fill="${CREAM}" />
-    <rect x="196.5" y="209" width="3" height="10" rx="1.5" fill="${NAVY}" opacity=".65" />
-    <rect x="200.5" y="209" width="3" height="10" rx="1.5" fill="${NAVY}" opacity=".65" />
+    <path d="M167 152q-11 26-10 54" fill="none" stroke="${CREAM}" stroke-width="3.4" stroke-linecap="round" />
+    <rect x="152.5" y="204" width="9" height="18" rx="4.5" fill="#E2D2B2" />
 
-    <path d="M164 248h72a14 14 0 0 1 14 14v30a14 14 0 0 1-14 14h-72a14 14 0 0 1-14-14v-30a14 14 0 0 1 14-14z" fill="${CREAM}" />
-    <path d="M152 266h96" stroke="${NAVY}" stroke-width="2.6" opacity=".55" fill="none" stroke-linecap="round" />
-    <circle cx="200" cy="273" r="4.5" fill="${NAVY}" opacity=".55" />
+    <path d="M213 171l15 16-15 16-15-16z" fill="${CREAM}" />
+    <rect x="209.5" y="181" width="3.2" height="12" rx="1.6" fill="${NAVY}" opacity=".6" />
+    <rect x="213.8" y="181" width="3.2" height="12" rx="1.6" fill="${NAVY}" opacity=".6" />
+
+    <rect x="172" y="214" width="82" height="60" rx="15" fill="${CREAM}" />
+    <path d="M178 231h70" stroke="${NAVY}" stroke-width="2.8" opacity=".6" fill="none" stroke-linecap="round" />
+    <rect x="179" y="232" width="8" height="17" rx="4" fill="${NAVY}" opacity=".45" />
   </g>`;
 
 /**
@@ -360,34 +365,31 @@ const BACKPACK = `
  */
 function bagScene(dayIndex) {
   const things = bagThings(dayIndex).filter(t => BAG_PLACES[t.key]);
-  const height = things.some(t => BAG_LOW.includes(t.key)) ? BAG_SCENE.tall : BAG_SCENE.short;
+  const H = 492;
+  const DROP = 24;
 
-  const drawings = things.map(t => {
+  const drawings = things.map((t) => {
     const p = BAG_PLACES[t.key];
-    return `<g class="bag-thing" transform="translate(${p.x} ${p.y})">${BAG_ART[t.key]}</g>`;
+    return `<g class="bag-thing" transform="translate(${p.x} ${p.y}) scale(${p.s})">${BAG_ART[t.key]}</g>`;
   }).join('');
 
-  const arrows = things.map(t => {
-    const p = BAG_PLACES[t.key];
-    return bagArrow(p.from, p.via, p.to);
-  }).join('');
+  const leads = things.map(t => bagArrow(BAG_PLACES[t.key].from, BAG_PLACES[t.key].to)).join('');
 
-  const labels = things.map(t => {
+  const labels = things.map((t) => {
     const p = BAG_PLACES[t.key];
-    const left = (p.x / BAG_SCENE.w) * 100;
-    const top = ((p.y + 44) / height) * 100;
     return `
       <span class="bag-label ${t.detail ? 'is-wide' : ''}"
-            style="left:${left}%; top:${top}%; --tint:${BAG_TINT[t.key] || '#9AA3AE'}">
+            style="left:${(p.x / BAG_SCENE.w) * 100}%; top:${((p.y + p.label + DROP) / H) * 100}%;
+                   --tint:${BAG_TINT[t.key] || '#9AA3AE'}">
         <b>${esc(t.label)}</b>
         ${t.detail ? `<i>${esc(t.detail)}</i>` : ''}
       </span>`;
   }).join('');
 
   return `
-    <div class="bag-scene" style="aspect-ratio:${BAG_SCENE.w}/${height}">
-      <svg viewBox="0 0 ${BAG_SCENE.w} ${height}" aria-hidden="true">
-        ${arrows}${BACKPACK}${drawings}
+    <div class="bag-scene" style="aspect-ratio:${BAG_SCENE.w}/${H}">
+      <svg viewBox="0 0 ${BAG_SCENE.w} ${H}" aria-hidden="true">
+        <g transform="translate(0 ${DROP})">${leads}${BACKPACK}${drawings}</g>
       </svg>
       ${labels}
     </div>`;
