@@ -147,6 +147,35 @@ needed to pack a bag.
 
 ## Reminders
 
+### Writing one down
+
+The + on the Reminders page opens a page torn out of a notebook: punched down the side, a
+red margin just inside the holes, and every field sitting on its own rule. The rules are the
+rows' own bottom borders rather than a background of ruled lines, so nothing has to be nudged
+to make the writing sit on them — the row *is* the line.
+
+The handwriting is whatever script the phone already has: an iPhone has Snell Roundhand for
+the title and Bradley Hand for the notes in the margins, which is what the design uses.
+Anything else falls back to its own cursive. No font is downloaded for it.
+
+Four fields, and they are the four the app can act on: what to remember, a line about it,
+which day, and which lesson of that day. The five school days come first so they are all in
+view at once, with *Every day* after them; a lesson can only be picked once a particular day
+is, because lessons differ from day to day.
+
+**A time of its own is deliberately not among them.** The app cannot wake a closed browser to
+ring at half past seven — see the limits below — so a field that looked like an alarm but was
+only a label would be a promise it could not keep. The lesson says when, and says it more
+precisely, because it comes from the timetable.
+
+Nor is there a *Repeat*: the day already is the repeat. *Every day* or *Tuesday* says
+everything a weekly repeat would.
+
+This replaced a compose box that sat at the top of the list. The + matches how homework is
+added, and the list is left to be a list.
+
+### Being reminded
+
 Two, both off by default, both set in Profile:
 
 - **Daily reminder** (3:00 PM) asks "Any homework today?" and opens straight into the add screen.
@@ -227,7 +256,7 @@ Stored under the `homework.v1` key in local storage:
 ```js
 Subject      — not stored: taken from the timetable, keyed by the lesson's own name
 Homework     { id, subjectId, title, dueDate, createdAt, completed, completedAt }
-Note         { id, text, day, lesson, createdAt }  // day 0-4 = Sun-Thu, null = every day
+Note         { id, text, note, day, lesson, createdAt }  // day 0-4 = Sun-Thu, null = every day
 UserProgress { xp, level, shownUpTo,    // +10 XP per homework, 100 XP per level, fifty of them
                metAt }                  // shownUpTo stops a hatching replaying
 Settings     { dailyReminderEnabled, dailyReminderTime,

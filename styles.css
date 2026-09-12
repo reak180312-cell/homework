@@ -18,6 +18,16 @@
   --tint:       14%;       /* subject colour over parchment */
   --on-ink:     #FBF7EE;
 
+  /* The notebook page a reminder is written on. */
+  --leaf:       #FBF7ED;   /* the sheet itself */
+  --leaf-rule:  #DCE2EC;   /* the ruled lines */
+  --leaf-red:   #E0A6A0;   /* the margin down the side */
+  --leaf-hole:  #E9E2D4;   /* punched, with the paper showing through */
+  --leaf-pencil:#98A5BB;   /* what is written in the margins */
+
+  --font-script: 'Snell Roundhand', 'Apple Chancery', 'Segoe Script', cursive;
+  --font-hand:   'Bradley Hand', 'Segoe Print', cursive;
+
   --font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino,
                   'Book Antiqua', Georgia, 'Times New Roman', serif;
 
@@ -60,6 +70,11 @@
     --stamp:     #C4705A;
     --tint:      24%;
     --on-ink:    #12161B;
+    --leaf:      #1A1F26;
+    --leaf-rule: #2C3440;
+    --leaf-red:  #7A4F4C;
+    --leaf-hole: #11151A;
+    --leaf-pencil:#6C7A90;
     --shadow:    0 1px 2px rgba(0,0,0,.45), 0 10px 28px -16px rgba(0,0,0,.75);
     --shadow-lift:0 2px 6px rgba(0,0,0,.55), 0 18px 40px -18px rgba(0,0,0,.85);
     color-scheme: dark;
@@ -79,6 +94,11 @@
   --stamp:     #C4705A;
   --tint:      24%;
   --on-ink:    #12161B;
+  --leaf:      #1A1F26;
+  --leaf-rule: #2C3440;
+  --leaf-red:  #7A4F4C;
+  --leaf-hole: #11151A;
+  --leaf-pencil:#6C7A90;
   --shadow:    0 1px 2px rgba(0,0,0,.45), 0 10px 28px -16px rgba(0,0,0,.75);
   --shadow-lift:0 2px 6px rgba(0,0,0,.55), 0 18px 40px -18px rgba(0,0,0,.85);
   color-scheme: dark;
@@ -479,6 +499,190 @@ button { border: 0; background: none; cursor: pointer; }
 }
 :root[data-theme="dark"] .desk-art {
   filter: brightness(.42) saturate(.72) contrast(1.06) opacity(.9);
+}
+
+
+/* ── Adding a reminder: a page out of a notebook ───────────
+   Punched down the side, a red margin just inside the holes, and every field
+   sitting on its own rule. The rules are the rows' own bottom borders rather
+   than a background of lines, so nothing has to be nudged to make the writing
+   sit on them — the row is the line.
+
+   The handwriting is whatever script the phone already has. An iPhone has
+   Snell Roundhand for the title and Bradley Hand for the margins, which is
+   what the drawing uses; anything else falls back to its own cursive. No font
+   is downloaded for it. */
+
+.sheet-paper { background: var(--leaf); }
+.sheet-paper .sheet-grip { background: var(--leaf-rule); }
+
+.paper {
+  position: relative;
+  max-height: 86dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+}
+
+/* One hole every row-height, so they keep step with the rules. */
+.paper-holes {
+  position: absolute;
+  left: 15px;
+  top: 62px;
+  bottom: 8px;
+  width: 13px;
+  pointer-events: none;
+  background-image: radial-gradient(circle at 6.5px 6.5px,
+    var(--leaf-hole) 5.6px, transparent 6.2px);
+  background-size: 13px 58px;
+  background-repeat: repeat-y;
+}
+
+.paper-margin {
+  position: absolute;
+  left: 45px;
+  top: 46px;
+  bottom: 0;
+  width: 1px;
+  background: var(--leaf-red);
+  opacity: .8;
+  pointer-events: none;
+}
+
+.paper-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px var(--gutter) 10px;
+}
+
+.paper-title {
+  font-family: var(--font-script);
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: .01em;
+  color: var(--ink);
+}
+
+.paper-btn {
+  flex: none;
+  border: 0;
+  background: none;
+  padding: 6px 2px;
+  font-size: 16px;
+  color: var(--ink);
+  transition: opacity .18s var(--ease);
+}
+.paper-btn.is-save { font-weight: 700; }
+.paper-btn:disabled { opacity: .32; }
+.paper-btn:active { opacity: .5; }
+
+/* Every row is a ruled line, and the writing sits on it. */
+.paper-rule {
+  position: relative;
+  border-bottom: 1px solid var(--leaf-rule);
+  padding: 8px var(--gutter) 9px 64px;
+  min-height: 58px;
+}
+.paper-rule[hidden] { display: none; }
+
+/* What someone has written in the margins of their own notebook. */
+.paper-margins {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 54px;
+  padding-left: 64px;
+}
+.paper-margins i {
+  font-family: var(--font-hand);
+  font-style: normal;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--leaf-pencil);
+  max-width: 45%;
+}
+.paper-margins .is-left  { transform: rotate(-4deg); }
+.paper-margins .is-right {
+  transform: rotate(3deg);
+  text-align: right;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.paper-field { display: block; }
+
+.paper-label {
+  display: block;
+  font-size: 11.5px;
+  letter-spacing: .035em;
+  color: var(--ink-3);
+  margin-bottom: 2px;
+}
+
+.paper-field input {
+  width: 100%;
+  border: 0;
+  background: none;
+  padding: 0;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -.012em;
+  color: var(--ink);
+}
+.paper-field input:focus { outline: none; }
+.paper-field input::placeholder { color: var(--ink-3); font-weight: 400; }
+
+.paper-chips {
+  display: flex;
+  gap: 8px;
+  padding-top: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.paper-chips::-webkit-scrollbar { display: none; }
+
+.p-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--leaf-rule);
+  background: transparent;
+  font-size: 14px;
+  color: var(--ink-2);
+  transition: transform .18s var(--spring);
+}
+.p-chip.is-on {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--on-ink);
+  font-weight: 600;
+}
+.p-chip.is-on .chip-dot { background: var(--on-ink); }
+.p-chip:active { transform: scale(.94); }
+
+.paper-foot {
+  font-family: var(--font-hand);
+  font-size: 12.5px;
+  color: var(--leaf-pencil);
+  padding: 13px var(--gutter) 2px 64px;
+  transform: rotate(-3deg);
+  transform-origin: left center;
+}
+
+/* A reminder can carry a line about itself now, the way homework does. */
+.note-sub {
+  display: block;
+  font-size: 13px;
+  color: var(--ink-3);
+  margin-top: 1px;
 }
 
 
@@ -1329,37 +1533,6 @@ input.hw-title::placeholder { color: var(--ink-3); }
 
 /* ── Reminders page ──────────────────────────────────────── */
 
-.rem-compose {
-  background: var(--card);
-  border-radius: var(--r-card);
-  box-shadow: var(--shadow);
-  padding: 14px 0 14px;
-  margin-bottom: 8px;
-}
-
-.rem-compose > input {
-  width: calc(100% - 32px);
-  margin: 0 16px 10px;
-  padding: 10px 0;
-  border: 0;
-  background: none;
-  font-size: 17px;
-  font-weight: 500;
-  letter-spacing: -.015em;
-}
-.rem-compose > input:focus { outline: none; }
-.rem-compose > input::placeholder { color: var(--ink-3); }
-
-.rem-compose .chips-scroll { padding-inline: 16px; margin: 0; }
-.rem-compose #rem-lessons { margin-top: 6px; }
-
-.rem-compose .btn-primary {
-  width: calc(100% - 32px);
-  margin: 14px 16px 0;
-  padding: 13px;
-  font-size: 15.5px;
-}
-
 .note-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 
 .note-lesson {
@@ -1590,15 +1763,6 @@ input.hw-title::placeholder { color: var(--ink-3); }
 }
 
 
-/* Empty field, tapped Add: say so instead of sitting there greyed out. */
-.rem-compose.is-nudged { animation: nudge .42s var(--ease); }
-@keyframes nudge {
-  0%, 100% { transform: translateX(0); }
-  22% { transform: translateX(-5px); }
-  46% { transform: translateX(4px); }
-  70% { transform: translateX(-2px); }
-}
-
 
 /* A row leaving must not re-run the entry animation. */
 .hw-slot.is-leaving { animation: none !important; }
@@ -1778,8 +1942,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
 .done-subject { letter-spacing: .08em; }
 
 /* Cards sit on parchment, so they need an edge as well as a shadow. */
-.card, .subject-row, .level-card, .done-row, .note-row,
-.pack-list, .rem-compose {
+.card, .subject-row, .level-card, .done-row, .note-row, .pack-list {
   border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
 }
 

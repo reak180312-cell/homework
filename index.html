@@ -83,13 +83,6 @@
       <h1>Reminders</h1>
       <p id="rem-sub" class="head-sub"></p>
     </header>
-    <div class="rem-compose">
-      <input id="rem-input" type="text" placeholder="What do you need to remember?"
-             autocomplete="off" enterkeyhint="done" />
-      <div id="rem-days" class="chips chips-scroll"></div>
-      <div id="rem-lessons" class="chips chips-scroll"></div>
-      <button id="rem-add" class="btn-primary">Add reminder</button>
-    </div>
     <div id="rem-scope" class="segmented"></div>
     <div id="rem-list"></div>
   </section>
@@ -214,6 +207,51 @@
       </button>
       <button id="hw-save" class="btn-primary" disabled>Save</button>
     </div>
+  </div>
+</div>
+
+<!-- Adding a reminder: a page out of a notebook, ruled and punched. -->
+<div id="sheet-rem" class="sheet sheet-paper" hidden role="dialog" aria-modal="true"
+     aria-label="New reminder">
+  <div class="sheet-grip"></div>
+  <div class="paper">
+    <span class="paper-holes" aria-hidden="true"></span>
+    <span class="paper-margin" aria-hidden="true"></span>
+
+    <div class="paper-head">
+      <button id="rem-cancel" class="paper-btn">Cancel</button>
+      <h2 class="paper-title">New reminder</h2>
+      <button id="rem-save" class="paper-btn is-save">Save</button>
+    </div>
+
+    <div class="paper-rule paper-margins" aria-hidden="true">
+      <i class="is-left">Small steps matter &#9825;</i>
+      <i class="is-right">A brighter tomorrow</i>
+    </div>
+
+    <label class="paper-rule paper-field">
+      <span class="paper-label">Title</span>
+      <input id="rem-title" type="text" autocomplete="off" autocapitalize="sentences"
+             enterkeyhint="next" placeholder="What not to forget" />
+    </label>
+
+    <label class="paper-rule paper-field">
+      <span class="paper-label">Notes</span>
+      <input id="rem-note" type="text" autocomplete="off" autocapitalize="sentences"
+             enterkeyhint="done" placeholder="Anything else (optional)" />
+    </label>
+
+    <div class="paper-rule paper-field">
+      <span class="paper-label">Days</span>
+      <div id="rem-sheet-days" class="paper-chips"></div>
+    </div>
+
+    <div id="rem-sheet-lesson" class="paper-rule paper-field">
+      <span class="paper-label">Lesson</span>
+      <div id="rem-sheet-lessons" class="paper-chips"></div>
+    </div>
+
+    <p class="paper-foot" aria-hidden="true">You&#8217;ve got this &#9825;</p>
   </div>
 </div>
 

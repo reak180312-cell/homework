@@ -1386,9 +1386,10 @@ function renderTtButton() {
 
 /* ── Reminders, on their own page ──────────────────────────── */
 
-let remDay = null;         // null = every day
-let remLesson = null;
-let remScope = 'today';    // the list below starts on today, "All" shows the rest
+let remScope = 'today';    // the list starts on today, "All" shows the rest
+
+/* What is being written on the notebook page. null day means every day. */
+let remDraft = null;
 
 /** One reminder, shared by the Today and All views. */
 function reminderRow(x) {
@@ -1397,6 +1398,7 @@ function reminderRow(x) {
     <div class="note-row" data-note="${x.id}" style="--sc:${sub ? sub.color : 'var(--ink-3)'}">
       <span class="note-main">
         <span class="note-text">${esc(x.text)}</span>
+        ${x.note ? `<span class="note-sub">${esc(x.note)}</span>` : ''}
         ${x.lesson ? `<span class="note-lesson"><span class="chip-dot"></span>${esc(shortName(x.lesson))}</span>`
                    : (x.day === null ? '<span class="note-tag">Every day</span>' : '')}
       </span>
@@ -1409,23 +1411,6 @@ function reminderRow(x) {
 function renderReminders() {
   const n = state.notes.length;
   $('#rem-sub').textContent = n ? `${n} saved` : '';
-
-  $('#rem-days').innerHTML = `
-    <button class="chip chip-day ${remDay === null ? 'is-on' : ''}" data-remday="all">Every day</button>
-    ${SCHOOL_DAYS.map((d, i) => `
-      <button class="chip chip-day ${remDay === i ? 'is-on' : ''}" data-remday="${i}">${esc(d.short)}</button>`).join('')}`;
-
-  // A lesson can only be chosen once a specific day is.
-  const lessons = remDay === null ? [] : lessonsFor(remDay);
-  $('#rem-lessons').hidden = !lessons.length;
-  $('#rem-lessons').innerHTML = lessons.length ? `
-    <button class="chip chip-day ${remLesson === null ? 'is-on' : ''}" data-remlesson="">Whole day</button>
-    ${lessons.map(l => {
-      const sub = subjectForLesson(l.name);
-      return `<button class="chip ${remLesson === l.name ? 'is-on' : ''}"
-        data-remlesson="${esc(l.name)}" style="--sc:${sub ? sub.color : 'var(--ink-3)'}">
-        <span class="chip-dot"></span>${esc(l.name)}</button>`;
-    }).join('')}` : '';
 
   const today = schoolDayIndex();
   const todayCount = state.notes.filter(x => x.day === null || x.day === today).length;
@@ -1469,30 +1454,64 @@ function renderReminders() {
   }).join('');
 }
 
-function addReminder() {
-  const input = $('#rem-input');
-  const text = input ? input.value.trim() : '';
+/* A page out of a notebook. The fields are the ones the app can act on: what
+   to remember, a line about it, which day, and which lesson of that day. A
+   time of its own is deliberately not among them — the app cannot wake a
+   closed browser to ring at half past seven, and a field that looks like an
+   alarm but is only a label would be a promise it cannot keep. The lesson
+   says when, and says it more precisely, because it comes from the
+   timetable. */
+function openRemSheet() {
+  remDraft = { text: '', note: '', day: schoolDayIndex(), lesson: null };
+  if (remDraft.day < 0) remDraft.day = null;
 
-  // Nothing typed yet: say so and put the cursor where it needs to go, rather
-  // than sitting there greyed out doing nothing when tapped.
-  if (!text) {
-    if (!input) return;
-    const box = $('.rem-compose');
-    if (box) {
-      box.classList.remove('is-nudged');
-      void box.offsetWidth;
-      box.classList.add('is-nudged');
-    }
-    input.focus();
-    return;
-  }
+  $('#rem-title').value = '';
+  $('#rem-note').value = '';
+  drawRemSheet();
+  showSheet('#sheet-rem');
 
-  state.notes.push({ id: uid(), text, day: remDay, lesson: remLesson, createdAt: Date.now() });
+  // Focus inside the gesture, so the keyboard actually opens on a phone.
+  $('#rem-title').focus();
+}
+
+function drawRemSheet() {
+  if (!remDraft) return;
+
+  $('#rem-sheet-days').innerHTML = `
+    ${SCHOOL_DAYS.map((d, i) => `
+      <button class="p-chip ${remDraft.day === i ? 'is-on' : ''}" data-remday="${i}">${esc(d.short)}</button>`).join('')}
+    <button class="p-chip ${remDraft.day === null ? 'is-on' : ''}" data-remday="all">Every day</button>`;
+
+  // A lesson can only be chosen once a particular day is.
+  const lessons = remDraft.day === null ? [] : lessonsFor(remDraft.day);
+  $('#rem-sheet-lesson').hidden = !lessons.length;
+  $('#rem-sheet-lessons').innerHTML = lessons.length ? `
+    <button class="p-chip ${remDraft.lesson === null ? 'is-on' : ''}" data-remlesson="">Whole day</button>
+    ${lessons.map(l => {
+      const sub = subjectForLesson(l.name);
+      return `<button class="p-chip ${remDraft.lesson === l.name ? 'is-on' : ''}"
+        data-remlesson="${esc(l.name)}" style="--sc:${sub ? sub.color : 'var(--ink-3)'}">
+        <span class="chip-dot"></span>${esc(shortName(l.name))}</button>`;
+    }).join('')}` : '';
+
+  $('#rem-save').disabled = !$('#rem-title').value.trim();
+}
+
+function saveReminder() {
+  if (!remDraft) return;
+  const text = $('#rem-title').value.trim();
+  if (!text) { $('#rem-title').focus(); return; }
+
+  state.notes.push({
+    id: uid(), text,
+    note: $('#rem-note').value.trim(),
+    day: remDraft.day, lesson: remDraft.lesson,
+    createdAt: Date.now(),
+  });
   save();
-  input.value = '';
-  remLesson = null;
+  remDraft = null;
+  closeSheet();
   renderReminders();
-  input.focus();
 }
 
 
@@ -1935,7 +1954,8 @@ function maybeArrival(level, fromLevel) {
    would sit on top of the reminder's own Add button. A cleared homework screen
    is the other exception: the empty state is already holding one. */
 function syncFab() {
-  const belongs = currentTab === 'home' || currentTab === 'subjects';
+  const belongs = currentTab === 'home' || currentTab === 'subjects'
+    || currentTab === 'reminders';
   // A cleared screen carries its own + beside the line, so the header one
   // steps aside and there is only ever one of them.
   const cleared = currentTab === 'home' && !activeHw().length;
@@ -2442,7 +2462,10 @@ function wireLists() {
 function wireApp() {
   for (const btn of $$('.tab')) btn.addEventListener('click', () => showTab(btn.dataset.tab));
 
-  on('#fab', 'click', () => openHwSheet());
+  on('#fab', 'click', () => {
+    if (currentTab === 'reminders') openRemSheet();
+    else openHwSheet();
+  });
   on('#subject-back', 'click', closeSubjectPage);
   on('#scrim', 'click', closeSheet);
 
@@ -2460,10 +2483,6 @@ function wireApp() {
 
 
   // Reminders page
-  on('#rem-input', 'keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); addReminder(); }
-  });
-  on('#rem-add', 'click', addReminder);
 
   on('#rem-scope', 'click', (e) => {
     const seg = e.target.closest('[data-scope]');
@@ -2472,19 +2491,30 @@ function wireApp() {
     renderReminders();
   });
 
-  on('#rem-days', 'click', (e) => {
-    const chip = e.target.closest('[data-remday]');
-    if (!chip) return;
-    remDay = chip.dataset.remday === 'all' ? null : Number(chip.dataset.remday);
-    remLesson = null;                 // lessons differ from day to day
-    renderReminders();
+  // The notebook page
+  on('#rem-cancel', 'click', closeSheet);
+  on('#rem-save', 'click', saveReminder);
+  on('#rem-title', 'input', drawRemSheet);
+  on('#rem-title', 'keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); $('#rem-note').focus(); }
+  });
+  on('#rem-note', 'keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); saveReminder(); }
   });
 
-  on('#rem-lessons', 'click', (e) => {
+  on('#rem-sheet-days', 'click', (e) => {
+    const chip = e.target.closest('[data-remday]');
+    if (!chip || !remDraft) return;
+    remDraft.day = chip.dataset.remday === 'all' ? null : Number(chip.dataset.remday);
+    remDraft.lesson = null;           // lessons differ from day to day
+    drawRemSheet();
+  });
+
+  on('#rem-sheet-lessons', 'click', (e) => {
     const chip = e.target.closest('[data-remlesson]');
-    if (!chip) return;
-    remLesson = chip.dataset.remlesson || null;
-    renderReminders();
+    if (!chip || !remDraft) return;
+    remDraft.lesson = chip.dataset.remlesson || null;
+    drawRemSheet();
   });
 
   on('#rem-list', 'click', (e) => {
@@ -2553,8 +2583,7 @@ function wireApp() {
   });
   on('#rem-list', 'click', (e) => {
     if (!e.target.closest('[data-act="first-reminder"]')) return;
-    const input = $('#rem-input');
-    if (input) input.focus();
+    openRemSheet();
   });
 
   on('#collection', 'click', (e) => {
