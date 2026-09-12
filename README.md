@@ -35,9 +35,9 @@ Open it → Add homework → See it all together → Finish it → Earn XP → R
   its own colour and when the work is for, then says what to do in the largest type on the
   screen, because that is the part you actually read. A note underneath is optional and only
   shows when there is one. Tap the circle on the right (or swipe the card right) to finish
-  it; tap the card to edit or delete it. With nothing left the screen clears and a paper
-  plane flies in carrying the news — see [The flight](#the-flight) — over a desk that has
-  been tidied for the day.
+  it; tap the card to edit or delete it. With nothing left the screen clears to one line —
+  *You finished all* — and the + leaves the header to sit beside it, so there is only ever
+  one of it.
 - **Bag** — the drawing this was specified in: a backpack in the middle with everything that
   goes into it around the outside. Nothing points at anything — what is on the page is what
   you take, and the picture says so without being explained. Pick any day along the top;
@@ -61,84 +61,27 @@ Homework saved by an older version, when subjects were picked by hand, is moved 
 it was meant for — Math onto מתמטיקה, Hebrew onto שפה. Anything that matches no lesson keeps the
 subject it had rather than losing it.
 
-## The flight
+## The desk
 
-Finish everything and the homework screen clears, and a paper plane comes in from the
-left trailing a dashed line, loops once, and levels out at the top of the screen. The
-message is written on its wing — *You finished all* — so the screen never says it twice.
+The homework screen sits on a desk, whether there is homework on it or not. The picture is
+fixed to the foot of the screen and the list scrolls over it, so it reads as the room the
+app is in rather than as one more thing in the column. Its top fades into the paper, so the
+photograph never ends on an edge, and it runs on behind the tab bar rather than stopping at
+it.
 
-It flies **once a launch**. Coming back to the tab later in the same session finds it
-already there, resting exactly where it landed; a reload flies it again. Finishing your
-last piece of homework counts as the first time the screen has cleared, so the plane
-arrives on the same beat the row leaves.
+How much of it shows is one figure, `--desk-band`, and both the picture and the cleared
+screen are measured from it — otherwise the two drift apart on a screen shaped differently
+from a phone. The band is set against the **width**, because that is what decides how big
+the things on the desk look, and capped against the height so a short screen is not all
+desk. `object-fit: cover` then picks the part of the photograph that fills it: the shelf of
+books, the cup and the plant, with the foreground below the fold.
 
-Someone who has never written anything down does not get a plane. There is nothing to
-celebrate yet, so that screen keeps its quiet line and its own +.
+The picture is shown only once it has decoded. Half a photograph drawn top-down looks like
+something has gone wrong; nothing, and then all of it, does not.
 
-### How it is built
-
-Nine pictures of the plane were supplied, and they turned out to be nine moments of one
-flight rather than nine different drawings. So they are the keyframes: the plane's centre
-and width were measured in each picture, converted into the scene's own units, and written
-straight into `@keyframes pf-fly`. The browser draws everything in between, which is where
-the extra frames come from.
-
-The plane is the artwork, cut off the wall it was drawn on. Colour keying could not do it:
-the room is warm-lit, so paper in shadow is exactly as warm as the wall behind it, and a
-warmth threshold eats half the plane. Subtracting a clean frame could not do it either —
-white paper on a cream wall is only about nine levels apart. What works is both at once.
-Where paper covers the wall the colour moves *and* the warmth drops, and that combined
-score reads 2-6 on bare wall against about 25 across the plane, which do not overlap. The
-plate it is subtracted from is the one frame whose plane is somewhere else entirely; a
-median of all nine would not do, because six of them park the plane in the same corner and
-the median there is the plane, not the wall.
-
-The trail is drawn rather than photographed, so it stays crisp at any size and can take the
-night colours. Its shape was traced from the dashes in the pictures, not sketched by eye.
-
-### Keeping it smooth
-
-The first version put the plane and the trail inside one `<svg>`, which is the obvious way
-to build it and the wrong one. **Chrome never gives an SVG child its own compositor layer**,
-so every frame of the flight went through the main thread: measured at 259 paints, 133
-layouts and a style recalculation a frame across three seconds, with close to half the
-frames missed on a throttled phone. It was visibly rough.
-
-Both moving parts are now ordinary HTML. The plane is an `<img>` moved by `transform`, and
-the trail is one element per dash, each fading in as the plane reaches it. Transform and
-opacity are the only two properties the compositor can animate on its own, and between them
-they are all this needs. Paints per flight went from 259 to about 15, and layouts from 133
-to 3.
-
-Clipping a wrapper instead was tried and was no better: a `clip-path` animation still costs
-a style recalculation every frame, `will-change` or not.
-
-Laying the dashes out individually also fixes something the clip got wrong. A wipe travels
-left to right, so at the loop it uncovers the top and bottom of the curve at the same
-moment; dashes come out in the order the path runs, loop included.
-
-Each dash is placed with `getPointAtLength` when the app starts — once, off the critical
-path, in the same idle moment the pictures are fetched — and its delay says when the tail
-passes it, read off the same turning points the flight itself is built from. The fade is
-centred on that moment rather than started by it, or the trail runs a tenth of a second
-short of the plane the whole way across.
-
-The flight also waits for its own picture: started while the plane is still arriving, the
-first half of the crossing happens to an empty patch of wall.
-
-That this actually runs on the compositor is a test, not a memory of having checked once.
-The main thread is jammed solid for 600ms in the middle of the flight, and the plane has to
-keep moving.
-
-The scene is laid **over** the screen rather than taking a share of it. In the flow it is as
-tall as a third of a phone, which on a short one pushed the desk down through the tab bar.
-
-The desk underneath used to drift 1.8% larger and back over eighteen seconds. Nobody could
-see it, and it never stopped — a full-width photograph being transformed for as long as the
-screen was up, and the last thing waking the main thread once the plane had landed. It is
-still now, and a cleared screen runs nothing at all.
-
-If your phone is set to reduce motion, the plane is simply already there.
+It used to be something the empty state carried, fetched quietly at idle so it would be in
+hand the moment the last piece of homework was ticked off. Now that it is part of the
+screen it loads with the page, and that warming step is gone.
 
 ## Timetable
 
@@ -290,8 +233,7 @@ styles.css    the whole visual system
 app.js        all behaviour, one file, sectioned
 sw.js         offline cache + notification clicks
 server.js     dependency-free static server
-art/          the desk the homework screen clears to when nothing is left, the paper
-              plane that flies in over it, and the bag's ten pieces
+art/          the desk the homework screen sits on, and the bag's ten pieces
 icons/        app icons, built from the supplied logo. The tab, launcher and 512px
               icons keep the artwork’s rounded tile and its transparent corners; the
               iOS one is opaque edge to edge, because iOS fills transparency with

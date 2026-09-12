@@ -22,6 +22,3 @@ WhatsApp Image*
 
 # ...and the bag artwork, which is part of the build
 !art/bag/*.webp
-
-# ...and the paper plane that flies in when the list is clear
-!art/plane.webp

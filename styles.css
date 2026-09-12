@@ -15,7 +15,6 @@
   --done:       #3F7D5F;
   --late:       #A56B33;
   --stamp:      #9A4A38;   /* the red-brown of an inked stamp */
-  --trail:      #A9B2D4;   /* the pencil the plane's path is dashed in */
   --tint:       14%;       /* subject colour over parchment */
   --on-ink:     #FBF7EE;
 
@@ -32,6 +31,10 @@
 
   --gutter:     20px;
   --tabbar-h:   62px;
+  /* How much of the desk shows at the foot of the homework screen. Off the
+     width, since that sets how big the things on it look, but never more
+     than a share of a short screen. */
+  --desk-band:  min(62vw, 46vh);
 
   color-scheme: light;
 }
@@ -50,7 +53,6 @@
     --done:      #5FA87F;
     --late:      #C99150;
     --stamp:     #C4705A;
-    --trail:     #59617F;
     --tint:      24%;
     --on-ink:    #12161B;
     --shadow:    0 1px 2px rgba(0,0,0,.45), 0 10px 28px -16px rgba(0,0,0,.75);
@@ -70,7 +72,6 @@
   --done:      #5FA87F;
   --late:      #C99150;
   --stamp:     #C4705A;
-  --trail:     #59617F;
   --tint:      24%;
   --on-ink:    #12161B;
   --shadow:    0 1px 2px rgba(0,0,0,.45), 0 10px 28px -16px rgba(0,0,0,.75);
@@ -384,21 +385,16 @@ button { border: 0; background: none; cursor: pointer; }
    both edges and fades into the paper, so nothing frames it. */
 
 .empty-home {
-  position: relative;   /* the flight is laid over this, not inside its column */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  gap: 18px;
-  /* The desk is already screen-wide and breathes to scale 1.018, and the plane
-     starts outside the scene: both would have the page scrolling sideways by a
-     few pixels. Nothing here is meant to be reachable past the edges. */
-  overflow: hidden;
-  /* Fill exactly what the header and the tab bar leave, so the picture lands
-     just above the tabs rather than floating in the middle of the page. */
+  /* The desk is behind the whole screen now, so this only has to stand clear
+     of it — the same band, off the same figure, so the two cannot drift apart
+     on a screen shaped differently from a phone. */
   min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)
-                   - var(--tabbar-h) - 134px);
-  margin-inline: calc(var(--gutter) * -1);
+                   - 134px - var(--desk-band));
+  padding-bottom: 22px;
 }
 
 .empty-home-line {
@@ -429,137 +425,48 @@ button { border: 0; background: none; cursor: pointer; }
   background: color-mix(in srgb, var(--done) 12%, transparent);
 }
 
-.empty-art {
-  display: block;
+/* The desk the homework sits on, whether there is any or not. It is fixed to
+   the foot of the screen and the list scrolls over it, so it reads as the
+   room the app is in rather than as one more thing in the column. The top
+   fades into the paper so the photograph never ends on an edge. */
+.desk-art {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
   width: 100%;
-  height: auto;
+  /* A band of the photograph rather than the whole of it, so that what shows
+     is the shelf of books, the cup and the plant — the foreground falls below
+     the fold. Measured against the width, because that is what sets how big
+     the things on the desk are; capped against the height so a short screen
+     is not all desk. --desk-band is the same figure the cleared screen uses
+     to know how much room to leave. */
+  height: var(--desk-band);
+  object-fit: cover;
+  object-position: 50% 30%;
+  pointer-events: none;
   opacity: 0;
   transition: opacity .45s ease;
   -webkit-user-drag: none;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 86%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 86%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 26%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 26%);
 }
 
-.empty-art.is-ready { opacity: 1; }
+.desk-art.is-ready { opacity: 1; }
+
+/* Everything on the homework screen stands in front of it. */
+#view-home .head,
+#home-list { position: relative; z-index: 1; }
 
 /* The scene is lit for a bright room; at night it dims down to the paper. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .empty-art {
-    filter: brightness(.5) saturate(.78) contrast(1.06) opacity(.92);
+  :root:not([data-theme="light"]) .desk-art {
+    filter: brightness(.42) saturate(.72) contrast(1.06) opacity(.9);
   }
 }
-:root[data-theme="dark"] .empty-art {
-  filter: brightness(.5) saturate(.78) contrast(1.06) opacity(.92);
-}
-
-
-/* ── The flight ──────────────────────────────────────────────
-   Nine pictures of a paper plane arrived as nine moments of one flight. The
-   plane's centre and width were measured in each and converted into this
-   scene's units, and those measurements are the keyframes below; the browser
-   draws every frame in between.
-
-   The plane and its trail share one 100-by-58 scene and one timeline, down to
-   the same easing on each leg, which is what keeps the end of the trail under
-   the plane's tail the whole way across. Nothing animates but transforms, so
-   the whole flight is compositing and no layout. */
-
-.sr-only {
-  position: absolute;
-  width: 1px; height: 1px;
-  margin: -1px; padding: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* The plane flies over the screen rather than taking a share of it. In the
-   flow its scene is as tall as a third of a phone, which on a short one pushed
-   the desk down through the tab bar and left the page scrolling. Out of the
-   flow the desk sits exactly where it always did, and the flight has the whole
-   upper half to cross. */
-.pf {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  width: 100%;
-  aspect-ratio: 100 / 58;
-  /* The plane starts outside the scene and flies in, so this must clip — a page
-     that scrolls sideways is worse than a plane with a short runway. */
-  overflow: hidden;
-}
-
-/* One element per dash, placed along the curve when the app starts. They are
-   revealed by fading in, because opacity is the one property besides transform
-   that the compositor can animate on its own — a clip-path wipe cost a style
-   recalculation every frame whatever it was hinted with. */
-.pf-dash {
-  position: absolute;
-  width: 2.1%;
-  height: 1.47%;
-  border-radius: 999px;
-  background: var(--trail);
-  opacity: 0;
-}
-
-/* Placed where the pictures leave it, and moved from there by transform alone.
-   Percentages in a translate are of the element itself, so the scene's units
-   are converted once, here, rather than guessed at in the keyframes:
-   the plane is 35.6 of those units wide and 23.6 tall. */
-.pf-plane {
-  position: absolute;
-  left: 54.4%;
-  top: 16.4%;
-  width: 35.6%;
-  height: auto;
-  will-change: transform;
-  -webkit-user-drag: none;
-}
-
-/* Holding, while the plane's own picture is still on its way. */
-.is-wait .pf-plane,
-.is-wait .pf-dash { opacity: 0; }
-
-/* Already flown this launch: the whole thing is simply there, where it landed,
-   with nothing animating and no layers held open. */
-.is-land .pf-plane { transform: none; }
-.is-land .pf-dash { opacity: 1; }
-
-.is-fly .pf-plane { animation: pf-fly 3.1s both; }
-/* The delay is per dash, set from where it falls along the path. */
-.is-fly .pf-dash { animation: pf-dash .22s linear both; }
-
-/* Measured from the pictures: in small and low from the left, growing as it
-   crosses, a dip two thirds of the way, then a climb into place. */
-@keyframes pf-fly {
-  0%   { transform: translate(-219.7%, 62.7%) scale(.22); opacity: 0;
-         animation-timing-function: cubic-bezier(.2,.5,.5,1); }
-  10%  { opacity: 1; }
-  24%  { transform: translate(-140.2%, 40.7%) scale(.3);
-         animation-timing-function: linear; }
-  52%  { transform: translate(-70.8%, 40.7%) scale(.6);
-         animation-timing-function: linear; }
-  78%  { transform: translate(-11.8%, 58.9%) scale(.81);
-         animation-timing-function: cubic-bezier(.3,0,.2,1); }
-  100% { transform: translate(0, 0) scale(1); opacity: 1; }
-}
-
-/* Each dash simply arrives. Its delay says when the tail reaches it, worked out
-   from the same turning points the flight is built from — within a frame or two,
-   since the legs are eased and the delay is read off them straight. */
-@keyframes pf-dash {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* Lit for a bright room, like the desk below it. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .pf-plane {
-    filter: brightness(.62) saturate(.8) contrast(1.04);
-  }
-}
-:root[data-theme="dark"] .pf-plane {
-  filter: brightness(.62) saturate(.8) contrast(1.04);
+:root[data-theme="dark"] .desk-art {
+  filter: brightness(.42) saturate(.72) contrast(1.06) opacity(.9);
 }
 
 
