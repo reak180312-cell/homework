@@ -179,82 +179,119 @@ function bagThings(dayIndex) {
 
 const BAG_SCENE = { w: 400, short: 520, tall: 580 };
 
-const INK = '#2C3A48';
-const PAPER = '#FBF6EA';
+/* Flat illustration rather than line art: every shape is a fill, depth comes
+   from a darker tone beside a lighter one, and each thing sits on a soft
+   shadow. Nothing is outlined, so nothing has to be hinted at small sizes. */
 
-/* Each thing is drawn around its own origin, so moving one means changing one
-   pair of numbers in BAG_PLACES rather than every coordinate in its path. */
+const BLUE = '#6E94C4', BLUE_D = '#587FAF', NAVY = '#2E4360';
+const SAGE = '#A3BFA5', SAGE_D = '#8CAB8F';
+const CREAM = '#EFE6D5', CREAM_D = '#E0D5BE', PAGE = '#F7F1E6';
+const CORAL = '#E4918A', CORAL_D = '#D17E77';
+
+/** The soft ground shadow every thing stands on. */
+const shade = (rx = 30, y = 30) =>
+  `<ellipse cx="0" cy="${y}" rx="${rx}" ry="${rx * 0.17}" fill="#6B5B45" opacity=".13" />`;
+
 const BAG_ART = {
   pencil: `
-    <g transform="translate(-17 -14) rotate(-13)">
-      <rect x="-4" y="-24" width="8" height="28" rx="2.5" fill="#E8836F" />
-      <path d="M-4-24 0-31 4-24z" fill="${INK}" />
+    ${shade(34, 26)}
+    <g>
+      <rect x="-9" y="-40" width="7" height="30" rx="2" fill="#E8C35C" />
+      <path d="M-9-40h7l-3.5-7z" fill="#E2B24A" />
+      <rect x="-9" y="-13" width="7" height="5" fill="#E9A8A1" />
+      <rect x="4" y="-44" width="8" height="34" rx="3" fill="#6E9E72" />
+      <rect x="4" y="-44" width="8" height="7" rx="3" fill="#547C58" />
+      <rect x="16" y="-38" width="7" height="28" rx="3" fill="#5B7FB5" />
+      <rect x="16" y="-38" width="7" height="6" rx="3" fill="#44608C" />
     </g>
-    <g transform="translate(0 -17) rotate(2)">
-      <rect x="-4" y="-24" width="8" height="28" rx="2.5" fill="#F2CE63" />
-      <path d="M-4-24 0-31 4-24z" fill="${INK}" />
-    </g>
-    <g transform="translate(17 -14) rotate(15)">
-      <rect x="-4" y="-24" width="8" height="28" rx="2.5" fill="#7FB069" />
-      <path d="M-4-24 0-31 4-24z" fill="${INK}" />
-    </g>
-    <rect x="-32" y="-13" width="64" height="29" rx="14" fill="#4E7CA8" />
-    <path d="M-32 0h64" fill="none" />
-    <circle cx="21" cy="0" r="3.4" fill="${PAPER}" />`,
+    <rect x="-34" y="-14" width="68" height="30" rx="14" fill="${BLUE}" />
+    <path d="M-34 0a14 14 0 0 0 14 16h40a14 14 0 0 0 14-16z" fill="${BLUE_D}" />
+    <rect x="-34" y="-4" width="68" height="5" rx="2.5" fill="${NAVY}" opacity=".75" />
+    <circle cx="-28" cy="-1.5" r="4" fill="${NAVY}" opacity=".75" />`,
 
   bottle: `
-    <rect x="-7" y="-34" width="14" height="11" rx="3" fill="#3E6A93" />
-    <path d="M-5-23v4c0 4-8 6-8 15v22c0 6 4 10 9 10h8c5 0 9-4 9-10v-22c0-9-8-11-8-15v-4z" fill="#A9CFE6" />
-    <path d="M-13-4h26" fill="none" />`,
+    ${shade(17, 36)}
+    <rect x="-8" y="-46" width="16" height="10" rx="4" fill="${NAVY}" />
+    <path d="M6-44h4a4 4 0 0 1 0 8H6z" fill="${NAVY}" />
+    <path d="M-11-36h22a3 3 0 0 1 3 3v56a9 9 0 0 1-9 9h-10a9 9 0 0 1-9-9v-56a3 3 0 0 1 3-3z" fill="${SAGE}" />
+    <path d="M4-36h7a3 3 0 0 1 3 3v56a9 9 0 0 1-9 9H4z" fill="${SAGE_D}" />
+    <rect x="-7" y="-30" width="4" height="40" rx="2" fill="#FFFFFF" opacity=".3" />`,
 
   lunch: `
-    <path d="M-13-23v-4q0-5 5-5h16q5 0 5 5v4" fill="none" />
-    <rect x="-31" y="-23" width="62" height="45" rx="9" fill="#EFDFC0" />
-    <path d="M-31-23h62v14a9 9 0 0 1-9 9h-44a9 9 0 0 1-9-9z" fill="#7FB069" />
-    <path d="M-31 0h62" fill="none" />
-    <rect x="-8" y="-6" width="16" height="13" rx="3.5" fill="#7FB069" />`,
+    ${shade(33, 25)}
+    <path d="M-32-2h64v14a8 8 0 0 1-8 8h-48a8 8 0 0 1-8-8z" fill="${CREAM}" />
+    <path d="M10-2h22v14a8 8 0 0 1-8 8H10z" fill="${CREAM_D}" />
+    <path d="M-24-22h48a8 8 0 0 1 8 8v12h-64V-14a8 8 0 0 1 8-8z" fill="${SAGE}" />
+    <path d="M10-22h14a8 8 0 0 1 8 8v12H10z" fill="${SAGE_D}" />
+    <rect x="-32" y="-3" width="64" height="4" rx="2" fill="#FFFFFF" opacity=".35" />
+    <rect x="-7" y="-4" width="14" height="13" rx="3" fill="${SAGE_D}" />`,
 
   shoes: `
-    <path d="M-31 6c0-6 3-10 7-12l10-5 7 6 8-4c7 0 13 4 19 9 3 2 7 4 11 5 4 1 6 3 6 6 0 3-2 5-6 5h-55c-4 0-7-3-7-10z" fill="${PAPER}" />
-    <path d="M-14-8l7 7M-3-12l7 7M8-14l7 7" fill="none" />
-    <path d="M-31 9h62v3a4 4 0 0 1-4 4h-54a4 4 0 0 1-4-4z" fill="#4E7CA8" />`,
+    ${shade(33, 20)}
+    <path d="M-32 2c0-6 3-9 7-11l11-5 7 6 8-4c7 0 13 4 19 9 3 2 7 4 11 5 4 1 6 3 6 6v2h-69z" fill="${PAGE}" />
+    <path d="M-15-8l7 7M-4-12l7 7M7-14l7 7" stroke="${CREAM_D}" stroke-width="3" fill="none" stroke-linecap="round" />
+    <path d="M-32 10h69v3a5 5 0 0 1-5 5h-59a5 5 0 0 1-5-5z" fill="${BLUE}" />`,
 
   notebook: `
-    <rect x="-19" y="-31" width="45" height="62" rx="4" fill="#F2CE63" />
-    <rect x="-11" y="-31" width="37" height="62" rx="3" fill="${PAPER}" />
-    <path d="M-5-19h24M-5-8h24M-5 3h24M-5 14h15" fill="none" />
-    <g stroke-width="2">
-      <path d="M-19-25c-8 0-8 8 0 8M-19-11c-8 0-8 8 0 8M-19 3c-8 0-8 8 0 8M-19 17c-8 0-8 8 0 8" fill="none" />
+    ${shade(28, 33)}
+    <rect x="-10" y="-32" width="38" height="64" rx="4" fill="${PAGE}" />
+    <rect x="-20" y="-34" width="38" height="64" rx="4" fill="${CORAL}" />
+    <path d="M8-34h10v64H8z" fill="${CORAL_D}" />
+    <rect x="-12" y="-24" width="20" height="11" rx="2.5" fill="${PAGE}" />
+    <g fill="${NAVY}">
+      <rect x="-25" y="-28" width="11" height="5" rx="2.5" />
+      <rect x="-25" y="-15" width="11" height="5" rx="2.5" />
+      <rect x="-25" y="-2" width="11" height="5" rx="2.5" />
+      <rect x="-25" y="11" width="11" height="5" rx="2.5" />
+      <rect x="-25" y="24" width="11" height="5" rx="2.5" />
     </g>`,
 
   books: `
-    <rect x="-29" y="6" width="58" height="16" rx="3.5" fill="#4E7CA8" />
-    <rect x="-25" y="-9" width="54" height="15" rx="3.5" fill="#C98A6B" />
-    <rect x="-27" y="-24" width="52" height="15" rx="3.5" fill="#7FB069" />
-    <path d="M-20 14h9M-16-1h9M-18-16h9" fill="none" />`,
+    ${shade(33, 28)}
+    <rect x="-31" y="10" width="62" height="15" rx="3" fill="${BLUE}" />
+    <rect x="-27" y="12" width="56" height="11" rx="2" fill="${PAGE}" />
+    <rect x="-31" y="10" width="62" height="15" rx="3" fill="${BLUE}" />
+    <path d="M-31 10h62v5H-31z" fill="${BLUE_D}" opacity=".5" />
+    <rect x="-28" y="-5" width="56" height="15" rx="3" fill="${CORAL}" />
+    <rect x="-24" y="-3" width="50" height="11" rx="2" fill="${PAGE}" />
+    <rect x="-28" y="-5" width="56" height="15" rx="3" fill="${CORAL}" />
+    <path d="M-28-5h56v5h-56z" fill="${CORAL_D}" opacity=".5" />
+    <rect x="-26" y="-20" width="52" height="15" rx="3" fill="#7FA97E" />
+    <rect x="-22" y="-18" width="46" height="11" rx="2" fill="${PAGE}" />
+    <rect x="-26" y="-20" width="52" height="15" rx="3" fill="#7FA97E" />
+    <path d="M-26-20h52v5h-52z" fill="#6A9269" opacity=".5" />`,
 
   laptop: `
-    <path d="M-25-22h50a4 4 0 0 1 4 4v24h-58v-24a4 4 0 0 1 4-4z" fill="#C6CBD3" />
-    <rect x="-21" y="-18" width="42" height="22" rx="1.5" fill="#33404F" />
-    <path d="M-32 6h64l5 8a3 3 0 0 1-3 4h-68a3 3 0 0 1-3-4z" fill="#C6CBD3" />
-    <path d="M-7 10h14" fill="none" />`,
+    ${shade(36, 22)}
+    <path d="M-26-24h52a4 4 0 0 1 4 4v26h-60v-26a4 4 0 0 1 4-4z" fill="#C7CCD3" />
+    <rect x="-22" y="-20" width="44" height="23" rx="2" fill="#33414F" />
+    <path d="M-34 6h68l5 9a3 3 0 0 1-3 4h-72a3 3 0 0 1-3-4z" fill="#D3D8DE" />
+    <path d="M-8 10h16a2 2 0 0 1 0 4h-16a2 2 0 0 1 0-4z" fill="#B7BDC6" />`,
 
   airpods: `
-    <g transform="translate(-11 0) rotate(-9)">
-      <rect x="-4" y="-7" width="8" height="24" rx="4" fill="${PAPER}" />
-      <circle cx="0" cy="-11" r="8.5" fill="${PAPER}" />
+    ${shade(22, 22)}
+    <g transform="translate(-12 0) rotate(-9)">
+      <rect x="-4.5" y="-6" width="9" height="24" rx="4.5" fill="${PAGE}" />
+      <rect x="1" y="-6" width="3.5" height="24" rx="1.8" fill="${CREAM_D}" />
+      <circle cx="0" cy="-11" r="9" fill="${PAGE}" />
+      <circle cx="3" cy="-13" r="5" fill="#FFFFFF" opacity=".6" />
     </g>
-    <g transform="translate(11 0) rotate(9)">
-      <rect x="-4" y="-7" width="8" height="24" rx="4" fill="${PAPER}" />
-      <circle cx="0" cy="-11" r="8.5" fill="${PAPER}" />
+    <g transform="translate(12 0) rotate(9)">
+      <rect x="-4.5" y="-6" width="9" height="24" rx="4.5" fill="${PAGE}" />
+      <rect x="1" y="-6" width="3.5" height="24" rx="1.8" fill="${CREAM_D}" />
+      <circle cx="0" cy="-11" r="9" fill="${PAGE}" />
+      <circle cx="3" cy="-13" r="5" fill="#FFFFFF" opacity=".6" />
     </g>`,
 
   tanach: `
-    <rect x="-21" y="-28" width="42" height="56" rx="4" fill="#9A4A38" />
-    <rect x="14" y="-25" width="8" height="50" rx="2" fill="${PAPER}" />
-    <g stroke="#D9A94A" stroke-width="2.4">
-      <path d="M-14-19h22M-14 19h22" fill="none" />
-      <path d="M-3-6 3-6 6 0 3 6-3 6-6 0z" fill="none" />
+    ${shade(26, 32)}
+    <rect x="-14" y="-30" width="36" height="60" rx="4" fill="${PAGE}" />
+    <rect x="-22" y="-32" width="38" height="62" rx="4" fill="#A8544A" />
+    <path d="M6-32h10v62H6z" fill="#91473E" />
+    <g fill="#D9A94A" opacity=".9">
+      <rect x="-17" y="-22" width="18" height="3" rx="1.5" />
+      <rect x="-17" y="16" width="18" height="3" rx="1.5" />
+      <path d="M-8-7 -2-10 4-7 4 0 -2 3 -8 0z" />
     </g>`,
 };
 
@@ -276,25 +313,45 @@ const BAG_PLACES = {
 /** Which things push the scene taller, because they sit under the bag. */
 const BAG_LOW = ['airpods'];
 
-/** A curve with a head on the end, aimed along the curve's own last direction. */
+/** The wash behind each name, taken from the thing it belongs to. */
+const BAG_TINT = {
+  pencil: BLUE, bottle: SAGE, lunch: SAGE, shoes: BLUE,
+  notebook: CORAL, books: BLUE, laptop: '#9AA3AE', airpods: '#9AA3AE', tanach: '#A8544A',
+};
+
+/** A dotted lead that stops at a small open ring, the way the drawing does —
+ *  it points without jabbing. */
 function bagArrow(from, via, to) {
   const [x0, y0] = from, [cx, cy] = via, [x1, y1] = to;
-  const angle = Math.atan2(y1 - cy, x1 - cx) * 180 / Math.PI;
   return `
     <path class="bag-arrow" d="M${x0} ${y0} Q${cx} ${cy} ${x1} ${y1}" />
-    <path class="bag-head" d="M0 0-10-5-10 5Z" transform="translate(${x1} ${y1}) rotate(${angle})" />`;
+    <circle class="bag-head" cx="${x1}" cy="${y1}" r="5" />`;
 }
 
-/** The backpack itself, and the biggest thing on the page. */
+/** The backpack itself, and the biggest thing on the page. Drawn back to
+ *  front: shadow, handle, side pockets, body, then everything on the body. */
 const BACKPACK = `
   <g class="bag-pack">
-    <path d="M178 164q22-30 44 0" fill="none" />
-    <rect x="136" y="164" width="128" height="164" rx="34" fill="#5B7FA6" />
-    <path d="M136 220q64-27 128 0v74q0 34-34 34h-60q-34 0-34-34z" fill="#7396BC" />
-    <rect x="166" y="212" width="16" height="42" rx="5" fill="#EFDFC0" />
-    <rect x="218" y="212" width="16" height="42" rx="5" fill="#EFDFC0" />
-    <rect x="157" y="258" width="86" height="58" rx="15" fill="#EFDFC0" />
-    <path d="M264 228q20 7 20 31v26q0 24-20 31" fill="none" />
+    <ellipse cx="200" cy="330" rx="78" ry="13" fill="#6B5B45" opacity=".13" />
+
+    <path d="M184 190q16-46 32 0" fill="none" stroke="${NAVY}" stroke-width="8.5" stroke-linecap="round" />
+
+    <path d="M154 242h-12a14 14 0 0 0-14 14v32a14 14 0 0 0 14 14h12z" fill="${BLUE_D}" />
+    <path d="M246 242h12a14 14 0 0 1 14 14v32a14 14 0 0 1-14 14h-12z" fill="${BLUE_D}" />
+
+    <path d="M200 176c32 0 58 26 58 58v56a32 32 0 0 1-32 32h-52a32 32 0 0 1-32-32v-56c0-32 26-58 58-58z" fill="${BLUE}" />
+    <path d="M200 176c32 0 58 26 58 58v56a32 32 0 0 1-32 32h-24V176z" fill="${BLUE_D}" opacity=".4" />
+
+    <path d="M162 234q0-28 20-42" fill="none" stroke="${CREAM}" stroke-width="4" stroke-linecap="round" />
+    <circle cx="162" cy="238" r="5" fill="${CREAM}" />
+
+    <path d="M200 199l15 15-15 15-15-15z" fill="${CREAM}" />
+    <rect x="196.5" y="209" width="3" height="10" rx="1.5" fill="${NAVY}" opacity=".65" />
+    <rect x="200.5" y="209" width="3" height="10" rx="1.5" fill="${NAVY}" opacity=".65" />
+
+    <path d="M164 248h72a14 14 0 0 1 14 14v30a14 14 0 0 1-14 14h-72a14 14 0 0 1-14-14v-30a14 14 0 0 1 14-14z" fill="${CREAM}" />
+    <path d="M152 266h96" stroke="${NAVY}" stroke-width="2.6" opacity=".55" fill="none" stroke-linecap="round" />
+    <circle cx="200" cy="273" r="4.5" fill="${NAVY}" opacity=".55" />
   </g>`;
 
 /**
@@ -320,7 +377,8 @@ function bagScene(dayIndex) {
     const left = (p.x / BAG_SCENE.w) * 100;
     const top = ((p.y + 44) / height) * 100;
     return `
-      <span class="bag-label ${t.detail ? 'is-wide' : ''}" style="left:${left}%; top:${top}%">
+      <span class="bag-label ${t.detail ? 'is-wide' : ''}"
+            style="left:${left}%; top:${top}%; --tint:${BAG_TINT[t.key] || '#9AA3AE'}">
         <b>${esc(t.label)}</b>
         ${t.detail ? `<i>${esc(t.detail)}</i>` : ''}
       </span>`;

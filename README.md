@@ -77,11 +77,18 @@ whichever of them turns up; a second special item drops in below. `NO_NOTEBOOK`,
 `NEEDS_BOOK` and `SPECIAL` in [app.js](app.js) are the whole of it — change a rule there and
 every day follows.
 
-The scene is one SVG — the pictures and the arrows together, so they scale as a unit and each
-arrow can be aimed exactly at the bag — with the words laid over it in HTML, so they stay real
-text at a real size and wrap when a day has six subjects in two alphabets. `BAG_ART` holds the
-drawings, each one around its own origin, and `BAG_PLACES` says where each sits and where its
-arrow leaves and lands: moving something is changing one pair of numbers.
+The scene is one SVG — the pictures and the leads together, so they scale as a unit and each
+lead can be aimed exactly at the bag — with the words laid over it in HTML, so they stay real
+text at a real size and wrap when a day has six subjects. `BAG_ART` holds the drawings, each one
+around its own origin, and `BAG_PLACES` says where each sits and where its lead leaves and
+lands: moving something is changing one pair of numbers.
+
+Nothing is outlined. Every shape is a fill, depth comes from a darker tone beside a lighter one,
+and each thing stands on a soft shadow. Each name sits in a pill washed with its own thing's
+colour — `BAG_TINT` — mixed against the card, so it is a pale tint on parchment and a deep one
+at night. The lead to the bag is dotted and stops at a small open ring rather than an arrowhead:
+it points without jabbing. The subjects under a name are the timetable's own, so they read in
+Hebrew.
 
 It lives in `SCHEDULE` in [app.js](app.js) as one row per day, Sunday to Thursday, eight
 periods each — edit that array when the timetable changes. Teacher names, room numbers and

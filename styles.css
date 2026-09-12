@@ -1323,32 +1323,25 @@ input.hw-title::placeholder { color: var(--ink-3); }
   overflow: visible;
 }
 
-/* One line weight across the whole scene, the way the icons are drawn. The
-   colours are fill attributes on the shapes themselves — a rule here would
-   beat them, so this sets the line and leaves fill alone. */
-.bag-scene path,
-.bag-scene rect,
-.bag-scene circle {
-  stroke: #2C3A48;
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
+/* Nothing is outlined: the shapes are fills, and depth comes from a darker
+   tone beside a lighter one. The colours live on the shapes themselves, where
+   a stylesheet rule would only have to fight them. */
 
-.bag-pack rect,
-.bag-pack path { stroke-width: 2.6; }
-
-/* The arrows are the quiet part: they say which way, not look at me. */
+/* The leads are the quiet part: dotted, and stopping at a small ring just
+   short of the bag rather than jabbing at it. */
 .bag-arrow {
-  stroke: var(--ink-3) !important;
-  fill: none !important;
-  stroke-width: 1.8 !important;
-  stroke-dasharray: 4 5;
-  fill: none !important;
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-dasharray: 0.5 6;
+  opacity: .75;
 }
 .bag-head {
-  fill: var(--ink-3) !important;
-  stroke: none !important;
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1.7;
+  opacity: .75;
 }
 
 .bag-label {
@@ -1361,22 +1354,28 @@ input.hw-title::placeholder { color: var(--ink-3); }
 }
 .bag-label.is-wide { max-width: 40%; }
 
+/* The name sits in a soft wash of its own thing's colour. */
 .bag-label b {
-  display: block;
-  font-size: 13.5px;
-  font-weight: 650;
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--tint) 26%, var(--card));
+  font-size: 13px;
+  font-weight: 700;
   letter-spacing: -.012em;
-  line-height: 1.15;
+  line-height: 1.2;
   color: var(--ink);
 }
+
+/* What it is for goes under the chip, plainly. */
 .bag-label i {
   display: block;
-  margin-top: 2px;
+  margin-top: 5px;
   font-style: normal;
   font-size: 11px;
-  line-height: 1.25;
+  line-height: 1.3;
   letter-spacing: -.004em;
-  color: var(--ink-3);
+  color: var(--ink-2);
   overflow-wrap: anywhere;
 }
 
