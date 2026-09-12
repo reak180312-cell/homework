@@ -482,55 +482,74 @@ button { border: 0; background: none; cursor: pointer; }
 .pf {
   position: absolute;
   top: 0; left: 0; right: 0;
-  display: block;
   width: 100%;
+  aspect-ratio: 100 / 58;
   /* The plane starts outside the scene and flies in, so this must clip — a page
      that scrolls sideways is worse than a plane with a short runway. */
   overflow: hidden;
 }
 
-.pf-trail {
-  fill: none;
-  stroke: var(--trail);
-  stroke-width: .85;
-  stroke-linecap: round;
-  stroke-dasharray: 2.1 2.9;
+/* One element per dash, placed along the curve when the app starts. They are
+   revealed by fading in, because opacity is the one property besides transform
+   that the compositor can animate on its own — a clip-path wipe cost a style
+   recalculation every frame whatever it was hinted with. */
+.pf-dash {
+  position: absolute;
+  width: 2.1%;
+  height: 1.47%;
+  border-radius: 999px;
+  background: var(--trail);
+  opacity: 0;
 }
 
-.pf-plane,
-.pf-wipe { transform-box: fill-box; }
-.pf-plane { transform-origin: center; }
-.pf-wipe  { transform-origin: left; transform: scaleX(.625); }
+/* Placed where the pictures leave it, and moved from there by transform alone.
+   Percentages in a translate are of the element itself, so the scene's units
+   are converted once, here, rather than guessed at in the keyframes:
+   the plane is 35.6 of those units wide and 23.6 tall. */
+.pf-plane {
+  position: absolute;
+  left: 54.4%;
+  top: 16.4%;
+  width: 35.6%;
+  height: auto;
+  will-change: transform;
+  -webkit-user-drag: none;
+}
 
-/* Already flown this launch: it is simply there, where it landed. */
+/* Holding, while the plane's own picture is still on its way. */
+.is-wait .pf-plane,
+.is-wait .pf-dash { opacity: 0; }
+
+/* Already flown this launch: the whole thing is simply there, where it landed,
+   with nothing animating and no layers held open. */
 .is-land .pf-plane { transform: none; }
+.is-land .pf-dash { opacity: 1; }
 
 .is-fly .pf-plane { animation: pf-fly 3.1s both; }
-.is-fly .pf-wipe  { animation: pf-wipe 3.1s both; }
+/* The delay is per dash, set from where it falls along the path. */
+.is-fly .pf-dash { animation: pf-dash .22s linear both; }
 
 /* Measured from the pictures: in small and low from the left, growing as it
    crosses, a dip two thirds of the way, then a climb into place. */
 @keyframes pf-fly {
-  0%   { transform: translate(-78.2px, 14.8px) scale(.22); opacity: 0;
+  0%   { transform: translate(-219.7%, 62.7%) scale(.22); opacity: 0;
          animation-timing-function: cubic-bezier(.2,.5,.5,1); }
   10%  { opacity: 1; }
-  24%  { transform: translate(-49.9px, 9.6px) scale(.3);
+  24%  { transform: translate(-140.2%, 40.7%) scale(.3);
          animation-timing-function: linear; }
-  52%  { transform: translate(-25.2px, 9.6px) scale(.6);
+  52%  { transform: translate(-70.8%, 40.7%) scale(.6);
          animation-timing-function: linear; }
-  78%  { transform: translate(-4.2px, 13.9px) scale(.81);
+  78%  { transform: translate(-11.8%, 58.9%) scale(.81);
          animation-timing-function: cubic-bezier(.3,0,.2,1); }
   100% { transform: translate(0, 0) scale(1); opacity: 1; }
 }
 
-/* The trail is revealed to exactly where the plane's tail has reached, which is
-   its centre less half its width at that moment. Same legs, same easings. */
-@keyframes pf-wipe {
-  0%   { transform: scaleX(.001); animation-timing-function: cubic-bezier(.2,.5,.5,1); }
-  24%  { transform: scaleX(.245); animation-timing-function: linear; }
-  52%  { transform: scaleX(.421); animation-timing-function: linear; }
-  78%  { transform: scaleX(.578); animation-timing-function: cubic-bezier(.3,0,.2,1); }
-  100% { transform: scaleX(.625); }
+/* Each dash simply arrives. Its delay says when the tail reaches it, worked out
+   from the same turning points the flight is built from — within a frame or two,
+   since the legs are eased and the delay is read off them straight. */
+@keyframes pf-dash {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* Lit for a bright room, like the desk below it. */
@@ -1731,12 +1750,11 @@ input.hw-title::placeholder { color: var(--ink-3); }
   50%     { transform: scale(1.05) translateY(-3px); }
 }
 
-/* The light on the desk moves, slowly enough that you only notice if you look. */
-.empty-art { animation: desk-light 18s ease-in-out infinite; }
-@keyframes desk-light {
-  0%, 100% { transform: scale(1) translateY(0); }
-  50%      { transform: scale(1.018) translateY(-3px); }
-}
+/* The desk used to drift 1.8% larger and back over eighteen seconds. Nobody
+   could see it, and it never stopped: a full-width photograph being
+   transformed for as long as the screen was up, which is the one thing on a
+   cleared screen that kept waking the main thread after the plane had landed.
+   It is still now. */
 
 .empty h2 { animation: rise .45s var(--ease) .06s backwards; }
 .empty p  { animation: rise .45s var(--ease) .13s backwards; }

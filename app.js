@@ -1269,6 +1269,25 @@ const empty = (title, line, opts = {}) => {
    ever one of it — over a desk that has been tidied for the day. */
 /* Show the picture only once it has decoded. Half a photo drawn top-down looks
    like something went wrong; nothing, and then all of it, does not. */
+/* The flight waits for its own picture. Started while the plane is still
+   arriving, the first half of the crossing happens to an empty patch of wall
+   and the plane snaps in somewhere over the middle. */
+function launchPlane(box) {
+  const home = box.querySelector('.empty-home.is-wait');
+  const img = box.querySelector('.pf-plane');
+  if (!home || !img) return;
+  const go = (cls) => {
+    home.classList.remove('is-wait');
+    home.classList.add(cls);
+  };
+  if (img.decode) img.decode().then(() => go('is-fly')).catch(() => go('is-land'));
+  else if (img.complete && img.naturalWidth) go('is-fly');
+  else {
+    img.addEventListener('load', () => go('is-fly'), { once: true });
+    img.addEventListener('error', () => go('is-land'), { once: true });
+  }
+}
+
 function revealArt(box) {
   const art = box.querySelector('.empty-art');
   if (!art) return;
@@ -1294,19 +1313,79 @@ const PLANE_TRAIL = "M -8 37.5 C 0 36.8 5 36.2 13 35.2 C 17 34.7 18.5 31.5 21 28
   + "C 19.8 29 21.2 32.2 24.6 32.3 C 31 32.5 38 32 44 31.2 "
   + "C 48.5 30.6 52 30.4 57.6 30.3";
 
+/* Nothing here is an SVG child, and nothing animates but opacity and
+   transform. Chrome never gives an SVG child its own compositor layer, so when
+   the plane and the trail lived inside a drawing the flight repainted it sixty
+   times a second: 259 paints and 133 layouts across three seconds, with half
+   the frames missed. Clipping a wrapper instead was no better — a clip-path
+   animation still costs a style recalculation a frame, will-change or not.
+
+   So the trail is laid out as its own dashes, one element each, and they are
+   revealed by fading in as the plane reaches them. Opacity and transform are
+   the two properties the compositor can animate without waking the main
+   thread, and between them they are all this needs. */
+
+/* Where the plane's tail has got to, at each turn of the flight. Reading it
+   backwards gives the moment the tail passes any point on the path. */
+const TAIL_AT = [[0, -9.9], [0.24, 16.96], [0.52, 36.3], [0.78, 53.6], [1, 58]];
+const FLIGHT_MS = 3100;
+const DASH_MS = 220;      // how long one dash takes to come up
+
+function tailReaches(x) {
+  if (x <= TAIL_AT[0][1]) return 0;
+  for (let i = 1; i < TAIL_AT.length; i++) {
+    const [t0, x0] = TAIL_AT[i - 1], [t1, x1] = TAIL_AT[i];
+    if (x <= x1) return t0 + (t1 - t0) * ((x - x0) / (x1 - x0));
+  }
+  return 1;
+}
+
+/* The dashes are measured off the curve once and kept. Doing it this way
+   rather than with stroke-dasharray also gets the loop right: the reveal
+   follows the path round it, where a straight wipe would cut across. */
+let trailDashes = null;
+function planeDashes() {
+  if (trailDashes) return trailDashes;
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("width", "0");
+  svg.setAttribute("height", "0");
+  svg.style.cssText = "position:absolute;left:-9999px;top:0";
+  const path = document.createElementNS(NS, "path");
+  path.setAttribute("d", PLANE_TRAIL);
+  svg.appendChild(path);
+  document.body.appendChild(svg);
+
+  const out = [];
+  try {
+    const len = path.getTotalLength();
+    for (let d = 0; d <= len; d += 5) {          // one dash every five units
+      const a = path.getPointAtLength(d);
+      const b = path.getPointAtLength(Math.min(len, d + 0.8));
+      out.push({
+        x: a.x, y: a.y,
+        turn: Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI,
+        // Centred on the tail passing, not begun by it: a fade that starts
+        // there is only half out a tenth of a second later, and the trail
+        // trails the plane by its own fade.
+        at: tailReaches(a.x),
+      });
+    }
+  } catch (e) { /* no geometry: the flight simply arrives without a trail */ }
+  svg.remove();
+  trailDashes = out;
+  return out;
+}
+
 const planeScene = () => `
-  <svg class="pf" viewBox="0 0 100 58" aria-hidden="true">
-    <defs>
-      <clipPath id="pf-wipe">
-        <rect class="pf-wipe" x="-10" y="0" width="110" height="58" />
-      </clipPath>
-    </defs>
-    <g clip-path="url(#pf-wipe)">
-      <path class="pf-trail" d="${PLANE_TRAIL}" />
-    </g>
-    <image class="pf-plane" href="art/plane.webp"
-           x="54.4" y="9.5" width="35.6" height="23.5" />
-  </svg>`;
+  <div class="pf" aria-hidden="true">
+    ${planeDashes().map(d => `<i class="pf-dash" style="left:${d.x.toFixed(2)}%;
+      top:${(d.y / 58 * 100).toFixed(2)}%;
+      transform:translate(-50%,-50%) rotate(${d.turn.toFixed(1)}deg);
+      animation-delay:${Math.round(d.at * FLIGHT_MS - DASH_MS / 2)}ms"></i>`).join("")}
+    <img class="pf-plane" src="art/plane.webp" alt="" width="354" height="235"
+         decoding="async" draggable="false" />
+  </div>`;
 
 /* The flight belongs to opening the app and finding it clear, not to every
    glance at the tab. Once a launch; a reload is a new launch. */
@@ -1359,8 +1438,9 @@ function renderHome() {
   } else if (state.homework.length) {
     // Everything is done, so the plane brings the news. It only flies the
     // first time this launch; after that it is simply already there.
-    box.innerHTML = emptyHome('You finished all', takeFlight() ? 'fly' : 'land');
+    box.innerHTML = emptyHome('You finished all', takeFlight() ? 'wait' : 'land');
     revealArt(box);
+    launchPlane(box);
   } else {
     box.innerHTML = emptyHome('Nothing here yet', null);
     revealArt(box);
@@ -2626,6 +2706,7 @@ function wireApp() {
  */
 function warmArt() {
   const start = () => {
+    planeDashes();          // measure the flight path once, off the critical path
     for (const src of ['art/desk.jpg', 'art/plane.webp']) {
       const img = new Image();
       img.src = src;

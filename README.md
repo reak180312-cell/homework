@@ -96,13 +96,47 @@ the median there is the plane, not the wall.
 The trail is drawn rather than photographed, so it stays crisp at any size and can take the
 night colours. Its shape was traced from the dashes in the pictures, not sketched by eye.
 
-The plane and the trail share one 100-by-58 scene and one timeline, down to the same easing
-on each leg, which is what keeps the end of the trail under the plane's tail the whole way
-across. The trail is revealed by a clip rectangle whose scale tracks the plane's tail, so
-there is no mask to re-raster. Nothing animates but transforms.
+### Keeping it smooth
+
+The first version put the plane and the trail inside one `<svg>`, which is the obvious way
+to build it and the wrong one. **Chrome never gives an SVG child its own compositor layer**,
+so every frame of the flight went through the main thread: measured at 259 paints, 133
+layouts and a style recalculation a frame across three seconds, with close to half the
+frames missed on a throttled phone. It was visibly rough.
+
+Both moving parts are now ordinary HTML. The plane is an `<img>` moved by `transform`, and
+the trail is one element per dash, each fading in as the plane reaches it. Transform and
+opacity are the only two properties the compositor can animate on its own, and between them
+they are all this needs. Paints per flight went from 259 to about 15, and layouts from 133
+to 3.
+
+Clipping a wrapper instead was tried and was no better: a `clip-path` animation still costs
+a style recalculation every frame, `will-change` or not.
+
+Laying the dashes out individually also fixes something the clip got wrong. A wipe travels
+left to right, so at the loop it uncovers the top and bottom of the curve at the same
+moment; dashes come out in the order the path runs, loop included.
+
+Each dash is placed with `getPointAtLength` when the app starts — once, off the critical
+path, in the same idle moment the pictures are fetched — and its delay says when the tail
+passes it, read off the same turning points the flight itself is built from. The fade is
+centred on that moment rather than started by it, or the trail runs a tenth of a second
+short of the plane the whole way across.
+
+The flight also waits for its own picture: started while the plane is still arriving, the
+first half of the crossing happens to an empty patch of wall.
+
+That this actually runs on the compositor is a test, not a memory of having checked once.
+The main thread is jammed solid for 600ms in the middle of the flight, and the plane has to
+keep moving.
 
 The scene is laid **over** the screen rather than taking a share of it. In the flow it is as
 tall as a third of a phone, which on a short one pushed the desk down through the tab bar.
+
+The desk underneath used to drift 1.8% larger and back over eighteen seconds. Nobody could
+see it, and it never stopped — a full-width photograph being transformed for as long as the
+screen was up, and the last thing waking the main thread once the plane had landed. It is
+still now, and a cleared screen runs nothing at all.
 
 If your phone is set to reduce motion, the plane is simply already there.
 
