@@ -66,15 +66,23 @@ subject it had rather than losing it.
 The homework screen sits on a desk, whether there is homework on it or not. The picture is
 fixed to the foot of the screen and the list scrolls over it, so it reads as the room the
 app is in rather than as one more thing in the column. Its top fades into the paper, so the
-photograph never ends on an edge, and it runs on behind the tab bar rather than stopping at
-it.
+photograph never ends on an edge, and it stands **on** the tab bar rather than running
+under it, so the books and the cup are whole instead of having their feet cut off.
+
+The photograph as supplied is portrait and mostly wall — the books, the cup and the plant
+sit in its bottom half, and only that half is ever on screen. So only that half is shipped:
+cropped from halfway down, which keeps the top of the plant and still leaves a band of plain
+wall for the fade to work on. That crop is 1.68 times as wide as it is tall, so at full
+width it stands 59.5vw high.
 
 How much of it shows is one figure, `--desk-band`, and both the picture and the cleared
 screen are measured from it — otherwise the two drift apart on a screen shaped differently
-from a phone. The band is set against the **width**, because that is what decides how big
-the things on the desk look, and capped against the height so a short screen is not all
-desk. `object-fit: cover` then picks the part of the photograph that fills it: the shelf of
-books, the cup and the plant, with the foreground below the fold.
+from a phone, which is exactly what happened when the picture was measured off the width
+and the space left for the sentence off the height: they collided on a 540-wide screen. The
+band is set against the **width**, because that is what decides how big the things on the
+desk look, and capped against the height so a short screen is not all desk. The cap crops
+rather than shrinking them: `object-position: 50% 100%` anchors the picture to its own foot,
+so it is the wall above the desk that goes.
 
 The picture is shown only once it has decoded. Half a photograph drawn top-down looks like
 something has gone wrong; nothing, and then all of it, does not.
@@ -82,6 +90,10 @@ something has gone wrong; nothing, and then all of it, does not.
 It used to be something the empty state carried, fetched quietly at idle so it would be in
 hand the moment the last piece of homework was ticked off. Now that it is part of the
 screen it loads with the page, and that warming step is gone.
+
+It is kept under 60KB, which is a promise the speed tests hold the build to. Rebuild it
+from a fresh photograph with `scratchpad/new-desk.js`, which crops, resizes, and then picks
+the highest JPEG quality that still comes in under the limit rather than guessing at one.
 
 ## Timetable
 

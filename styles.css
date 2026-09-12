@@ -31,10 +31,12 @@
 
   --gutter:     20px;
   --tabbar-h:   62px;
-  /* How much of the desk shows at the foot of the homework screen. Off the
-     width, since that sets how big the things on it look, but never more
-     than a share of a short screen. */
-  --desk-band:  min(62vw, 46vh);
+  /* How much of the desk shows at the foot of the homework screen. The
+     picture is 1.68 times as wide as it is tall, so at full width it stands
+     59.5vw high — measured off the width, because that is what sets how big
+     the books and the cup look. Capped against the height so a short screen
+     is not all desk; the cap crops rather than shrinking them. */
+  --desk-band:  min(59.5vw, 34vh);
 
   color-scheme: light;
 }
@@ -393,7 +395,7 @@ button { border: 0; background: none; cursor: pointer; }
      of it — the same band, off the same figure, so the two cannot drift apart
      on a screen shaped differently from a phone. */
   min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)
-                   - 134px - var(--desk-band));
+                   - 134px - var(--tabbar-h) - var(--desk-band));
   padding-bottom: 22px;
 }
 
@@ -433,7 +435,7 @@ button { border: 0; background: none; cursor: pointer; }
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
   z-index: 0;
   width: 100%;
   /* A band of the photograph rather than the whole of it, so that what shows
@@ -444,7 +446,10 @@ button { border: 0; background: none; cursor: pointer; }
      to know how much room to leave. */
   height: var(--desk-band);
   object-fit: cover;
-  object-position: 50% 30%;
+  /* Anchored to the foot of the picture: the books, the cup and the plant
+     stand on its bottom edge, and it is the wall above them that gets cut
+     when a screen is too short. */
+  object-position: 50% 100%;
   pointer-events: none;
   opacity: 0;
   transition: opacity .45s ease;
