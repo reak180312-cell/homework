@@ -36,7 +36,10 @@
      59.5vw high — measured off the width, because that is what sets how big
      the books and the cup look. Capped against the height so a short screen
      is not all desk; the cap crops rather than shrinking them. */
-  --desk-band:  min(59.5vw, 34vh);
+  --desk-band:  min(59.5vw, 38vh);
+  /* And how far clear of the tab bar it stands. Flush against it, the picture
+     reads as tucked underneath. */
+  --desk-lift:  12px;
 
   color-scheme: light;
 }
@@ -395,7 +398,7 @@ button { border: 0; background: none; cursor: pointer; }
      of it — the same band, off the same figure, so the two cannot drift apart
      on a screen shaped differently from a phone. */
   min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)
-                   - 134px - var(--tabbar-h) - var(--desk-band));
+                   - 134px - var(--tabbar-h) - var(--desk-lift) - var(--desk-band));
   padding-bottom: 22px;
 }
 
@@ -435,7 +438,7 @@ button { border: 0; background: none; cursor: pointer; }
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--desk-lift));
   z-index: 0;
   width: 100%;
   /* A band of the photograph rather than the whole of it, so that what shows
@@ -454,8 +457,12 @@ button { border: 0; background: none; cursor: pointer; }
   opacity: 0;
   transition: opacity .45s ease;
   -webkit-user-drag: none;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 26%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 26%);
+  /* Soft at both ends. The top has always faded into the paper; the foot needs
+     it too now that it no longer meets the tab bar — the desk surface is a few
+     shades off the paper in daylight and a good deal lighter than it at night,
+     so a hard edge there would read as a cut rather than a photograph. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 26%, #000 93%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 26%, #000 93%, transparent 100%);
 }
 
 .desk-art.is-ready { opacity: 1; }

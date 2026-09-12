@@ -66,8 +66,11 @@ subject it had rather than losing it.
 The homework screen sits on a desk, whether there is homework on it or not. The picture is
 fixed to the foot of the screen and the list scrolls over it, so it reads as the room the
 app is in rather than as one more thing in the column. Its top fades into the paper, so the
-photograph never ends on an edge, and it stands **on** the tab bar rather than running
-under it, so the books and the cup are whole instead of having their feet cut off.
+photograph never ends on an edge, and it stands a little **clear of** the tab bar rather
+than running under it, so the books and the cup are whole instead of having their feet cut
+off. Both ends fade: the foot needs it as much as the top now that it no longer meets the
+tab bar, since the desk surface is a few shades off the paper in daylight and a good deal
+lighter than it at night.
 
 The photograph as supplied is portrait and mostly wall — the books, the cup and the plant
 sit in its bottom half, and only that half is ever on screen. So only that half is shipped:
