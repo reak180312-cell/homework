@@ -83,6 +83,11 @@ text at a real size and wrap when a day has six subjects. `BAG_ART` holds the dr
 around its own origin, and `BAG_PLACES` says where each sits and where its lead leaves and
 lands: moving something is changing one pair of numbers.
 
+The things themselves are not drawn in code — they are the supplied artwork, one file per
+thing in [art/bag/](art/bag/), trimmed to its own edges and kept at its own shape. Only the
+leads are drawn, and only because they have to know where the bag is. All ten come to about
+130 KB and ride in the offline cache.
+
 The layout is measured off that drawing rather than judged by eye: the scene is 400 by 492,
 the bag spans 161 of it and sits centred, and every thing has its own place, size and lead in
 `BAG_PLACES`. Sport, the MacBook and the Tanach share the slot beside the bag and the AirPods

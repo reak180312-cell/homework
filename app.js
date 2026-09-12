@@ -174,151 +174,56 @@ function bagThings(dayIndex) {
 
 
 /* ── The bag, drawn ────────────────────────────────────────
-   The backpack in the middle and everything that goes in it around the
-   outside, one arrow each. Every shape carries its own fill, so the stylesheet
-   never has to fight a presentation attribute for the colours. */
+   The artwork is supplied, one file per thing, so none of it is redrawn here.
+   Each picture keeps its own shape: the width is a share of the scene and the
+   height follows from the file, which is also why nothing jumps while they
+   load. Only the leads are drawn, and only because they have to know where the
+   bag is. */
 
-const BAG_SCENE = { w: 400, h: 492 };
+const BAG_SCENE = { w: 400, h: 510 };
 
-/* Flat illustration rather than line art: every shape is a fill, depth comes
-   from a darker tone beside a lighter one, and each thing sits on a soft
-   shadow. Nothing is outlined, so nothing has to be hinted at small sizes. */
+/* The AirPods hang below the bag, which is the one thing that needs the scene
+   to be taller — and only on the day they turn up. */
+const BAG_LOW = ['airpods'];
 
-const BLUE = '#6E94C4', BLUE_D = '#587FAF', NAVY = '#2E4360';
-const SAGE = '#A3BFA5', SAGE_D = '#8CAB8F';
-const CREAM = '#EFE6D5', CREAM_D = '#E0D5BE', PAGE = '#F7F1E6';
-const CORAL = '#E4918A', CORAL_D = '#D17E77';
-
-/** The soft ground shadow every thing stands on. */
-const shade = (rx = 30, y = 30) =>
-  `<ellipse cx="0" cy="${y}" rx="${rx}" ry="${rx * 0.17}" fill="#6B5B45" opacity=".13" />`;
-
-const BAG_ART = {
-  pencil: `
-    ${shade(34, 26)}
-    <g>
-      <rect x="-9" y="-40" width="7" height="30" rx="2" fill="#E8C35C" />
-      <path d="M-9-40h7l-3.5-7z" fill="#E2B24A" />
-      <rect x="-9" y="-13" width="7" height="5" fill="#E9A8A1" />
-      <rect x="4" y="-44" width="8" height="34" rx="3" fill="#6E9E72" />
-      <rect x="4" y="-44" width="8" height="7" rx="3" fill="#547C58" />
-      <rect x="16" y="-38" width="7" height="28" rx="3" fill="#5B7FB5" />
-      <rect x="16" y="-38" width="7" height="6" rx="3" fill="#44608C" />
-    </g>
-    <rect x="-34" y="-14" width="68" height="30" rx="14" fill="${BLUE}" />
-    <path d="M-34 0a14 14 0 0 0 14 16h40a14 14 0 0 0 14-16z" fill="${BLUE_D}" />
-    <rect x="-34" y="-4" width="68" height="5" rx="2.5" fill="${NAVY}" opacity=".75" />
-    <circle cx="-28" cy="-1.5" r="4" fill="${NAVY}" opacity=".75" />`,
-
-  bottle: `
-    ${shade(15, 27)}
-    <rect x="-8" y="-26" width="16" height="8" rx="3" fill="${NAVY}" />
-    <path d="M7-25h4a4 4 0 0 1 0 8h-4" fill="none" stroke="${NAVY}" stroke-width="3.4" />
-    <path d="M-13-18h26a2 2 0 0 1 2 2v30a9 9 0 0 1-9 9h-12a9 9 0 0 1-9-9v-30a2 2 0 0 1 2-2z" fill="${SAGE}" />
-    <path d="M5-18h8a2 2 0 0 1 2 2v30a9 9 0 0 1-9 9h-1z" fill="${SAGE_D}" />
-    <rect x="-9" y="-13" width="3.5" height="24" rx="1.75" fill="#FFFFFF" opacity=".32" />
-  `,
-
-  lunch: `
-    ${shade(33, 25)}
-    <path d="M-32-2h64v14a8 8 0 0 1-8 8h-48a8 8 0 0 1-8-8z" fill="${CREAM}" />
-    <path d="M10-2h22v14a8 8 0 0 1-8 8H10z" fill="${CREAM_D}" />
-    <path d="M-24-22h48a8 8 0 0 1 8 8v12h-64V-14a8 8 0 0 1 8-8z" fill="${SAGE}" />
-    <path d="M10-22h14a8 8 0 0 1 8 8v12H10z" fill="${SAGE_D}" />
-    <rect x="-32" y="-3" width="64" height="4" rx="2" fill="#FFFFFF" opacity=".35" />
-    <rect x="-7" y="-4" width="14" height="13" rx="3" fill="${SAGE_D}" />`,
-
-  shoes: `
-    ${shade(33, 20)}
-    <path d="M-32 2c0-6 3-9 7-11l11-5 7 6 8-4c7 0 13 4 19 9 3 2 7 4 11 5 4 1 6 3 6 6v2h-69z" fill="${PAGE}" />
-    <path d="M-15-8l7 7M-4-12l7 7M7-14l7 7" stroke="${CREAM_D}" stroke-width="3" fill="none" stroke-linecap="round" />
-    <path d="M-32 10h69v3a5 5 0 0 1-5 5h-59a5 5 0 0 1-5-5z" fill="${BLUE}" />`,
-
-  notebook: `
-    ${shade(30, 31)}
-    <rect x="-6" y="-26" width="44" height="54" rx="4" fill="${PAGE}" />
-    <rect x="-16" y="-28" width="44" height="56" rx="4" fill="${CORAL}" />
-    <path d="M14-28h10a4 4 0 0 1 4 4v48a4 4 0 0 1-4 4H14z" fill="${CORAL_D}" />
-    <rect x="-8" y="-19" width="22" height="11" rx="2.5" fill="${PAGE}" />
-    <g fill="${NAVY}">
-      <rect x="-23" y="-23" width="13" height="5" rx="2.5" />
-      <rect x="-23" y="-11" width="13" height="5" rx="2.5" />
-      <rect x="-23" y="1" width="13" height="5" rx="2.5" />
-      <rect x="-23" y="13" width="13" height="5" rx="2.5" />
-    </g>
-  `,
-
-  books: `
-    ${shade(33, 28)}
-    <rect x="-31" y="10" width="62" height="15" rx="3" fill="${BLUE}" />
-    <rect x="-27" y="12" width="56" height="11" rx="2" fill="${PAGE}" />
-    <rect x="-31" y="10" width="62" height="15" rx="3" fill="${BLUE}" />
-    <path d="M-31 10h62v5H-31z" fill="${BLUE_D}" opacity=".5" />
-    <rect x="-28" y="-5" width="56" height="15" rx="3" fill="${CORAL}" />
-    <rect x="-24" y="-3" width="50" height="11" rx="2" fill="${PAGE}" />
-    <rect x="-28" y="-5" width="56" height="15" rx="3" fill="${CORAL}" />
-    <path d="M-28-5h56v5h-56z" fill="${CORAL_D}" opacity=".5" />
-    <rect x="-26" y="-20" width="52" height="15" rx="3" fill="#7FA97E" />
-    <rect x="-22" y="-18" width="46" height="11" rx="2" fill="${PAGE}" />
-    <rect x="-26" y="-20" width="52" height="15" rx="3" fill="#7FA97E" />
-    <path d="M-26-20h52v5h-52z" fill="#6A9269" opacity=".5" />`,
-
-  laptop: `
-    ${shade(36, 22)}
-    <path d="M-26-24h52a4 4 0 0 1 4 4v26h-60v-26a4 4 0 0 1 4-4z" fill="#C7CCD3" />
-    <rect x="-22" y="-20" width="44" height="23" rx="2" fill="#33414F" />
-    <path d="M-34 6h68l5 9a3 3 0 0 1-3 4h-72a3 3 0 0 1-3-4z" fill="#D3D8DE" />
-    <path d="M-8 10h16a2 2 0 0 1 0 4h-16a2 2 0 0 1 0-4z" fill="#B7BDC6" />`,
-
-  airpods: `
-    ${shade(22, 22)}
-    <g transform="translate(-12 0) rotate(-9)">
-      <rect x="-4.5" y="-6" width="9" height="24" rx="4.5" fill="${PAGE}" />
-      <rect x="1" y="-6" width="3.5" height="24" rx="1.8" fill="${CREAM_D}" />
-      <circle cx="0" cy="-11" r="9" fill="${PAGE}" />
-      <circle cx="3" cy="-13" r="5" fill="#FFFFFF" opacity=".6" />
-    </g>
-    <g transform="translate(12 0) rotate(9)">
-      <rect x="-4.5" y="-6" width="9" height="24" rx="4.5" fill="${PAGE}" />
-      <rect x="1" y="-6" width="3.5" height="24" rx="1.8" fill="${CREAM_D}" />
-      <circle cx="0" cy="-11" r="9" fill="${PAGE}" />
-      <circle cx="3" cy="-13" r="5" fill="#FFFFFF" opacity=".6" />
-    </g>`,
-
-  tanach: `
-    ${shade(26, 32)}
-    <rect x="-14" y="-30" width="36" height="60" rx="4" fill="${PAGE}" />
-    <rect x="-22" y="-32" width="38" height="62" rx="4" fill="#A8544A" />
-    <path d="M6-32h10v62H6z" fill="#91473E" />
-    <g fill="#D9A94A" opacity=".9">
-      <rect x="-17" y="-22" width="18" height="3" rx="1.5" />
-      <rect x="-17" y="16" width="18" height="3" rx="1.5" />
-      <path d="M-8-7 -2-10 4-7 4 0 -2 3 -8 0z" />
-    </g>`,
+/* Width as a share of the scene, and the shape each file came out at. */
+const BAG_PICS = {
+  pack:     { w: 0.40,  ratio: 0.84 },
+  pencil:   { w: 0.245, ratio: 1.45 },
+  bottle:   { w: 0.115, ratio: 0.47 },
+  lunch:    { w: 0.205, ratio: 1.54 },
+  notebook: { w: 0.225, ratio: 0.98 },
+  books:    { w: 0.235, ratio: 1.17 },
+  shoes:    { w: 0.235, ratio: 1.42 },
+  laptop:   { w: 0.26,  ratio: 1.44 },
+  airpods:  { w: 0.155, ratio: 0.73 },
+  tanach:   { w: 0.15,  ratio: 0.86 },
 };
 
-/* Where each thing sits, how big it is drawn, where its name goes, and where
-   its lead leaves and lands — all measured off the drawing this copies, so the
-   scene keeps its proportions at any size.
+const PACK_PLACE = { x: 202, y: 232 };
 
-   Sport, the MacBook and the Tanach share the slot beside the bag: they never
-   fall on the same day. The AirPods take the one above it. */
+/* Where each thing sits (its middle), where its name goes under it, and where
+   its lead leaves and lands. Measured off the drawing this copies.
+
+   Sport, the MacBook and the Tanach share the slot beside the bag and the
+   AirPods take the one above it: they never fall on the same day. */
 const BAG_PLACES = {
-  pencil:   { x: 89,  y: 56,  s: 1.3,  label: 50, from: [142, 114], to: [164, 140] },
-  bottle:   { x: 332, y: 66,  s: 1.5,  label: 44, from: [290, 116], to: [262, 150] },
-  airpods:  { x: 200, y: 52,  s: 1.2,  label: 44, from: [200, 76],  to: [200, 110] },
-  lunch:    { x: 68,  y: 185, s: 1.3,  label: 50, from: [114, 190], to: [132, 208] },
-  shoes:    { x: 340, y: 185, s: 1.3,  label: 46, from: [292, 190], to: [268, 208] },
-  laptop:   { x: 340, y: 183, s: 1.1,  label: 46, from: [292, 190], to: [268, 208] },
-  tanach:   { x: 340, y: 183, s: 1.5,  label: 52, from: [292, 190], to: [268, 208] },
-  notebook: { x: 84,  y: 342, s: 1.45, label: 54, from: [127, 311], to: [148, 290] },
-  books:    { x: 317, y: 331, s: 1.5,  label: 54, from: [276, 311], to: [263, 292] },
+  pencil:   { x: 86,  y: 84,  label: 134, from: [128, 130], to: [150, 160] },
+  bottle:   { x: 333, y: 88,  label: 145, from: [298, 140], to: [266, 168] },
+  airpods:  { x: 200, y: 470, label: 528, from: [200, 428], to: [200, 340] },
+  lunch:    { x: 68,  y: 212, label: 247, from: [112, 216], to: [130, 222] },
+  shoes:    { x: 340, y: 212, label: 253, from: [290, 216], to: [272, 222] },
+  laptop:   { x: 340, y: 210, label: 254, from: [286, 216], to: [272, 222] },
+  tanach:   { x: 340, y: 210, label: 253, from: [308, 216], to: [274, 222] },
+  notebook: { x: 88,  y: 378, label: 432, from: [134, 348], to: [156, 322] },
+  books:    { x: 318, y: 372, label: 420, from: [270, 344], to: [250, 324] },
 };
 
 /** The wash behind each name, taken from the thing it belongs to. */
 const BAG_TINT = {
-  pencil: BLUE, bottle: SAGE, lunch: SAGE, shoes: BLUE,
-  notebook: CORAL, books: BLUE, laptop: '#9AA3AE', airpods: '#9AA3AE', tanach: '#A8544A',
+  pencil: '#6E94C4', bottle: '#A3BFA5', lunch: '#A3BFA5', shoes: '#6E94C4',
+  notebook: '#E4918A', books: '#6E94C4', laptop: '#9AA3AE', airpods: '#9AA3AE',
+  tanach: '#3E5C8A',
 };
 
 /** A dashed lead that stops at a small open ring just short of the bag. */
@@ -328,36 +233,15 @@ function bagArrow(from, to) {
     <circle class="bag-head" cx="${to[0]}" cy="${to[1]}" r="7" />`;
 }
 
-/** The backpack: the biggest thing on the page, drawn back to front. */
-const BACKPACK = `
-  <g class="bag-pack">
-    <ellipse cx="202" cy="288" rx="80" ry="11" fill="#6B5B45" opacity=".13" />
-
-    <path d="M189 145v-10a8 8 0 0 1 8-8h8a8 8 0 0 1 8 8v10"
-          fill="none" stroke="${NAVY}" stroke-width="7.5" stroke-linecap="round" />
-
-    <path d="M136 192c0-36 29-65 64.5-65s64.5 29 64.5 65v60a36 36 0 0 1-36 36h-57a36 36 0 0 1-36-36z"
-          fill="${NAVY}" />
-
-    <path d="M150 212h-10a12 12 0 0 0-12 12v28a16 16 0 0 0 16 16h6z" fill="${BLUE_D}" />
-    <path d="M252 212h10a12 12 0 0 1 12 12v28a16 16 0 0 1-16 16h-6z" fill="${BLUE_D}" />
-
-    <path d="M142 188c0-32 26-59 58.5-59s58.5 27 58.5 59v66a30 30 0 0 1-30 30h-57a30 30 0 0 1-30-30z"
-          fill="${BLUE}" />
-    <path d="M142 188c0-32 26-59 58.5-59v155h-28.5a30 30 0 0 1-30-30z"
-          fill="#83A7D2" opacity=".5" />
-
-    <path d="M167 152q-11 26-10 54" fill="none" stroke="${CREAM}" stroke-width="3.4" stroke-linecap="round" />
-    <rect x="152.5" y="204" width="9" height="18" rx="4.5" fill="#E2D2B2" />
-
-    <path d="M213 171l15 16-15 16-15-16z" fill="${CREAM}" />
-    <rect x="209.5" y="181" width="3.2" height="12" rx="1.6" fill="${NAVY}" opacity=".6" />
-    <rect x="213.8" y="181" width="3.2" height="12" rx="1.6" fill="${NAVY}" opacity=".6" />
-
-    <rect x="172" y="214" width="82" height="60" rx="15" fill="${CREAM}" />
-    <path d="M178 231h70" stroke="${NAVY}" stroke-width="2.8" opacity=".6" fill="none" stroke-linecap="round" />
-    <rect x="179" y="232" width="8" height="17" rx="4" fill="${NAVY}" opacity=".45" />
-  </g>`;
+/** One picture, centred on its place, sized as a share of the scene. */
+function bagPic(key, place, extra, H) {
+  const art = BAG_PICS[key];
+  const w = Math.round(art.w * BAG_SCENE.w);
+  return `<img class="bag-pic ${extra}" src="art/bag/${key}.webp" alt="" aria-hidden="true"
+       width="${w}" height="${Math.round(w / art.ratio)}" decoding="async"
+       style="left:${(place.x / BAG_SCENE.w) * 100}%; top:${(place.y / H) * 100}%;
+              width:${art.w * 100}%" />`;
+}
 
 /**
  * The scene for one day. Everything on it is worked out from the timetable,
@@ -365,21 +249,16 @@ const BACKPACK = `
  */
 function bagScene(dayIndex) {
   const things = bagThings(dayIndex).filter(t => BAG_PLACES[t.key]);
-  const H = 492;
-  const DROP = 24;
-
-  const drawings = things.map((t) => {
-    const p = BAG_PLACES[t.key];
-    return `<g class="bag-thing" transform="translate(${p.x} ${p.y}) scale(${p.s})">${BAG_ART[t.key]}</g>`;
-  }).join('');
+  const H = things.some(t => BAG_LOW.includes(t.key)) ? 560 : BAG_SCENE.h;
 
   const leads = things.map(t => bagArrow(BAG_PLACES[t.key].from, BAG_PLACES[t.key].to)).join('');
+  const pics = things.map(t => bagPic(t.key, BAG_PLACES[t.key], 'bag-thing', H)).join('');
 
   const labels = things.map((t) => {
     const p = BAG_PLACES[t.key];
     return `
       <span class="bag-label ${t.detail ? 'is-wide' : ''}"
-            style="left:${(p.x / BAG_SCENE.w) * 100}%; top:${((p.y + p.label + DROP) / H) * 100}%;
+            style="left:${(p.x / BAG_SCENE.w) * 100}%; top:${(p.label / H) * 100}%;
                    --tint:${BAG_TINT[t.key] || '#9AA3AE'}">
         <b>${esc(t.label)}</b>
         ${t.detail ? `<i>${esc(t.detail)}</i>` : ''}
@@ -388,9 +267,9 @@ function bagScene(dayIndex) {
 
   return `
     <div class="bag-scene" style="aspect-ratio:${BAG_SCENE.w}/${H}">
-      <svg viewBox="0 0 ${BAG_SCENE.w} ${H}" aria-hidden="true">
-        <g transform="translate(0 ${DROP})">${leads}${BACKPACK}${drawings}</g>
-      </svg>
+      <svg viewBox="0 0 ${BAG_SCENE.w} ${H}" aria-hidden="true">${leads}</svg>
+      ${bagPic('pack', PACK_PLACE, 'bag-pack', H)}
+      ${pics}
       ${labels}
     </div>`;
 }

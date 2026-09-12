@@ -2,7 +2,7 @@
 
 // Bump this whenever the shell changes shape: it drops every older cache on
 // activate, so a page can never be served new markup with stale script.
-const CACHE = 'homework-v14';
+const CACHE = 'homework-v15';
 
 // Only what the app needs to run. The 512px icon is for the installer and the
 // splash screen, which nobody reaches offline, so it is fetched if it is ever
@@ -13,6 +13,16 @@ const SHELL = [
   './app.js',
   './manifest.webmanifest',
   './art/desk.jpg',
+  './art/bag/pack.webp',
+  './art/bag/pencil.webp',
+  './art/bag/bottle.webp',
+  './art/bag/lunch.webp',
+  './art/bag/notebook.webp',
+  './art/bag/books.webp',
+  './art/bag/shoes.webp',
+  './art/bag/laptop.webp',
+  './art/bag/airpods.webp',
+  './art/bag/tanach.webp',
   './icons/favicon-64.png',
   './icons/icon-192.png',
 ];
