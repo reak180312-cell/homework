@@ -1276,14 +1276,58 @@ function revealArt(box) {
   else art.addEventListener('load', () => art.classList.add('is-ready'), { once: true });
 }
 
-const emptyHome = (title) => `
-  <div class="empty-home">
-    <h2 class="empty-home-line">
-      <span>${esc(title)}</span>
-      <button class="empty-add" data-act="add-first" aria-label="Add homework">
-        <svg class="ico" aria-hidden="true"><use href="#i-plus" /></svg>
-      </button>
-    </h2>
+/* ── The flight ────────────────────────────────────────────
+   Nine pictures of a paper plane turned up, and they are nine moments of one
+   flight: in small from the left, growing as it crosses, a dip, then a climb
+   into place at the top right. So they are used as its keyframes, measured off
+   the pictures themselves — the browser draws every frame in between.
+
+   The plane is the artwork, cut off the wall it was drawn on. The trail is
+   drawn rather than photographed, so it stays crisp at any size and can take
+   the night colours. Both live in the same 100-by-58 scene, so they scale
+   together and never need re-aligning per screen.
+
+   The message rides on the wing, which is where the pictures put it, so the
+   screen does not say it twice. Screen readers get it from the heading. */
+const PLANE_TRAIL = "M -8 37.5 C 0 36.8 5 36.2 13 35.2 C 17 34.7 18.5 31.5 21 28 "
+  + "C 23 25.2 26.6 24.2 26.9 27.4 C 27.2 30.6 23.2 32 21.2 30.2 "
+  + "C 19.8 29 21.2 32.2 24.6 32.3 C 31 32.5 38 32 44 31.2 "
+  + "C 48.5 30.6 52 30.4 57.6 30.3";
+
+const planeScene = () => `
+  <svg class="pf" viewBox="0 0 100 58" aria-hidden="true">
+    <defs>
+      <clipPath id="pf-wipe">
+        <rect class="pf-wipe" x="-10" y="0" width="110" height="58" />
+      </clipPath>
+    </defs>
+    <g clip-path="url(#pf-wipe)">
+      <path class="pf-trail" d="${PLANE_TRAIL}" />
+    </g>
+    <image class="pf-plane" href="art/plane.webp"
+           x="54.4" y="9.5" width="35.6" height="23.5" />
+  </svg>`;
+
+/* The flight belongs to opening the app and finding it clear, not to every
+   glance at the tab. Once a launch; a reload is a new launch. */
+let flownThisLaunch = false;
+function takeFlight() {
+  if (flownThisLaunch) return false;
+  flownThisLaunch = true;
+  return true;
+}
+
+const emptyHome = (title, plane) => `
+  <div class="empty-home ${plane ? 'has-plane is-' + plane : ''}">
+    ${plane ? `
+      <h2 class="sr-only">${esc(title)}</h2>
+      ${planeScene()}` : `
+      <h2 class="empty-home-line">
+        <span>${esc(title)}</span>
+        <button class="empty-add" data-act="add-first" aria-label="Add homework">
+          <svg class="ico" aria-hidden="true"><use href="#i-plus" /></svg>
+        </button>
+      </h2>`}
     <img class="empty-art" src="art/desk.jpg" alt="" width="941" height="820"
          decoding="async" draggable="false" />
   </div>`;
@@ -1310,10 +1354,17 @@ function renderHome() {
 
   const box = $('#home-list');
   box.classList.add('list-hw');
-  box.innerHTML = list.length
-    ? list.map(hwRow).join('')
-    : emptyHome(state.homework.length ? 'You finished all' : 'Nothing here yet');
-  if (!list.length) revealArt(box);
+  if (list.length) {
+    box.innerHTML = list.map(hwRow).join('');
+  } else if (state.homework.length) {
+    // Everything is done, so the plane brings the news. It only flies the
+    // first time this launch; after that it is simply already there.
+    box.innerHTML = emptyHome('You finished all', takeFlight() ? 'fly' : 'land');
+    revealArt(box);
+  } else {
+    box.innerHTML = emptyHome('Nothing here yet', null);
+    revealArt(box);
+  }
   syncFab();
 }
 
@@ -1930,8 +1981,11 @@ function maybeArrival(level, fromLevel) {
    is the other exception: the empty state is already holding one. */
 function syncFab() {
   const belongs = currentTab === 'home' || currentTab === 'subjects';
-  const cleared = currentTab === 'home' && !activeHw().length;
-  $('#fab').hidden = !belongs || cleared;
+  // A screen that has never held homework carries its own + beside the line,
+  // so the header one steps aside. The finished screen has no line to sit
+  // beside — the plane has it — so there the header + is the only one.
+  const carriesItsOwn = currentTab === 'home' && !activeHw().length && !state.homework.length;
+  $('#fab').hidden = !belongs || carriesItsOwn;
 }
 
 function showTab(tab) {
@@ -2572,9 +2626,11 @@ function wireApp() {
  */
 function warmArt() {
   const start = () => {
-    const img = new Image();
-    img.src = 'art/desk.jpg';
-    if (img.decode) img.decode().catch(() => {});   // decode off the main thread too
+    for (const src of ['art/desk.jpg', 'art/plane.webp']) {
+      const img = new Image();
+      img.src = src;
+      if (img.decode) img.decode().catch(() => {});   // decode off the main thread too
+    }
   };
   if (typeof requestIdleCallback === 'function') requestIdleCallback(start, { timeout: 3000 });
   else setTimeout(start, 1200);

@@ -35,8 +35,8 @@ Open it → Add homework → See it all together → Finish it → Earn XP → R
   its own colour and when the work is for, then says what to do in the largest type on the
   screen, because that is the part you actually read. A note underneath is optional and only
   shows when there is one. Tap the circle on the right (or swipe the card right) to finish
-  it; tap the card to edit or delete it. With nothing left the screen clears to one line —
-  *You finished all* — and the + leaves the header to sit beside it, over a desk that has
+  it; tap the card to edit or delete it. With nothing left the screen clears and a paper
+  plane flies in carrying the news — see [The flight](#the-flight) — over a desk that has
   been tidied for the day.
 - **Bag** — the drawing this was specified in: a backpack in the middle with everything that
   goes into it around the outside. Nothing points at anything — what is on the page is what
@@ -60,6 +60,51 @@ how they look; which ones exist comes from `SCHEDULE`.
 Homework saved by an older version, when subjects were picked by hand, is moved onto the lesson
 it was meant for — Math onto מתמטיקה, Hebrew onto שפה. Anything that matches no lesson keeps the
 subject it had rather than losing it.
+
+## The flight
+
+Finish everything and the homework screen clears, and a paper plane comes in from the
+left trailing a dashed line, loops once, and levels out at the top of the screen. The
+message is written on its wing — *You finished all* — so the screen never says it twice.
+
+It flies **once a launch**. Coming back to the tab later in the same session finds it
+already there, resting exactly where it landed; a reload flies it again. Finishing your
+last piece of homework counts as the first time the screen has cleared, so the plane
+arrives on the same beat the row leaves.
+
+Someone who has never written anything down does not get a plane. There is nothing to
+celebrate yet, so that screen keeps its quiet line and its own +.
+
+### How it is built
+
+Nine pictures of the plane were supplied, and they turned out to be nine moments of one
+flight rather than nine different drawings. So they are the keyframes: the plane's centre
+and width were measured in each picture, converted into the scene's own units, and written
+straight into `@keyframes pf-fly`. The browser draws everything in between, which is where
+the extra frames come from.
+
+The plane is the artwork, cut off the wall it was drawn on. Colour keying could not do it:
+the room is warm-lit, so paper in shadow is exactly as warm as the wall behind it, and a
+warmth threshold eats half the plane. Subtracting a clean frame could not do it either —
+white paper on a cream wall is only about nine levels apart. What works is both at once.
+Where paper covers the wall the colour moves *and* the warmth drops, and that combined
+score reads 2-6 on bare wall against about 25 across the plane, which do not overlap. The
+plate it is subtracted from is the one frame whose plane is somewhere else entirely; a
+median of all nine would not do, because six of them park the plane in the same corner and
+the median there is the plane, not the wall.
+
+The trail is drawn rather than photographed, so it stays crisp at any size and can take the
+night colours. Its shape was traced from the dashes in the pictures, not sketched by eye.
+
+The plane and the trail share one 100-by-58 scene and one timeline, down to the same easing
+on each leg, which is what keeps the end of the trail under the plane's tail the whole way
+across. The trail is revealed by a clip rectangle whose scale tracks the plane's tail, so
+there is no mask to re-raster. Nothing animates but transforms.
+
+The scene is laid **over** the screen rather than taking a share of it. In the flow it is as
+tall as a third of a phone, which on a short one pushed the desk down through the tab bar.
+
+If your phone is set to reduce motion, the plane is simply already there.
 
 ## Timetable
 
@@ -211,7 +256,8 @@ styles.css    the whole visual system
 app.js        all behaviour, one file, sectioned
 sw.js         offline cache + notification clicks
 server.js     dependency-free static server
-art/          the desk the homework screen clears to when nothing is left
+art/          the desk the homework screen clears to when nothing is left, the paper
+              plane that flies in over it, and the bag's ten pieces
 icons/        app icons, built from the supplied logo. The tab, launcher and 512px
               icons keep the artwork’s rounded tile and its transparent corners; the
               iOS one is opaque edge to edge, because iOS fills transparency with

@@ -15,6 +15,7 @@
   --done:       #3F7D5F;
   --late:       #A56B33;
   --stamp:      #9A4A38;   /* the red-brown of an inked stamp */
+  --trail:      #A9B2D4;   /* the pencil the plane's path is dashed in */
   --tint:       14%;       /* subject colour over parchment */
   --on-ink:     #FBF7EE;
 
@@ -49,6 +50,7 @@
     --done:      #5FA87F;
     --late:      #C99150;
     --stamp:     #C4705A;
+    --trail:     #59617F;
     --tint:      24%;
     --on-ink:    #12161B;
     --shadow:    0 1px 2px rgba(0,0,0,.45), 0 10px 28px -16px rgba(0,0,0,.75);
@@ -68,6 +70,7 @@
   --done:      #5FA87F;
   --late:      #C99150;
   --stamp:     #C4705A;
+  --trail:     #59617F;
   --tint:      24%;
   --on-ink:    #12161B;
   --shadow:    0 1px 2px rgba(0,0,0,.45), 0 10px 28px -16px rgba(0,0,0,.75);
@@ -381,11 +384,16 @@ button { border: 0; background: none; cursor: pointer; }
    both edges and fades into the paper, so nothing frames it. */
 
 .empty-home {
+  position: relative;   /* the flight is laid over this, not inside its column */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
   gap: 18px;
+  /* The desk is already screen-wide and breathes to scale 1.018, and the plane
+     starts outside the scene: both would have the page scrolling sideways by a
+     few pixels. Nothing here is meant to be reachable past the edges. */
+  overflow: hidden;
   /* Fill exactly what the header and the tab bar leave, so the picture lands
      just above the tabs rather than floating in the middle of the page. */
   min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)
@@ -442,6 +450,97 @@ button { border: 0; background: none; cursor: pointer; }
 }
 :root[data-theme="dark"] .empty-art {
   filter: brightness(.5) saturate(.78) contrast(1.06) opacity(.92);
+}
+
+
+/* ── The flight ──────────────────────────────────────────────
+   Nine pictures of a paper plane arrived as nine moments of one flight. The
+   plane's centre and width were measured in each and converted into this
+   scene's units, and those measurements are the keyframes below; the browser
+   draws every frame in between.
+
+   The plane and its trail share one 100-by-58 scene and one timeline, down to
+   the same easing on each leg, which is what keeps the end of the trail under
+   the plane's tail the whole way across. Nothing animates but transforms, so
+   the whole flight is compositing and no layout. */
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The plane flies over the screen rather than taking a share of it. In the
+   flow its scene is as tall as a third of a phone, which on a short one pushed
+   the desk down through the tab bar and left the page scrolling. Out of the
+   flow the desk sits exactly where it always did, and the flight has the whole
+   upper half to cross. */
+.pf {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: block;
+  width: 100%;
+  /* The plane starts outside the scene and flies in, so this must clip — a page
+     that scrolls sideways is worse than a plane with a short runway. */
+  overflow: hidden;
+}
+
+.pf-trail {
+  fill: none;
+  stroke: var(--trail);
+  stroke-width: .85;
+  stroke-linecap: round;
+  stroke-dasharray: 2.1 2.9;
+}
+
+.pf-plane,
+.pf-wipe { transform-box: fill-box; }
+.pf-plane { transform-origin: center; }
+.pf-wipe  { transform-origin: left; transform: scaleX(.625); }
+
+/* Already flown this launch: it is simply there, where it landed. */
+.is-land .pf-plane { transform: none; }
+
+.is-fly .pf-plane { animation: pf-fly 3.1s both; }
+.is-fly .pf-wipe  { animation: pf-wipe 3.1s both; }
+
+/* Measured from the pictures: in small and low from the left, growing as it
+   crosses, a dip two thirds of the way, then a climb into place. */
+@keyframes pf-fly {
+  0%   { transform: translate(-78.2px, 14.8px) scale(.22); opacity: 0;
+         animation-timing-function: cubic-bezier(.2,.5,.5,1); }
+  10%  { opacity: 1; }
+  24%  { transform: translate(-49.9px, 9.6px) scale(.3);
+         animation-timing-function: linear; }
+  52%  { transform: translate(-25.2px, 9.6px) scale(.6);
+         animation-timing-function: linear; }
+  78%  { transform: translate(-4.2px, 13.9px) scale(.81);
+         animation-timing-function: cubic-bezier(.3,0,.2,1); }
+  100% { transform: translate(0, 0) scale(1); opacity: 1; }
+}
+
+/* The trail is revealed to exactly where the plane's tail has reached, which is
+   its centre less half its width at that moment. Same legs, same easings. */
+@keyframes pf-wipe {
+  0%   { transform: scaleX(.001); animation-timing-function: cubic-bezier(.2,.5,.5,1); }
+  24%  { transform: scaleX(.245); animation-timing-function: linear; }
+  52%  { transform: scaleX(.421); animation-timing-function: linear; }
+  78%  { transform: scaleX(.578); animation-timing-function: cubic-bezier(.3,0,.2,1); }
+  100% { transform: scaleX(.625); }
+}
+
+/* Lit for a bright room, like the desk below it. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .pf-plane {
+    filter: brightness(.62) saturate(.8) contrast(1.04);
+  }
+}
+:root[data-theme="dark"] .pf-plane {
+  filter: brightness(.62) saturate(.8) contrast(1.04);
 }
 
 
