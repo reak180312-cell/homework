@@ -31,13 +31,16 @@ Once installed it opens full screen, works offline, and keeps its own data.
 Open it → Add homework → See it all together → Finish it → Earn XP → Repeat tomorrow
 ```
 
-- **Homework** — everything unfinished, soonest first. Each card wears its subject's colour
-  with the name down its spine, when it is for, and what to do. Tap the circle on the right
-  (or swipe the card right) to finish it; tap the card to edit or delete it. With nothing
-  left the screen clears to one line — *You finished all* — and the + leaves the header to
-  sit beside it, over a desk that has been tidied for the day.
+- **Homework** — everything unfinished, soonest first. Each card leads with the subject in
+  its own colour and when the work is for, then says what to do in the largest type on the
+  screen, because that is the part you actually read. A note underneath is optional and only
+  shows when there is one. Tap the circle on the right (or swipe the card right) to finish
+  it; tap the card to edit or delete it. With nothing left the screen clears to one line —
+  *You finished all* — and the + leaves the header to sit beside it, over a desk that has
+  been tidied for the day.
 - **Bag** — the drawing this was specified in: a backpack in the middle with everything that
-  goes into it around the outside, an arrow from each one in. Pick any day along the top;
+  goes into it around the outside. Nothing points at anything — what is on the page is what
+  you take, and the picture says so without being explained. Pick any day along the top;
   everything changes with it. Your own reminders for that day sit underneath, because those
   are things to put in the bag too.
 - **Reminders** — things to remember, each set for a day and optionally a single lesson.
@@ -123,15 +126,39 @@ limitation of web apps, not a bug.
 
 ## The collection
 
-Twelve little creatures, one per level. Blip turns up at level 1, Luna at level 12.
+Fifty little creatures. Every level hatches one, and which one is luck: the egg is rolled
+when it cracks, and it can be any of the fifty you have not met.
+
+They come in five kinds, from the ones you will see often to the one you may never:
+
+| Rarity | How many | Chance per egg |
+| --- | --- | --- |
+| Common | 20 | 55% |
+| Uncommon | 14 | 26% |
+| Rare | 9 | 13% |
+| Epic | 5 | 5% |
+| Legendary | 2 | 1% |
+
+The roll picks a rarity by those weights, then picks at random among the ones of that
+rarity you are still missing. Once a whole tier is collected, a roll that lands on it falls
+back to anyone still missing, evenly — so an egg is never wasted, and the rarer ones start
+turning up faster as the common ones run out. A creature never hatches twice while a
+stranger is left. Fifty levels is 500 pieces of homework, so the last of them is a long way
+off — which is the point.
 
 ### Hatching
 
 Reaching a level takes over the screen. An egg drops in, rocks, cracks along its middle,
-breaks open, and whoever was inside pops out. Every creature has its own shell — twelve
-patterns and twelve colours — so the same thing never hatches twice. It happens once, the
-first time you reach that level, and a tap is ignored until the egg has actually opened,
-so a stray touch can't skip the one thing worth watching.
+breaks open, and whoever was inside pops out. The shell tells you something before it
+opens: its pattern is the rarity — dots, stripes, stars, swirls, a gold crown — and its
+colour is the creature inside, so no two eggs look quite alike and a good one is worth
+watching land. The rarity is the headline when it hatches; the new level is said quietly
+underneath, because by then it is the smaller news.
+
+It happens once, the first time you reach that level, and a tap is ignored until the egg
+has actually opened, so a stray touch can't skip the one thing worth watching. Which
+creature it was is written down the moment it is rolled, so closing the app mid-hatch
+cannot turn it into somebody else.
 
 The whole sequence is CSS keyframes on one fixed timeline. Nothing is measured or stepped
 in script, so there is nothing to drift out of step.
@@ -145,14 +172,16 @@ what they eat, what they say, what they are best at, what they are not, and one 
 them at the foot of the page. Nine facts each.
 
 Turn pages with the arrows or by swiping. Whoever is coming next sits at the back as an
-egg, with how much XP is still to go; the ones after that are not in the book yet. The
+egg, with how much XP is still to go — and nothing about who is inside it, because that
+is not decided until it cracks. The ones after that are not in the book at all. The
 shelf under the cover still shows everyone at a glance, and tapping a creature opens the
 book at their page.
 
-MONSTERS in [app.js](app.js) holds all twelve. They are drawn, not pictures: monsterSvg()
+MONSTERS in [app.js](app.js) holds all fifty. They are drawn, not pictures: monsterSvg()
 composes a body shape, one to three eyes, something on top and a marking, over a shared set
-of big eyes, blush and a smile, and eggSvg() does the same for shells — so twelve of them
-read as one family and nothing has to be downloaded.
+of big eyes, blush and a smile, and eggSvg() does the same for shells — so fifty of them
+read as one family, the whole cast costs a few kilobytes of code, and nothing has to be
+downloaded.
 
 ## Data
 
@@ -162,7 +191,7 @@ Stored under the `homework.v1` key in local storage:
 Subject      — not stored: taken from the timetable, keyed by the lesson's own name
 Homework     { id, subjectId, title, dueDate, createdAt, completed, completedAt }
 Note         { id, text, day, lesson, createdAt }  // day 0-4 = Sun-Thu, null = every day
-UserProgress { xp, level, shownUpTo,    // +10 XP per homework, 100 XP per level, twelve levels
+UserProgress { xp, level, shownUpTo,    // +10 XP per homework, 100 XP per level, fifty of them
                metAt }                  // shownUpTo stops a hatching replaying
 Settings     { dailyReminderEnabled, dailyReminderTime,
                bagReminderEnabled, bagReminderTime }

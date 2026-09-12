@@ -208,15 +208,15 @@ const PACK_PLACE = { x: 202, y: 232 };
    Sport, the MacBook and the Tanach share the slot beside the bag and the
    AirPods take the one above it: they never fall on the same day. */
 const BAG_PLACES = {
-  pencil:   { x: 86,  y: 84,  label: 134, from: [128, 130], to: [150, 160] },
-  bottle:   { x: 333, y: 88,  label: 145, from: [298, 140], to: [266, 168] },
-  airpods:  { x: 200, y: 470, label: 528, from: [200, 428], to: [200, 340] },
-  lunch:    { x: 68,  y: 212, label: 247, from: [112, 216], to: [130, 222] },
-  shoes:    { x: 340, y: 212, label: 253, from: [290, 216], to: [272, 222] },
-  laptop:   { x: 340, y: 210, label: 254, from: [286, 216], to: [272, 222] },
-  tanach:   { x: 340, y: 210, label: 253, from: [308, 216], to: [274, 222] },
-  notebook: { x: 88,  y: 378, label: 432, from: [134, 348], to: [156, 322] },
-  books:    { x: 318, y: 372, label: 420, from: [270, 344], to: [250, 324] },
+  pencil:   { x: 86,  y: 84,  label: 134 },
+  bottle:   { x: 333, y: 88,  label: 145 },
+  airpods:  { x: 200, y: 470, label: 528 },
+  lunch:    { x: 68,  y: 212, label: 247 },
+  shoes:    { x: 340, y: 212, label: 253 },
+  laptop:   { x: 340, y: 210, label: 254 },
+  tanach:   { x: 340, y: 210, label: 253 },
+  notebook: { x: 88,  y: 378, label: 432 },
+  books:    { x: 318, y: 372, label: 420 },
 };
 
 /** The wash behind each name, taken from the thing it belongs to. */
@@ -225,13 +225,6 @@ const BAG_TINT = {
   notebook: '#E4918A', books: '#6E94C4', laptop: '#9AA3AE', airpods: '#9AA3AE',
   tanach: '#3E5C8A',
 };
-
-/** A dashed lead that stops at a small open ring just short of the bag. */
-function bagArrow(from, to) {
-  return `
-    <path class="bag-arrow" d="M${from[0]} ${from[1]}L${to[0]} ${to[1]}" />
-    <circle class="bag-head" cx="${to[0]}" cy="${to[1]}" r="7" />`;
-}
 
 /** One picture, centred on its place, sized as a share of the scene. */
 function bagPic(key, place, extra, H) {
@@ -251,7 +244,6 @@ function bagScene(dayIndex) {
   const things = bagThings(dayIndex).filter(t => BAG_PLACES[t.key]);
   const H = things.some(t => BAG_LOW.includes(t.key)) ? 560 : BAG_SCENE.h;
 
-  const leads = things.map(t => bagArrow(BAG_PLACES[t.key].from, BAG_PLACES[t.key].to)).join('');
   const pics = things.map(t => bagPic(t.key, BAG_PLACES[t.key], 'bag-thing', H)).join('');
 
   const labels = things.map((t) => {
@@ -267,7 +259,6 @@ function bagScene(dayIndex) {
 
   return `
     <div class="bag-scene" style="aspect-ratio:${BAG_SCENE.w}/${H}">
-      <svg viewBox="0 0 ${BAG_SCENE.w} ${H}" aria-hidden="true">${leads}</svg>
       ${bagPic('pack', PACK_PLACE, 'bag-pack', H)}
       ${pics}
       ${labels}
@@ -293,160 +284,358 @@ function schoolDayIndex(d = new Date()) {
 }
 
 /* ── The collection ────────────────────────────────────────
-   One little creature per level. They are drawn rather than dropped in
-   as pictures: same line weight, same big eyes, same rounded everything,
-   so twelve of them sit together as one family. */
+   Fifty little creatures. They are drawn rather than dropped in as pictures:
+   same line weight, same big eyes, same rounded everything, so fifty of them
+   sit together as one family.
 
-const MONSTERS = [
-  { level: 1, id: 'blip', name: 'Blip', colour: '#5FB89C', shape: 'round', eyes: 1, top: 'antennae', mark: 'none',
-    egg: 'dots', shell: '#DFF1EA',
-    age: 'Three weeks old',
-    size: 'Fits in a cupped hand',
-    lives: 'In the pencil case, under the rulers',
-    eats: 'Pencil shavings, apparently',
-    says: 'A soft blip, about once an hour',
-    hobbies: ['Blinking slowly', 'Rolling downhill'],
-    best: 'Finding things you dropped',
-    worst: 'Staying awake past nine',
-    fact: 'Blip has one eye and has never once complained about it.' },
+   Nobody is tied to a level any more. Levelling up cracks an egg and whoever
+   is inside is whoever the roll gave you — which is why they have rarities,
+   and why the egg is patterned by rarity: you can tell how lucky you were
+   before it opens. The first twelve keep the ids they always had, so a
+   collection made before this still counts. */
 
-  { level: 2, id: 'pom', name: 'Pom', colour: '#E08BA6', shape: 'cloud', eyes: 2, top: 'none', mark: 'none',
-    egg: 'hearts', shell: '#FBE4EA',
-    age: 'Half a year',
-    size: 'About the size of a plum',
-    lives: 'In the hood of your coat',
-    eats: 'Anything warm',
-    says: 'Nothing at all, ever',
-    hobbies: ['Napping in socks', 'Being carried'],
-    best: 'Being comfortable anywhere',
-    worst: 'Walking',
-    fact: 'Pom has never walked anywhere by itself and does not intend to start.' },
-
-  { level: 3, id: 'nib', name: 'Nib', colour: '#9186D4', shape: 'tall', eyes: 3, top: 'none', mark: 'none',
-    egg: 'triangles', shell: '#E8E5F6',
-    age: 'Four months',
-    size: 'As tall as a glue stick',
-    lives: 'Behind the books on the shelf',
-    eats: 'Crumbs, in a very tidy way',
-    says: 'Mm.',
-    hobbies: ['Watching everything at once', 'Tidying'],
-    best: 'Noticing what moved',
-    worst: 'Surprises',
-    fact: 'With three eyes Nib can watch the door, the window and you at the same time.' },
-
-  { level: 4, id: 'tuft', name: 'Tuft', colour: '#EC9A72', shape: 'round', eyes: 2, top: 'ears', mark: 'none',
-    egg: 'stripes', shell: '#FBE8DC',
-    age: 'One year',
-    size: 'A grapefruit with ears',
-    lives: 'At the bottom of your school bag',
-    eats: 'Half a biscuit, saved for later',
-    says: 'A small hum when it rains',
-    hobbies: ['Listening to rain', 'Hiding in bags'],
-    best: 'Hearing things a room away',
-    worst: 'Loud rooms',
-    fact: 'Tuft can hear a packet being opened from the next room.' },
-
-  { level: 5, id: 'glim', name: 'Glim', colour: '#E3B655', shape: 'drop', eyes: 2, top: 'none', mark: 'glow',
-    egg: 'stars', shell: '#F9EED2',
-    age: 'Nobody knows',
-    size: 'Roughly a lamp',
-    lives: 'On the desk, after dark',
-    eats: 'Does not. Just glows.',
-    says: 'A faint buzz, like a bulb',
-    hobbies: ['Glowing gently', 'Reading past bedtime'],
-    best: 'Being the last light on',
-    worst: 'Mornings',
-    fact: 'Glim has finished more books than anyone else here.' },
-
-  { level: 6, id: 'moss', name: 'Moss', colour: '#6BA155', shape: 'round', eyes: 2, top: 'sprout', mark: 'none',
-    egg: 'leaves', shell: '#E4F0DC',
-    age: 'Two springs',
-    size: 'A flowerpot',
-    lives: 'On the windowsill',
-    eats: 'Sunlight and a little water',
-    says: 'A creak, like a growing branch',
-    hobbies: ['Growing things', 'Sitting in the sun'],
-    best: 'Keeping plants alive',
-    worst: 'Being indoors too long',
-    fact: 'The sprout on Moss’s head is a different plant every spring.' },
-
-  { level: 7, id: 'wisp', name: 'Wisp', colour: '#7BAED6', shape: 'wisp', eyes: 2, top: 'none', mark: 'none',
-    egg: 'waves', shell: '#E2EEF7',
-    age: 'Older than it looks',
-    size: 'Hard to say — it keeps changing',
-    lives: 'Wherever the draught is',
-    eats: 'Nothing anyone has seen',
-    says: 'A long sigh',
-    hobbies: ['Drifting', 'Turning up quietly'],
-    best: 'Appearing behind you',
-    worst: 'Staying in one place',
-    fact: 'Nobody has ever seen Wisp arrive. It is simply there.' },
-
-  { level: 8, id: 'cinder', name: 'Cinder', colour: '#DB7F52', shape: 'round', eyes: 2, top: 'horns', mark: 'none',
-    egg: 'zigzag', shell: '#FAE3D5',
-    age: 'Eight months',
-    size: 'A big mug',
-    lives: 'Next to the radiator',
-    eats: 'Toast crusts',
-    says: 'A crackle, like a fire',
-    hobbies: ['Warming cold hands', 'Small mischief'],
-    best: 'Warming cold hands',
-    worst: 'Keeping a secret',
-    fact: 'Cinder is exactly as warm as a fresh cup of tea.' },
-
-  { level: 9, id: 'pebble', name: 'Pebble', colour: '#7F92A6', shape: 'square', eyes: 2, top: 'none', mark: 'spots',
-    egg: 'speckles', shell: '#E6EAEF',
-    age: 'Very old',
-    size: 'A paperweight',
-    lives: 'Exactly where you left it',
-    eats: 'Once a month, quietly',
-    says: 'Nothing you would notice',
-    hobbies: ['Staying put', 'Collecting smaller pebbles'],
-    best: 'Not moving',
-    worst: 'Hurrying',
-    fact: 'Pebble has been in the same spot since Tuesday and is very pleased about it.' },
-
-  { level: 10, id: 'fizz', name: 'Fizz', colour: '#49A9A8', shape: 'round', eyes: 2, top: 'antennae', mark: 'bubbles',
-    egg: 'bubbles', shell: '#DCEFEF',
-    age: 'Two months',
-    size: 'A fizzy drink can',
-    lives: 'In the water bottle pocket',
-    eats: 'Bubbles, mostly',
-    says: 'A steady stream of questions',
-    hobbies: ['Fizzing', 'Asking questions'],
-    best: 'Asking but why',
-    worst: 'Sitting still',
-    fact: 'Fizz has asked about four thousand questions and is not finished.' },
-
-  { level: 11, id: 'snug', name: 'Snug', colour: '#AC825E', shape: 'cloud', eyes: 2, top: 'fringe', mark: 'none',
-    egg: 'checks', shell: '#F1E6D8',
-    age: 'Three years',
-    size: 'A folded jumper',
-    lives: 'Under the duvet',
-    eats: 'Breakfast, at length',
-    says: 'A long, contented sound',
-    hobbies: ['Blanket forts', 'Long breakfasts'],
-    best: 'Building a fort out of anything',
-    worst: 'Getting up',
-    fact: 'Snug once stayed in bed for a Sunday and most of a Monday.' },
-
-  { level: 12, id: 'luna', name: 'Luna', colour: '#6A78C0', shape: 'tall', eyes: 2, top: 'none', mark: 'stars',
-    egg: 'moons', shell: '#E4E6F5',
-    age: 'One whole moon',
-    size: 'As tall as a bedside lamp',
-    lives: 'On the windowsill at night',
-    eats: 'Nothing. Watches instead.',
-    says: 'The names of stars, quietly',
-    hobbies: ['Staying up late', 'Naming the stars'],
-    best: 'Knowing which star is which',
-    worst: 'Being awake before noon',
-    fact: 'Luna has named every star it can see, and a few it cannot.' },
+const RARITY = [
+  { key: 'common',    label: 'Common',    weight: 55, colour: '#8A94A2' },
+  { key: 'uncommon',  label: 'Uncommon',  weight: 26, colour: '#4FA83D' },
+  { key: 'rare',      label: 'Rare',      weight: 13, colour: '#3E63DD' },
+  { key: 'epic',      label: 'Epic',      weight: 5,  colour: '#9B51C9' },
+  { key: 'legendary', label: 'Legendary', weight: 1,  colour: '#D9A94A' },
 ];
 
-const MAX_LEVEL = MONSTERS.length;
+const rarityOf = (key) => RARITY.find(r => r.key === key) || RARITY[0];
 
-const monsterFor = (level) => MONSTERS[Math.min(level, MAX_LEVEL) - 1];
-const collected = (level) => MONSTERS.filter(m => m.level <= level);
+const MONSTERS = [
+  { id: 'blip', name: 'Blip', rarity: 'common', colour: '#5FB89C', shape: 'round', eyes: 1, top: 'antennae', mark: 'none',
+    age: 'Three weeks old', size: 'Fits in a cupped hand', lives: 'In the pencil case, under the rulers',
+    eats: 'Pencil shavings, apparently', says: 'A soft blip, about once an hour',
+    hobbies: ['Blinking slowly', 'Rolling downhill'], best: 'Finding things you dropped', worst: 'Staying awake past nine',
+    fact: 'Blip has one eye and has never once complained about it.' },
+
+  { id: 'pom', name: 'Pom', rarity: 'common', colour: '#E08BA6', shape: 'cloud', eyes: 2, top: 'none', mark: 'none',
+    age: 'Half a year', size: 'About the size of a plum', lives: 'In the hood of your coat',
+    eats: 'Anything warm', says: 'Nothing at all, ever',
+    hobbies: ['Napping in socks', 'Being carried'], best: 'Being comfortable anywhere', worst: 'Walking',
+    fact: 'Pom has never walked anywhere by itself and does not intend to start.' },
+
+  { id: 'nib', name: 'Nib', rarity: 'uncommon', colour: '#9186D4', shape: 'tall', eyes: 3, top: 'none', mark: 'none',
+    age: 'Four months', size: 'As tall as a glue stick', lives: 'Behind the books on the shelf',
+    eats: 'Crumbs, in a very tidy way', says: 'Mm.',
+    hobbies: ['Watching everything at once', 'Tidying'], best: 'Noticing what moved', worst: 'Surprises',
+    fact: 'With three eyes Nib can watch the door, the window and you at the same time.' },
+
+  { id: 'tuft', name: 'Tuft', rarity: 'common', colour: '#EC9A72', shape: 'round', eyes: 2, top: 'ears', mark: 'none',
+    age: 'One year', size: 'A grapefruit with ears', lives: 'At the bottom of your school bag',
+    eats: 'Half a biscuit, saved for later', says: 'A small hum when it rains',
+    hobbies: ['Listening to rain', 'Hiding in bags'], best: 'Hearing things a room away', worst: 'Loud rooms',
+    fact: 'Tuft can hear a packet being opened from the next room.' },
+
+  { id: 'glim', name: 'Glim', rarity: 'rare', colour: '#E3B655', shape: 'drop', eyes: 2, top: 'none', mark: 'glow',
+    age: 'Nobody knows', size: 'Roughly a lamp', lives: 'On the desk, after dark',
+    eats: 'Does not. Just glows.', says: 'A faint buzz, like a bulb',
+    hobbies: ['Glowing gently', 'Reading past bedtime'], best: 'Being the last light on', worst: 'Mornings',
+    fact: 'Glim has finished more books than anyone else here.' },
+
+  { id: 'moss', name: 'Moss', rarity: 'common', colour: '#6BA155', shape: 'round', eyes: 2, top: 'sprout', mark: 'none',
+    age: 'Two springs', size: 'A flowerpot', lives: 'On the windowsill',
+    eats: 'Sunlight and a little water', says: 'A creak, like a growing branch',
+    hobbies: ['Growing things', 'Sitting in the sun'], best: 'Keeping plants alive', worst: 'Being indoors too long',
+    fact: 'The sprout on Moss’s head is a different plant every spring.' },
+
+  { id: 'wisp', name: 'Wisp', rarity: 'rare', colour: '#7BAED6', shape: 'wisp', eyes: 2, top: 'none', mark: 'none',
+    age: 'Older than it looks', size: 'Hard to say — it keeps changing', lives: 'Wherever the draught is',
+    eats: 'Nothing anyone has seen', says: 'A long sigh',
+    hobbies: ['Drifting', 'Turning up quietly'], best: 'Appearing behind you', worst: 'Staying in one place',
+    fact: 'Nobody has ever seen Wisp arrive. It is simply there.' },
+
+  { id: 'cinder', name: 'Cinder', rarity: 'uncommon', colour: '#DB7F52', shape: 'round', eyes: 2, top: 'horns', mark: 'none',
+    age: 'Eight months', size: 'A big mug', lives: 'Next to the radiator',
+    eats: 'Toast crusts', says: 'A crackle, like a fire',
+    hobbies: ['Warming cold hands', 'Small mischief'], best: 'Warming cold hands', worst: 'Keeping a secret',
+    fact: 'Cinder is exactly as warm as a fresh cup of tea.' },
+
+  { id: 'pebble', name: 'Pebble', rarity: 'common', colour: '#7F92A6', shape: 'square', eyes: 2, top: 'none', mark: 'spots',
+    age: 'Very old', size: 'A paperweight', lives: 'Exactly where you left it',
+    eats: 'Once a month, quietly', says: 'Nothing you would notice',
+    hobbies: ['Staying put', 'Collecting smaller pebbles'], best: 'Not moving', worst: 'Hurrying',
+    fact: 'Pebble has been in the same spot since Tuesday and is very pleased about it.' },
+
+  { id: 'fizz', name: 'Fizz', rarity: 'uncommon', colour: '#49A9A8', shape: 'round', eyes: 2, top: 'antennae', mark: 'bubbles',
+    age: 'Two months', size: 'A fizzy drink can', lives: 'In the water bottle pocket',
+    eats: 'Bubbles, mostly', says: 'A steady stream of questions',
+    hobbies: ['Fizzing', 'Asking questions'], best: 'Asking but why', worst: 'Sitting still',
+    fact: 'Fizz has asked about four thousand questions and is not finished.' },
+
+  { id: 'snug', name: 'Snug', rarity: 'common', colour: '#AC825E', shape: 'cloud', eyes: 2, top: 'fringe', mark: 'none',
+    age: 'Three years', size: 'A folded jumper', lives: 'Under the duvet',
+    eats: 'Breakfast, at length', says: 'A long, contented sound',
+    hobbies: ['Blanket forts', 'Long breakfasts'], best: 'Building a fort out of anything', worst: 'Getting up',
+    fact: 'Snug once stayed in bed for a Sunday and most of a Monday.' },
+
+  { id: 'luna', name: 'Luna', rarity: 'epic', colour: '#6A78C0', shape: 'tall', eyes: 2, top: 'none', mark: 'stars',
+    age: 'One whole moon', size: 'As tall as a bedside lamp', lives: 'On the windowsill at night',
+    eats: 'Nothing. Watches instead.', says: 'The names of stars, quietly',
+    hobbies: ['Staying up late', 'Naming the stars'], best: 'Knowing which star is which', worst: 'Being awake before noon',
+    fact: 'Luna has named every star it can see, and a few it cannot.' },
+
+  { id: 'bud', name: 'Bud', rarity: 'common', colour: '#8FBF6A', shape: 'bean', eyes: 2, top: 'leaf', mark: 'none',
+    age: 'One spring', size: 'A small apple', lives: 'In the plant pot, pretending',
+    eats: 'Rainwater', says: 'A tiny rustle',
+    hobbies: ['Pretending to be a plant', 'Turning to face the sun'], best: 'Standing very still', worst: 'Being watered',
+    fact: 'Bud has been mistaken for a houseplant eleven times.' },
+
+  { id: 'mip', name: 'Mip', rarity: 'common', colour: '#D6A2C4', shape: 'blob', eyes: 1, top: 'tuft', mark: 'freckles',
+    age: 'Five weeks', size: 'A marshmallow', lives: 'Under the bed',
+    eats: 'Dust, allegedly', says: 'Mip.',
+    hobbies: ['Squeezing into gaps', 'Saying its own name'], best: 'Fitting anywhere', worst: 'Being found',
+    fact: 'Mip says only one word and that word is Mip.' },
+
+  { id: 'dot', name: 'Dot', rarity: 'common', colour: '#E8C35C', shape: 'pebble', eyes: 2, top: 'none', mark: 'spots',
+    age: 'Two months', size: 'A large coin', lives: 'In your coat pocket',
+    eats: 'Half a raisin', says: 'A click, twice',
+    hobbies: ['Counting things', 'Lining things up'], best: 'Counting past a hundred', worst: 'Odd numbers',
+    fact: 'Dot counts everything and has never once lost its place.' },
+
+  { id: 'puff', name: 'Puff', rarity: 'common', colour: '#B9D4E8', shape: 'cloud', eyes: 2, top: 'none', mark: 'none',
+    age: 'A wet afternoon', size: 'A pillow', lives: 'Near the window on grey days',
+    eats: 'Steam off a mug', says: 'A soft whoosh',
+    hobbies: ['Floating', 'Making small weather'], best: 'Looking like a cloud', worst: 'Strong wind',
+    fact: 'It rains very slightly wherever Puff is feeling thoughtful.' },
+
+  { id: 'coco', name: 'Coco', rarity: 'common', colour: '#9C6B4A', shape: 'round', eyes: 2, top: 'ears', mark: 'none',
+    age: 'Ten months', size: 'A cocoa mug', lives: 'Beside the kettle',
+    eats: 'Anything with chocolate in it', says: 'A happy gulp',
+    hobbies: ['Warm drinks', 'Sitting on hands'], best: 'Making a room feel warmer', worst: 'Cold mornings',
+    fact: 'Coco smells faintly of hot chocolate and will not explain why.' },
+
+  { id: 'nub', name: 'Nub', rarity: 'common', colour: '#C2B8A8', shape: 'square', eyes: 2, top: 'none', mark: 'none',
+    age: 'Four years', size: 'An eraser', lives: 'In the pencil case',
+    eats: 'Mistakes', says: 'A rubbery squeak',
+    hobbies: ['Fixing mistakes', 'Getting smaller'], best: 'Undoing things', worst: 'Ink',
+    fact: 'Nub is smaller than it was last term and says that is the job.' },
+
+  { id: 'wren', name: 'Wren', rarity: 'common', colour: '#A3764F', shape: 'drop', eyes: 2, top: 'tuft', mark: 'none',
+    age: 'One autumn', size: 'A small bird, roughly', lives: 'On the curtain rail',
+    eats: 'Seeds and crumbs', says: 'Three quick notes',
+    hobbies: ['Watching from high up', 'Singing at dawn'], best: 'Spotting things first', worst: 'Being indoors',
+    fact: 'Wren wakes before everyone and has opinions about it.' },
+
+  { id: 'tilly', name: 'Tilly', rarity: 'common', colour: '#E5A0B4', shape: 'bean', eyes: 2, top: 'bow', mark: 'heart',
+    age: 'Seven months', size: 'A rolled-up sock', lives: 'In the sock drawer',
+    eats: 'Crumbs from the biscuit tin', says: 'A pleased little hum',
+    hobbies: ['Matching socks', 'Being tidy'], best: 'Finding the other sock', worst: 'Odd socks',
+    fact: 'Tilly has never lost a sock and considers this its finest work.' },
+
+  { id: 'bop', name: 'Bop', rarity: 'common', colour: '#68A8D8', shape: 'round', eyes: 2, top: 'antennae', mark: 'none',
+    age: 'Three months', size: 'A tennis ball', lives: 'Wherever it last bounced',
+    eats: 'Whatever is going', says: 'Bop. Bop. Bop.',
+    hobbies: ['Bouncing', 'Landing on things'], best: 'Bouncing', worst: 'Standing still',
+    fact: 'Bop has not stopped bouncing since the day it hatched.' },
+
+  { id: 'sprig', name: 'Sprig', rarity: 'common', colour: '#7CB884', shape: 'tall', eyes: 2, top: 'sprout', mark: 'none',
+    age: 'Two summers', size: 'A ruler, standing up', lives: 'Among the herbs',
+    eats: 'Sunlight, mostly', says: 'A leafy whisper',
+    hobbies: ['Growing taller', 'Smelling of mint'], best: 'Smelling wonderful', worst: 'Being trimmed',
+    fact: 'Sprig grows a little every week and measures itself against the window.' },
+
+  { id: 'mo', name: 'Mo', rarity: 'common', colour: '#8E8FA8', shape: 'blob', eyes: 2, top: 'none', mark: 'none',
+    age: 'Unclear', size: 'A bowl of porridge', lives: 'Anywhere soft',
+    eats: 'Slowly', says: 'Mmmmm',
+    hobbies: ['Settling', 'Thinking it over'], best: 'Not rushing', worst: 'Being asked to decide',
+    fact: 'Mo has been thinking about something since March.' },
+
+  { id: 'gus', name: 'Gus', rarity: 'common', colour: '#D98F5C', shape: 'square', eyes: 2, top: 'horns', mark: 'none',
+    age: 'Two years', size: 'A lunchbox', lives: 'By the front door',
+    eats: 'Whatever is left', says: 'A short, gruff note',
+    hobbies: ['Guarding the door', 'Watching the street'], best: 'Noticing arrivals', worst: 'Goodbyes',
+    fact: 'Gus is at the door before the key is in the lock.' },
+
+  { id: 'pip', name: 'Pip', rarity: 'common', colour: '#EFC04F', shape: 'pebble', eyes: 1, top: 'sprout', mark: 'none',
+    age: 'A fortnight', size: 'An acorn', lives: 'In a jam jar on the shelf',
+    eats: 'A drop of water a day', says: 'A very small squeak',
+    hobbies: ['Waiting to grow', 'Being encouraged'], best: 'Patience', worst: 'Being rushed',
+    fact: 'Pip intends to be enormous one day and is taking its time.' },
+
+  { id: 'fen', name: 'Fen', rarity: 'common', colour: '#6E9E8E', shape: 'wisp', eyes: 2, top: 'none', mark: 'none',
+    age: 'A misty week', size: 'Knee-high, at a guess', lives: 'Low to the ground, early',
+    eats: 'Dew', says: 'Almost nothing',
+    hobbies: ['Sitting in fog', 'Muffling sounds'], best: 'Making mornings quiet', worst: 'Bright noon',
+    fact: 'Fen is only ever seen before eight in the morning.' },
+
+  { id: 'zuzu', name: 'Zuzu', rarity: 'uncommon', colour: '#C77FD6', shape: 'cloud', eyes: 3, top: 'tuft', mark: 'stars',
+    age: 'Eight months', size: 'A cushion', lives: 'Wherever someone is dozing',
+    eats: 'Nothing while awake', says: 'A gentle snore',
+    hobbies: ['Napping', 'Sharing dreams'], best: 'Falling asleep instantly', worst: 'Alarm clocks',
+    fact: 'Zuzu dreams other people’s dreams back at them, slightly improved.' },
+
+  { id: 'kip', name: 'Kip', rarity: 'uncommon', colour: '#5C8FBF', shape: 'bean', eyes: 2, top: 'fringe', mark: 'stripes',
+    age: 'One year', size: 'A shoe', lives: 'Under the desk',
+    eats: 'Lost pencils', says: 'A muffled hello',
+    hobbies: ['Keeping what falls', 'Sorting by colour'], best: 'Knowing where it went', worst: 'Giving things back',
+    fact: 'Everything you have ever dropped is under the desk with Kip.' },
+
+  { id: 'marl', name: 'Marl', rarity: 'uncommon', colour: '#A8896B', shape: 'square', eyes: 2, top: 'none', mark: 'swirl',
+    age: 'Nine years', size: 'A brick', lives: 'Holding a door open',
+    eats: 'Twice a year', says: 'A low rumble',
+    hobbies: ['Being useful', 'Holding things up'], best: 'Not budging', worst: 'Being moved',
+    fact: 'Marl has held the same door open since the summer before last.' },
+
+  { id: 'vex', name: 'Vex', rarity: 'uncommon', colour: '#D4606A', shape: 'spike', eyes: 2, top: 'horns', mark: 'none',
+    age: 'Six months', size: 'A closed fist', lives: 'Somewhere it was told not to',
+    eats: 'The last biscuit', says: 'A sharp tut',
+    hobbies: ['Disagreeing', 'Being right later'], best: 'Spotting the flaw', worst: 'Being told what to do',
+    fact: 'Vex has been proved right twice and will not let anyone forget it.' },
+
+  { id: 'ora', name: 'Ora', rarity: 'uncommon', colour: '#EFA23C', shape: 'drop', eyes: 2, top: 'halo', mark: 'glow',
+    age: 'One long summer', size: 'A grapefruit', lives: 'In the warmest patch of floor',
+    eats: 'Afternoon light', says: 'A warm hum',
+    hobbies: ['Following the sun', 'Warming cold feet'], best: 'Finding the sunny spot', worst: 'Curtains',
+    fact: 'Ora is always in the sunniest square of the room, whatever the hour.' },
+
+  { id: 'thistle', name: 'Thistle', rarity: 'uncommon', colour: '#8A76C4', shape: 'spike', eyes: 2, top: 'tuft', mark: 'none',
+    age: 'Two summers', size: 'A teapot', lives: 'At the edge of the garden',
+    eats: 'Whatever the wind brings', says: 'A prickly rustle',
+    hobbies: ['Standing its ground', 'Being admired from a distance'], best: 'Looking fierce', worst: 'Hugs',
+    fact: 'Thistle is far softer than it looks and would rather you did not know.' },
+
+  { id: 'bram', name: 'Bram', rarity: 'uncommon', colour: '#6B7F4A', shape: 'round', eyes: 3, top: 'leaf', mark: 'spots',
+    age: 'Four autumns', size: 'A football', lives: 'In the hedge',
+    eats: 'Berries, all of them', says: 'A contented munch',
+    hobbies: ['Finding berries', 'Getting stuck in hedges'], best: 'Reaching the high ones', worst: 'Thorns',
+    fact: 'Bram knows where every berry on the street is and when it will be ready.' },
+
+  { id: 'juno', name: 'Juno', rarity: 'uncommon', colour: '#3F8FA8', shape: 'tall', eyes: 2, top: 'crown', mark: 'none',
+    age: 'Three years', size: 'A tall glass', lives: 'At the head of the table',
+    eats: 'Politely, and first', says: 'A clear, carrying voice',
+    hobbies: ['Organising everyone', 'Making plans'], best: 'Getting things started', worst: 'Being interrupted',
+    fact: 'Juno has a plan for the week and everybody is in it.' },
+
+  { id: 'ash', name: 'Ash', rarity: 'uncommon', colour: '#7A7F86', shape: 'wisp', eyes: 2, top: 'none', mark: 'freckles',
+    age: 'After the fire', size: 'A drifting handful', lives: 'Above the fireplace',
+    eats: 'Warmth', says: 'A dry whisper',
+    hobbies: ['Drifting upward', 'Settling on things'], best: 'Going unnoticed', worst: 'Being dusted',
+    fact: 'Ash settles on everything and apologises for none of it.' },
+
+  { id: 'wick', name: 'Wick', rarity: 'uncommon', colour: '#E0803C', shape: 'tall', eyes: 1, top: 'none', mark: 'glow',
+    age: 'Burning a while', size: 'A candle', lives: 'On the shelf, alight',
+    eats: 'Slowly, itself', says: 'A quiet flicker',
+    hobbies: ['Burning steadily', 'Keeping watch at night'], best: 'Lasting longer than expected', worst: 'Draughts',
+    fact: 'Wick has been alight since the start of term and shows no sign of stopping.' },
+
+  { id: 'noor', name: 'Noor', rarity: 'uncommon', colour: '#D9C05A', shape: 'round', eyes: 2, top: 'halo', mark: 'stars',
+    age: 'One bright year', size: 'A lantern', lives: 'Wherever it is darkest',
+    eats: 'Nothing it will admit to', says: 'A soft chime',
+    hobbies: ['Lighting corners', 'Leading the way'], best: 'Being found in the dark', worst: 'Full daylight',
+    fact: 'Noor goes to the darkest corner of a room and simply stays there.' },
+
+  { id: 'ember', name: 'Ember', rarity: 'rare', colour: '#E05A3C', shape: 'drop', eyes: 2, top: 'horns', mark: 'glow',
+    age: 'Since the last fire went out', size: 'A closed hand', lives: 'In the last warm ash',
+    eats: 'A breath of air', says: 'A low crackle',
+    hobbies: ['Staying warm', 'Waiting to catch'], best: 'Outlasting the fire', worst: 'Rain',
+    fact: 'Ember is the part of the fire that refused to go out.' },
+
+  { id: 'frost', name: 'Frost', rarity: 'rare', colour: '#9FD0E0', shape: 'spike', eyes: 2, top: 'crown', mark: 'swirl',
+    age: 'One cold night', size: 'A windowpane’s worth', lives: 'On the inside of the glass',
+    eats: 'Nothing. It only spreads.', says: 'A thin crackle',
+    hobbies: ['Drawing on windows', 'Arriving overnight'], best: 'Making patterns nobody taught it', worst: 'Ten o’clock sun',
+    fact: 'Frost draws a different window every night and never repeats one.' },
+
+  { id: 'echo', name: 'Echo', rarity: 'rare', colour: '#8C9BB5', shape: 'wisp', eyes: 3, top: 'none', mark: 'swirl',
+    age: 'As old as the last thing said', size: 'The size of the room', lives: 'In empty halls',
+    eats: 'Silence', says: 'Whatever you said, a moment later',
+    hobbies: ['Repeating things', 'Waiting in stairwells'], best: 'Remembering exactly', worst: 'Carpet',
+    fact: 'Echo has never had an idea of its own and is perfectly happy about it.' },
+
+  { id: 'sable', name: 'Sable', rarity: 'rare', colour: '#4C4A5C', shape: 'bean', eyes: 2, top: 'ears', mark: 'moon',
+    age: 'Nine lives in', size: 'A cat, curled', lives: 'On the warmest chair, always',
+    eats: 'Only what it chose', says: 'Nothing, pointedly',
+    hobbies: ['Sitting where you were sitting', 'Ignoring you'], best: 'Choosing the best seat', worst: 'Being called',
+    fact: 'Sable was in your chair before you stood up. Nobody saw it move.' },
+
+  { id: 'cirrus', name: 'Cirrus', rarity: 'rare', colour: '#CFE0EE', shape: 'cloud', eyes: 2, top: 'none', mark: 'stripes',
+    age: 'High and thin', size: 'Wider than it looks', lives: 'The very top of the sky',
+    eats: 'Cold air', says: 'A far-off whistle',
+    hobbies: ['Being first to see weather', 'Streaking the sky'], best: 'Knowing what tomorrow brings', worst: 'Coming down',
+    fact: 'When Cirrus turns up, it rains within the day. It has never been wrong.' },
+
+  { id: 'onyx', name: 'Onyx', rarity: 'rare', colour: '#3A3F52', shape: 'square', eyes: 2, top: 'none', mark: 'stars',
+    age: 'Older than the building', size: 'A paving stone', lives: 'Under everything',
+    eats: 'Never, as far as anyone knows', says: 'A deep, slow note',
+    hobbies: ['Holding the floor up', 'Remembering'], best: 'Bearing weight', worst: 'Being asked to move',
+    fact: 'Onyx remembers what was here before the school was, and will not say.' },
+
+  { id: 'vela', name: 'Vela', rarity: 'rare', colour: '#5F7FD4', shape: 'drop', eyes: 2, top: 'fin', mark: 'bubbles',
+    age: 'One long voyage', size: 'A jug', lives: 'In the deep end',
+    eats: 'Whatever drifts past', says: 'A low bubble',
+    hobbies: ['Swimming in circles', 'Going deeper'], best: 'Holding its breath', worst: 'Dry land',
+    fact: 'Vela has never been to the bottom and thinks about it constantly.' },
+
+  { id: 'aurora', name: 'Aurora', rarity: 'epic', colour: '#3FBFA0', shape: 'wisp', eyes: 2, top: 'crown', mark: 'glow',
+    age: 'Nine hundred winters', size: 'The whole northern sky', lives: 'Above the cold places',
+    eats: 'Starlight', says: 'A sound you feel rather than hear',
+    hobbies: ['Rippling', 'Being photographed badly'], best: 'Stopping people in their tracks', worst: 'Cloud',
+    fact: 'Everyone who has seen Aurora describes a different colour, and all of them are right.' },
+
+  { id: 'solis', name: 'Solis', rarity: 'epic', colour: '#F0A32E', shape: 'round', eyes: 1, top: 'halo', mark: 'glow',
+    age: 'Every morning', size: 'Too bright to measure', lives: 'Just over the horizon',
+    eats: 'Nothing, and gives everything', says: 'The first bird of the day',
+    hobbies: ['Rising', 'Waking the whole street'], best: 'Turning up on time, always', worst: 'December',
+    fact: 'Solis has never once been late, in the whole history of mornings.' },
+
+  { id: 'tempest', name: 'Tempest', rarity: 'epic', colour: '#4A5A7A', shape: 'spike', eyes: 3, top: 'horns', mark: 'stripes',
+    age: 'Gathering since Tuesday', size: 'Fills the window', lives: 'Out at sea, mostly',
+    eats: 'Warm air', says: 'Thunder, eventually',
+    hobbies: ['Building slowly', 'Arriving all at once'], best: 'Making everyone look up', worst: 'Calm weather',
+    fact: 'Tempest takes three days to arrive and eleven minutes to pass.' },
+
+  { id: 'nimbus', name: 'Nimbus', rarity: 'epic', colour: '#7E8FA8', shape: 'cloud', eyes: 2, top: 'crown', mark: 'swirl',
+    age: 'A long grey season', size: 'Ceiling to floor', lives: 'Directly overhead',
+    eats: 'The sea, a little at a time', says: 'A patient, steady drumming',
+    hobbies: ['Raining', 'Turning up on sports day'], best: 'Timing', worst: 'Being wanted',
+    fact: 'Nimbus has never once rained on a day nobody minded.' },
+
+  { id: 'zenith', name: 'Zenith', rarity: 'legendary', colour: '#E8C24A', shape: 'tall', eyes: 3, top: 'crown', mark: 'stars',
+    age: 'As old as counting', size: 'As tall as the room lets it be', lives: 'At the very top of things',
+    eats: 'Nothing anyone may offer', says: 'One word, once, and it is always the right one',
+    hobbies: ['Being highest', 'Keeping perfect time'], best: 'Being exactly where it should be', worst: 'Second place',
+    fact: 'Zenith turns up only when someone has done everything they set out to do.' },
+
+  { id: 'eclipse', name: 'Eclipse', rarity: 'legendary', colour: '#2E2A44', shape: 'round', eyes: 1, top: 'halo', mark: 'glow',
+    age: 'Counted in centuries', size: 'Exactly the size of the sun, from here', lives: 'Between the light and you',
+    eats: 'Daylight, briefly', says: 'Absolute silence, for four minutes',
+    hobbies: ['Lining things up', 'Making birds go quiet'], best: 'Stopping everything at once', worst: 'Being predicted',
+    fact: 'When Eclipse arrives the birds stop singing, and nobody has ever taught them to.' },
+];
+
+const MONSTER_COUNT = MONSTERS.length;
+const monsterById = (id) => MONSTERS.find(m => m.id === id) || null;
+
+/** Everyone who has turned up, oldest first. */
+function collectedMonsters() {
+  const met = state.progress.metAt || {};
+  return MONSTERS.filter(m => met[m.id]).sort((a, b) => met[a.id] - met[b.id]);
+}
+
+/**
+ * Who comes out of the egg. A rarity is rolled first, then someone of that
+ * rarity you have not met — so the odds are the odds, but you are never given
+ * a creature you already have while any stranger is left.
+ */
+function rollMonster() {
+  const met = state.progress.metAt || {};
+  const strangers = MONSTERS.filter(m => !met[m.id]);
+  if (!strangers.length) return null;
+
+  const total = RARITY.reduce((sum, r) => sum + r.weight, 0);
+  let n = Math.random() * total;
+  for (const r of RARITY) {
+    n -= r.weight;
+    if (n > 0) continue;
+    const tier = strangers.filter(m => m.rarity === r.key);
+    if (tier.length) return tier[Math.floor(Math.random() * tier.length)];
+    break;                                    // that tier is finished
+  }
+  return strangers[Math.floor(Math.random() * strangers.length)];
+}
 
 /** The body outline. Everything else is placed relative to it. */
 function bodyPath(shape) {
@@ -461,6 +650,14 @@ function bodyPath(shape) {
       return '<path d="M28 52a13 13 0 0 1 6-12 15 15 0 0 1 15-11 15 15 0 0 1 15 11 13 13 0 0 1 6 12v14a18 18 0 0 1-18 18h-6a18 18 0 0 1-18-18z" />';
     case 'wisp':
       return '<path d="M50 20a28 28 0 0 1 28 28v34c-5 0-6-6-11-6s-6 6-11 6-6-6-11-6-6 6-11 6-6-6-11-6V48A28 28 0 0 1 50 20z" />';
+    case 'bean':
+      return '<path d="M30 36c9-15 31-15 40 0 7 11 5 24-2 33-7 10-29 10-36 0-7-9-9-22-2-33z" />';
+    case 'blob':
+      return '<path d="M50 24c15 0 26 9 28 22 2 13-5 26-15 32-9 5-19 5-28 0-10-6-17-19-15-32 2-13 15-22 30-22z" />';
+    case 'pebble':
+      return '<ellipse cx="50" cy="60" rx="31" ry="23" />';
+    case 'spike':
+      return '<path d="M50 20l9 11 13-4-2 14 13 8-10 10 5 14-15-2-6 12-10-11-14 3 2-14-12-9 12-9-2-14 14 4z" />';
     default:
       return '<ellipse cx="50" cy="56" rx="29" ry="28" />';
   }
@@ -497,6 +694,25 @@ function topOf(top, colour) {
     case 'fringe':
       return `<path d="M24 40c4-5 8-2 10 1 2-5 7-6 10-1 2-5 8-6 11-1 2-4 8-4 11 1 -3-12-14-19-21-19S27 28 24 40z"
                     fill="${colour}" opacity=".82" />`;
+    case 'tuft':
+      return `<g stroke="${colour}" stroke-width="4" stroke-linecap="round" fill="none">
+                <path d="M44 28l-3-12" /><path d="M50 26v-14" /><path d="M56 28l3-12" />
+              </g>`;
+    case 'leaf':
+      return `<path d="M50 30V18" stroke="#6BA155" stroke-width="3" stroke-linecap="round" fill="none" />
+              <path d="M50 22c7-7 14-6 16-5-1 7-9 11-16 5z" fill="#8CC46A" />
+              <path d="M50 24c-7-6-13-5-15-4 1 6 8 10 15 4z" fill="#7CB884" />`;
+    case 'bow':
+      return `<path d="M50 24l-14-8v16z" fill="${colour}" />
+              <path d="M50 24l14-8v16z" fill="${colour}" />
+              <circle cx="50" cy="24" r="4.5" fill="${colour}" />`;
+    case 'crown':
+      return `<path d="M32 26l3-16 8 9 7-12 7 12 8-9 3 16z" fill="#E3B655" />
+              <circle cx="50" cy="14" r="3" fill="#E3B655" />`;
+    case 'halo':
+      return `<ellipse cx="50" cy="17" rx="16" ry="5" fill="none" stroke="#E8C24A" stroke-width="3.4" />`;
+    case 'fin':
+      return `<path d="M50 12c8 6 12 12 13 18h-26c1-6 5-12 13-18z" fill="${colour}" />`;
     default:
       return '';
   }
@@ -517,6 +733,25 @@ function markOf(mark, colour) {
                 <path d="M34 66l1.4 3.2 3.2 1.4-3.2 1.4L34 75l-1.4-3.2-3.2-1.4 3.2-1.4z" />
                 <path d="M64 62l1.1 2.4 2.4 1.1-2.4 1.1L64 69l-1.1-2.4-2.4-1.1 2.4-1.1z" />
                 <path d="M55 76l.9 2 2 .9-2 .9-.9 2-.9-2-2-.9 2-.9z" />
+              </g>`;
+    case 'stripes':
+      return `<g fill="#2A2622" opacity=".12">
+                <rect x="20" y="48" width="60" height="6" rx="3" />
+                <rect x="20" y="62" width="60" height="6" rx="3" />
+                <rect x="20" y="76" width="60" height="6" rx="3" />
+              </g>`;
+    case 'swirl':
+      return `<path d="M56 66a6 6 0 1 1-6-6 10 10 0 1 1 10 10" fill="none"
+                    stroke="#FFFDF8" stroke-width="3" stroke-linecap="round" opacity=".55" />`;
+    case 'heart':
+      return `<path d="M50 76c-12-8-16-14-16-19a7 7 0 0 1 13-4 7 7 0 0 1 13 4c0 5-4 11-10 19z"
+                    fill="#FFFDF8" opacity=".45" />`;
+    case 'moon':
+      return `<path d="M62 60a13 13 0 1 1-13-13 10 10 0 0 0 13 13z" fill="#FFFDF8" opacity=".5" />`;
+    case 'freckles':
+      return `<g fill="#2A2622" opacity=".16">
+                <circle cx="33" cy="63" r="2.2" /><circle cx="40" cy="69" r="1.8" />
+                <circle cx="60" cy="69" r="1.8" /><circle cx="67" cy="63" r="2.2" />
               </g>`;
     case 'glow':
       return `<circle cx="50" cy="56" r="34" fill="${colour}" opacity=".16" />`;
@@ -625,6 +860,18 @@ function eggPattern(kind, colour, shell) {
                 <rect x="66" y="26" width="11" height="11"/><rect x="33" y="48" width="11" height="11"/>
                 <rect x="55" y="48" width="11" height="11"/><rect x="22" y="70" width="11" height="11"/>
                 <rect x="44" y="70" width="11" height="11"/><rect x="66" y="70" width="11" height="11"/>`, '.4');
+    case 'swirls':
+      return `<g fill="none" stroke="${colour}" stroke-width="3" stroke-linecap="round" opacity=".5">
+                <path d="M40 34a8 8 0 1 1-8 8 13 13 0 1 1 13 13" />
+                <path d="M62 68a7 7 0 1 1-7 7" />
+              </g>`;
+    case 'crowned':
+      return `<g opacity=".72">
+                <rect x="0" y="34" width="100" height="5" rx="2.5" fill="#D9A94A" />
+                <rect x="0" y="70" width="100" height="5" rx="2.5" fill="#D9A94A" />
+                <path d="M50 44l11 12-11 12-11-12z" fill="${colour}" />
+                <path d="M50 49l6 7-6 7-6-7z" fill="${shell}" />
+              </g>`;
     case 'moons':
       // Each crescent is the shell colour biting a circle out of the mark.
       return `<g opacity=".62">
@@ -638,6 +885,20 @@ function eggPattern(kind, colour, shell) {
   }
 }
 
+/** A pale version of a colour, for the shell a creature hatches from. */
+function paleOf(hex, amount = 0.76) {
+  const n = parseInt(String(hex).slice(1), 16);
+  const to = (c) => Math.round(c + (255 - c) * amount).toString(16).padStart(2, '0');
+  return '#' + to((n >> 16) & 255) + to((n >> 8) & 255) + to(n & 255);
+}
+
+/* The shell is patterned by rarity, so you can tell what kind of luck you have
+   had before it opens, and coloured from the creature inside, so no two eggs
+   look quite alike. */
+const RARITY_EGG = {
+  common: 'dots', uncommon: 'stripes', rare: 'stars', epic: 'swirls', legendary: 'crowned',
+};
+
 /* Clip paths need ids, and two eggs can be on screen at once. */
 let eggSeq = 0;
 
@@ -648,8 +909,8 @@ let eggSeq = 0;
 function eggSvg(m, { split = false } = {}) {
   const n = ++eggSeq;
   const face = `
-    <path d="${EGG_PATH}" fill="${m.shell}" />
-    <g clip-path="url(#eggc${n})">${eggPattern(m.egg, m.colour, m.shell)}</g>
+    <path d="${EGG_PATH}" fill="${paleOf(m.colour)}" />
+    <g clip-path="url(#eggc${n})">${eggPattern(RARITY_EGG[m.rarity] || 'dots', m.colour, paleOf(m.colour))}</g>
     <ellipse cx="37" cy="33" rx="8" ry="12" fill="#FFFFFF" opacity=".4" transform="rotate(-20 37 33)" />
     <path d="${EGG_PATH}" fill="none" stroke="${m.colour}" stroke-width="2" opacity=".4" />`;
 
@@ -922,7 +1183,7 @@ function sortForList(list) {
   });
 }
 
-const levelFor = (xp) => Math.min(MAX_LEVEL, Math.floor(xp / XP_PER_LEVEL) + 1);
+const levelFor = (xp) => Math.floor(xp / XP_PER_LEVEL) + 1;
 
 function monogram(name) {
   const words = name.trim().split(/\s+/);
@@ -940,20 +1201,42 @@ function tile(sub, extraClass = '') {
   return `<span class="subject-tile ${extraClass}" style="--sc:${sub.color}">${body}</span>`;
 }
 
+/** When it is for, short enough for a chip. */
+function dueChip(key) {
+  const diff = daysFromToday(key);
+  const weekday = () => keyToDate(key).toLocaleDateString([], { weekday: 'long' });
+  if (diff < -1) return 'Overdue';
+  if (diff === -1) return 'Was yesterday';
+  if (diff === 0) return 'For today';
+  if (diff === 1) return 'For tomorrow';
+  if (diff <= 6) return `For ${weekday()}`;
+  if (diff <= 13) return `Next ${weekday()}`;
+  return `For ${keyToDate(key).toLocaleDateString([], { day: 'numeric', month: 'short' })}`;
+}
+
 function hwRow(hw) {
   const sub = subjectById(hw.subjectId);
   const color = sub ? sub.color : 'var(--ink-2)';
   const diff = hw.dueDate ? daysFromToday(hw.dueDate) : null;
-  const soon = diff !== null && diff <= 0;
+  const soon = diff !== null && diff <= 1;
   const late = diff !== null && diff < 0;
 
   return `
     <div class="hw-slot" data-id="${hw.id}">
       <div class="hw ${soon ? 'is-soon' : ''} ${late ? 'is-late' : ''}" style="--sc:${color}">
-        <span class="hw-tab">${esc(sub ? sub.name : 'Subject')}</span>
         <button class="hw-main" data-act="edit">
-          <span class="hw-due">${hw.dueDate ? esc(duePhrase(hw.dueDate)) : 'no date yet'}</span>
-          <span class="hw-title">${esc(hw.title)}</span>
+          ${sub ? tile(sub, 'hw-tile') : '<span class="subject-tile hw-tile"></span>'}
+          <span class="hw-words">
+            <span class="hw-top">
+              <span class="hw-subject">${esc(sub ? sub.name : 'Subject')}</span>
+              <span class="hw-when">
+                <svg class="ico" aria-hidden="true"><use href="#i-calendar" /></svg>
+                ${hw.dueDate ? esc(dueChip(hw.dueDate)) : 'No date yet'}
+              </span>
+            </span>
+            <span class="hw-title">${esc(hw.title)}</span>
+            ${hw.note ? `<span class="hw-note">${esc(hw.note)}</span>` : ''}
+          </span>
         </button>
         <button class="check" data-act="complete" aria-label="Mark ${esc(hw.title)} as done">
           <span class="check-circle">
@@ -1321,8 +1604,9 @@ function renderProfile() {
   const into = xp % XP_PER_LEVEL;
   const doneCount = state.homework.filter(h => h.completed).length;
 
-  const here = monsterFor(level);
-  const allFound = level >= MAX_LEVEL;
+  const found = collectedMonsters();
+  const here = found[found.length - 1] || null;
+  const allFound = found.length >= MONSTER_COUNT;
 
   $('#level-card').innerHTML = `
     <div class="level-top">
@@ -1330,14 +1614,14 @@ function renderProfile() {
       <span class="level-xp">${allFound ? 'All found' : `${into} / ${XP_PER_LEVEL} XP`}</span>
     </div>
     <div class="bar"><div class="bar-fill" style="width:${allFound ? 100 : (into / XP_PER_LEVEL) * 100}%"></div></div>
-    <p class="level-chapter">${esc(here.name)} is with you</p>
+    <p class="level-chapter">${here ? esc(here.name) + ' is with you' : 'Your first egg is on the way'}</p>
     <p class="level-note">${allFound
-      ? 'Everyone has turned up.'
+      ? 'All fifty have turned up.'
       : (xp > 0
-          ? `${XP_PER_LEVEL - into} XP until the next one turns up`
-          : 'Finish some homework and someone will turn up.')}</p>`;
+          ? `${XP_PER_LEVEL - into} XP until the next egg`
+          : 'Finish some homework and an egg will turn up.')}</p>`;
 
-  renderCollection(level);
+  renderCollection();
 
   // History, newest first, grouped by the day it was finished.
   const done = state.homework
@@ -1383,16 +1667,17 @@ function renderProfile() {
 }
 
 
-/** The shelf of everyone you have met, with the next one waiting. */
-function renderCollection(level) {
-  const have = collected(level);
-  const next = MONSTERS[level] || null;
+/** The shelf of everyone who has turned up. Nobody is teased with what is
+ *  coming: which creature hatches next is a roll, so there is no next one
+ *  to point at. */
+function renderCollection() {
+  const have = collectedMonsters();
 
   const cover = $('#book-count');
   if (cover) {
-    cover.textContent = have.length >= MAX_LEVEL
-      ? `All ${MAX_LEVEL} found`
-      : `${have.length} of ${MAX_LEVEL} found`;
+    cover.textContent = have.length >= MONSTER_COUNT
+      ? `All ${MONSTER_COUNT} found`
+      : `${have.length} of ${MONSTER_COUNT} found`;
   }
   const peek = $('#book-peek');
   if (peek) {
@@ -1403,29 +1688,23 @@ function renderCollection(level) {
   const box = $('#collection');
   if (!box) return;
 
-  box.innerHTML = MONSTERS.map(m => {
-    const got = m.level <= level;
-    // Only the very next one is teased; the rest are not even outlined.
-    if (!got && (!next || m.level > next.level)) {
-      return '<span class="mon-slot is-empty" aria-hidden="true"></span>';
-    }
-    if (!got) {
-      return `<span class="mon-slot is-locked" title="Level ${m.level}">
-                ${monsterSvg(m, { locked: true })}
-                <span class="mon-name">Level ${m.level}</span>
-              </span>`;
-    }
-    return `<button class="mon-slot" data-monster="${m.id}" style="--mc:${m.colour}">
-              ${monsterSvg(m)}
-              <span class="mon-name">${esc(m.name)}</span>
-            </button>`;
-  }).join('');
+  box.innerHTML = have.length
+    ? have.map(m => `
+        <button class="mon-slot" data-monster="${m.id}" style="--mc:${m.colour}">
+          ${monsterSvg(m)}
+          <span class="mon-name">${esc(m.name)}</span>
+          <span class="mon-rank is-${m.rarity}">${esc(rarityOf(m.rarity).label)}</span>
+        </button>`).join('')
+    : '<span class="mon-slot is-empty" aria-hidden="true"></span>'.repeat(4);
 
   const note = $('#collection-note');
   if (note) {
-    note.textContent = have.length >= MAX_LEVEL
-      ? 'That is everyone. Tap any of them to read their page.'
-      : `Next one at level ${next ? next.level : MAX_LEVEL}. Tap a creature to open their page.`;
+    const left = MONSTER_COUNT - have.length;
+    note.textContent = !have.length
+      ? `All ${MONSTER_COUNT} are out there. Finish some homework and the first egg will turn up.`
+      : left
+        ? `${left} still out there. Tap a creature to open their page.`
+        : 'That is everyone. Tap any of them to read their page.';
   }
 }
 
@@ -1440,10 +1719,9 @@ let bookAt = 0;
 
 /** One spread per creature met, then the egg of the one still coming. */
 function bookPages() {
-  const level = levelFor(state.progress.xp);
-  const pages = collected(level).map(m => ({ kind: 'found', m }));
-  const next = MONSTERS[level] || null;
-  if (next) pages.push({ kind: 'egg', m: next });
+  const pages = collectedMonsters().map(m => ({ kind: 'found', m }));
+  const left = MONSTER_COUNT - pages.length;
+  if (left) pages.push({ kind: 'egg', left });
   return pages;
 }
 
@@ -1451,12 +1729,13 @@ function foundSpread(m) {
   const met = (state.progress.metAt || {})[m.id];
   const found = met
     ? new Date(met).toLocaleDateString([], { day: 'numeric', month: 'long' })
-    : `when you reached level ${m.level}`;
+    : 'a while ago';
+  const rank = rarityOf(m.rarity);
   return `
     <div class="page page-l" style="--mc:${m.colour}">
       <div class="portrait">${monsterSvg(m)}</div>
       <h2 class="page-name">${esc(m.name)}</h2>
-      <p class="page-sub">Level ${m.level}</p>
+      <p class="page-rank is-${m.rarity}">${esc(rank.label)}</p>
       <dl class="page-facts">
         <div><dt>Age</dt><dd>${esc(m.age)}</dd></div>
         <div><dt>Size</dt><dd>${esc(m.size)}</dd></div>
@@ -1481,21 +1760,24 @@ function foundSpread(m) {
 }
 
 /** The last spread: an egg, and how far off it is. */
-function eggSpread(m) {
+/** The back of the book: how many are still out there, and how close the
+ *  next egg is. Which of them is inside it is nobody's business until it
+ *  opens. */
+function eggSpread(left) {
   const into = state.progress.xp % XP_PER_LEVEL;
   const togo = XP_PER_LEVEL - into;
+  const pieces = Math.ceil(togo / XP_PER_HOMEWORK);
   return `
-    <div class="page page-l is-waiting" style="--mc:${m.colour}">
-      <div class="portrait portrait-egg">${eggSvg(m)}</div>
-      <h2 class="page-name">Still in the egg</h2>
-      <p class="page-sub">Hatches at level ${m.level}</p>
-      <p class="page-hint">Whoever is in there is not saying.</p>
+    <div class="page page-l is-waiting" style="--mc:#8A94A2">
+      <div class="portrait portrait-egg">${eggSvg({ colour: '#8A94A2', rarity: 'common' })}</div>
+      <h2 class="page-name">${left} still out there</h2>
+      <p class="page-hint">Every egg is a different one. You cannot choose.</p>
     </div>
     <div class="page page-r is-waiting">
-      <p class="page-wait">Nobody has met this one yet.</p>
+      <p class="page-wait">The next egg is on its way.</p>
       <span class="page-rules">${'<i></i>'.repeat(8)}</span>
-      <p class="page-fact">${togo} XP to go — about ${Math.ceil(togo / XP_PER_HOMEWORK)} more
-        ${Math.ceil(togo / XP_PER_HOMEWORK) === 1 ? 'piece' : 'pieces'} of homework.</p>
+      <p class="page-fact">${togo} XP to go — about ${pieces} more
+        ${pieces === 1 ? 'piece' : 'pieces'} of homework.</p>
     </div>`;
 }
 
@@ -1509,7 +1791,7 @@ function renderBook(dir = 0) {
   // The class goes on before the new pages do, so they animate in as they arrive.
   spread.classList.toggle('turn-next', dir > 0);
   spread.classList.toggle('turn-prev', dir < 0);
-  spread.innerHTML = page.kind === 'found' ? foundSpread(page.m) : eggSpread(page.m);
+  spread.innerHTML = page.kind === 'found' ? foundSpread(page.m) : eggSpread(page.left);
 
   $('#book-prev').disabled = bookAt === 0;
   $('#book-next').disabled = bookAt === pages.length - 1;
@@ -1530,7 +1812,7 @@ function turnPage(dir) {
 function openBook(id) {
   const pages = bookPages();
   if (!pages.length) return;
-  const i = id ? pages.findIndex(p => p.m.id === id) : 0;
+  const i = id ? pages.findIndex(p => p.m && p.m.id === id) : 0;
   bookAt = i >= 0 ? i : 0;
   renderBook(0);
 
@@ -1583,7 +1865,7 @@ function showArrival(m, fromLevel) {
 
   box.innerHTML = `
     <div class="ar-stage">
-      <p class="ar-kicker">Level ${fromLevel} → ${m.level}</p>
+      <p class="ar-kicker is-${m.rarity}">${esc(rarityOf(m.rarity).label)}</p>
       <div class="hatch" style="--mc:${m.colour}; --shell:${m.shell}">
         <span class="hatch-glow"></span>
         <div class="hatch-mon">${monsterSvg(m)}</div>
@@ -1591,6 +1873,7 @@ function showArrival(m, fromLevel) {
         <span class="hatch-shards">${'<i></i>'.repeat(8)}</span>
       </div>
       <h2 class="ar-name">${esc(m.name)} hatched</h2>
+      <p class="ar-level">Level ${fromLevel} → ${fromLevel + 1}</p>
       <p class="ar-line">${esc(m.age)} · ${esc(m.hobbies[0].toLowerCase())}</p>
       <button class="ar-continue btn-primary">Say hello</button>
     </div>`;
@@ -1618,18 +1901,24 @@ function showArrival(m, fromLevel) {
   auto = setTimeout(close, HATCH_OPEN_MS + 6500);
 }
 
-/** Called after a level lands. Each creature turns up once, ever. */
+/**
+ * Called after a level lands. The egg is rolled here rather than looked up:
+ * any of the fifty can be inside, weighted by rarity, and never one you
+ * already have while a stranger is left. Rolled once and written down, so a
+ * reload cannot re-roll it into somebody else.
+ */
 function maybeArrival(level, fromLevel) {
   const seen = state.progress.shownUpTo || 1;
   if (level <= seen) return false;
 
-  const m = monsterFor(level);
   state.progress.shownUpTo = level;
   state.progress.metAt = state.progress.metAt || {};
-  if (m && !state.progress.metAt[m.id]) state.progress.metAt[m.id] = Date.now();
+
+  const m = rollMonster();
+  if (m) state.progress.metAt[m.id] = Date.now();
   save();
 
-  if (!m) return false;
+  if (!m) return false;                 // everyone has already turned up
   showArrival(m, fromLevel || level - 1);
   return true;
 }
@@ -1698,6 +1987,7 @@ function openHwSheet({ id = null, subjectId = null } = {}) {
     subjectId: editing ? editing.subjectId
       : (subjectId || state.lastSubjectId || SUBJECTS[0].id),
     title: editing ? editing.title : '',
+    note: editing ? (editing.note || '') : '',
     dueDate: editing ? editing.dueDate : null,
   };
   if (!subjectById(draft.subjectId)) draft.subjectId = SUBJECTS[0].id;
@@ -1705,6 +1995,7 @@ function openHwSheet({ id = null, subjectId = null } = {}) {
   $('#hw-delete').hidden = !editing;
   const input = $('#hw-title');
   input.value = draft.title;
+  $('#hw-note').value = draft.note;
 
   drawSheetChips();
   showSheet('#sheet-hw');
@@ -1751,16 +2042,18 @@ function syncSaveButton() {
 
 function saveHw() {
   const title = $('#hw-title').value.trim();
+  const note = $('#hw-note').value.trim();
   if (!title || !draft) return;
 
   if (draft.id) {
     const hw = state.homework.find(h => h.id === draft.id);
-    if (hw) Object.assign(hw, { title, subjectId: draft.subjectId, dueDate: draft.dueDate });
+    if (hw) Object.assign(hw, { title, note, subjectId: draft.subjectId, dueDate: draft.dueDate });
   } else {
     state.homework.push({
       id: uid(),
       subjectId: draft.subjectId,
       title,
+      note,
       dueDate: draft.dueDate,
       createdAt: Date.now(),
       completed: false,
@@ -1910,7 +2203,9 @@ function showLevelUp(level, from) {
     <div class="levelup-card">
       <div class="levelup-ring"><span>${level}</span></div>
       <h2>Level ${from || level - 1} → ${level}</h2>
-      <p>${esc(monsterFor(level).name)} is still with you</p>
+      <p>${(() => { const f = collectedMonsters(); return f.length
+        ? esc(f[f.length - 1].name) + ' is still with you'
+        : 'All fifty have turned up'; })()}</p>
     </div>`;
   box.hidden = false;
   box.classList.remove('is-leaving');

@@ -175,14 +175,15 @@ button { border: 0; background: none; cursor: pointer; }
    colour washes the whole card, the date says when it is for, and the
    circle waits on the right. */
 
+/* The card carries the subject's own mark, then says what it is, what it is
+   about, and when it is for — the date as a chip rather than a line of prose. */
 .hw {
   position: relative;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
   align-items: stretch;
-  border-radius: var(--r-card);
+  border-radius: 20px;
   overflow: hidden;
-  background: color-mix(in srgb, var(--sc) 15%, var(--card));
+  background: var(--card);
   box-shadow: var(--shadow);
   transition: transform .22s var(--ease), opacity .22s linear, box-shadow .2s var(--ease);
   touch-action: pan-y;
@@ -202,63 +203,100 @@ button { border: 0; background: none; cursor: pointer; }
 }
 .hw.is-swiping::before { opacity: 1; }
 
-/* The spine: the subject's name, read from the bottom up. */
-.hw-tab {
+.hw-main {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 12px 0;
-  min-width: 30px;
-  background: color-mix(in srgb, var(--sc) 34%, var(--card));
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  line-height: 1;
-  color: color-mix(in srgb, var(--sc) 72%, var(--ink));
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.hw-main {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-  min-width: 0;
-  padding: 15px 6px 16px 14px;
+  gap: 13px;
+  padding: 14px 2px 14px 14px;
   cursor: pointer;
   text-align: left;
 }
 
-.hw-due {
-  font-size: 13.5px;
-  font-weight: 550;
-  line-height: 1.25;
-  letter-spacing: .005em;
-  color: color-mix(in srgb, var(--sc) 62%, var(--ink-2));
+.hw-tile {
+  width: 54px; height: 54px;
+  border-radius: 16px;
+  font-size: 21px;
 }
-.hw.is-soon .hw-due { color: color-mix(in srgb, var(--sc) 50%, var(--ink)); font-weight: 650; }
-.hw.is-late .hw-due { color: var(--late); font-weight: 650; }
+.hw-tile .ico { width: 26px; height: 26px; }
+
+.hw-words {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.hw-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.hw-subject {
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--sc) 76%, var(--ink));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* When it is for. Grey while that is a long way off, warmer as it closes in. */
+.hw-when {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px 4px 8px;
+  border-radius: var(--r-pill);
+  background: var(--line-soft);
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -.005em;
+  white-space: nowrap;
+}
+.hw-when .ico { width: 13px; height: 13px; stroke-width: 2; }
+.hw.is-soon .hw-when {
+  background: color-mix(in srgb, var(--stamp) 15%, transparent);
+  color: var(--stamp);
+}
+.hw.is-late .hw-when {
+  background: color-mix(in srgb, var(--late) 18%, transparent);
+  color: var(--late);
+}
 
 .hw-title {
-  font-size: 17.5px;
+  font-size: 18px;
   font-weight: 550;
-  letter-spacing: -.012em;
-  line-height: 1.3;
+  letter-spacing: -.016em;
+  line-height: 1.25;
   color: var(--ink);
   overflow-wrap: anywhere;
 }
-.hw.is-soon .hw-title { font-weight: 650; }
+
+.hw-note {
+  font-size: 14px;
+  line-height: 1.3;
+  letter-spacing: -.008em;
+  color: var(--ink-3);
+  overflow-wrap: anywhere;
+}
 
 /* The circle. Big target, quiet until it matters. */
 .check {
-  --size: 27px;
+  --size: 28px;
   display: grid;
   place-items: center;
-  width: 52px;
+  width: 56px;
   flex: none;
   align-self: center;
 }
@@ -266,7 +304,7 @@ button { border: 0; background: none; cursor: pointer; }
 .check-circle {
   width: var(--size); height: var(--size);
   border-radius: 50%;
-  border: 1.9px solid color-mix(in srgb, var(--sc) 55%, var(--ink-3));
+  border: 1.9px solid color-mix(in srgb, var(--sc) 45%, var(--ink-3));
   background: color-mix(in srgb, var(--card) 55%, transparent);
   transition: border-color .16s var(--ease), background-color .16s var(--ease),
               transform .24s var(--spring);
@@ -640,6 +678,7 @@ button { border: 0; background: none; cursor: pointer; }
 
 .sheet-body { padding: 12px var(--gutter) 18px; }
 
+.hw-note-input,
 .hw-title {
   width: 100%;
   padding: 4px 2px 14px;
@@ -1303,10 +1342,12 @@ input.hw-title::placeholder { color: var(--ink-3); }
 
 
 /* ── The bag, drawn ──────────────────────────────────────────
-   The backpack in the middle, everything that goes in it around the outside,
-   one arrow each. The pictures are a single SVG so they scale together and
-   the arrows can be aimed exactly; the words are HTML laid over it, so they
-   stay real text at a real size and wrap when a day has a lot of subjects. */
+   The backpack in the middle, everything that goes in it around the outside.
+   Nothing points at anything: what is on the page is what you take, and the
+   picture reads at a glance without being told how. Each thing is its own
+   picture placed by percentage, so the whole scene scales together; the words
+   are HTML laid over it, so they stay real text at a real size and wrap when
+   a day has a lot of subjects. */
 
 .bag-scene {
   position: relative;
@@ -1315,16 +1356,8 @@ input.hw-title::placeholder { color: var(--ink-3); }
   margin: 2px auto 0;
 }
 
-/* The leads are all that is drawn; the things themselves are pictures laid
-   over the top, so each keeps its own artwork exactly. */
-.bag-scene svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
+/* Every thing is a picture of its own, laid at its own spot, so each keeps
+   its artwork exactly as drawn. */
 .bag-pic {
   position: absolute;
   height: auto;
@@ -1335,23 +1368,6 @@ input.hw-title::placeholder { color: var(--ink-3); }
 }
 
 
-
-/* The leads are the quiet part: dotted, and stopping at a small ring just
-   short of the bag rather than jabbing at it. */
-.bag-arrow {
-  fill: none;
-  stroke: var(--ink-3);
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-dasharray: 4 4;
-  opacity: .75;
-}
-.bag-head {
-  fill: none;
-  stroke: var(--ink-3);
-  stroke-width: 1.7;
-  opacity: .75;
-}
 
 .bag-label {
   position: absolute;
@@ -1749,6 +1765,57 @@ body {
 .btn-primary, .fab, .toast, .chip-day.is-on, .chip-due.is-on { background: var(--ink); color: var(--on-ink); }
 
 
+/* ── How rare they are ───────────────────────────────────────
+   The same five words everywhere: on the shelf, on their page, and over the
+   egg as it opens. The colour is the whole signal, so it never needs saying
+   twice. */
+
+.is-common    { --rank: #8A94A2; }
+.is-uncommon  { --rank: #4FA83D; }
+.is-rare      { --rank: #3E63DD; }
+.is-epic      { --rank: #9B51C9; }
+.is-legendary { --rank: #D9A94A; }
+
+.mon-rank {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--rank);
+}
+
+.page-rank {
+  margin-top: 5px;
+  padding: 3px 11px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--rank) 16%, transparent);
+  color: color-mix(in srgb, var(--rank) 80%, var(--ink));
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+/* On the hatching screen the rarity is the headline. */
+.ar-kicker.is-common,
+.ar-kicker.is-uncommon,
+.ar-kicker.is-rare,
+.ar-kicker.is-epic,
+.ar-kicker.is-legendary {
+  color: var(--rank);
+  font-size: 13px;
+  letter-spacing: .2em;
+}
+
+.ar-level {
+  margin-top: 14px;
+  font-size: 13px;
+  letter-spacing: .06em;
+  color: var(--ink-3);
+  animation: rise .5s var(--ease) 3.3s backwards;
+}
+
+
 /* ── The collection ──────────────────────────────────────────
    A shelf of little creatures. Each one drawn, not photographed, so they
    all belong to the same family. */
@@ -1767,7 +1834,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   padding: 8px 2px 6px;
   border-radius: 14px;
   background: color-mix(in srgb, var(--mc, var(--ink-3)) 9%, transparent);
