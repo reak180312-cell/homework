@@ -209,7 +209,9 @@ it or the shadow under it. The cork is `#C89868`, the frame `#D8B084`, and the e
 run from `#F8F0E8` through `#FCD4CC` to `#FCECC0`. `scratchpad/mock-mode.js` is what read
 them.
 
-The cork itself is a 160px tile generated to that colour and to the grain measured beside it
+The cork itself is a 240px tile generated to that colour, with much finer mottling than the
+board it came from — a 160px tile with patches big enough to read as a motif turned into a
+visible pattern once it repeated four times across the board
 — about fifteen levels — with every fleck drawn four times so the pattern meets itself at the
 edges. It tiles at any size for under seven kilobytes, which a cut of the real board could
 not: every clean patch of it is small, and the notes cover the rest. Rebuild it with
