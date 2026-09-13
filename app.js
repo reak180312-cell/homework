@@ -1538,26 +1538,9 @@ function renderReminders() {
   trimTabs();
 
   const mine = notesFor(tab).slice().sort(byTime);
-  const board = $('#rem-board');
-
-  board.classList.toggle('is-bare', !mine.length);
-
-  if (!state.notes.length) {
-    board.innerHTML = `
-      <button class="board-empty" data-act="first-reminder">
-        <span class="board-empty-line">Nothing pinned up yet</span>
-        <span class="board-empty-sub">Tap to write one</span>
-      </button>`;
-    return;
-  }
-
-  if (!mine.length) {
-    board.innerHTML = `
-      <p class="board-empty-line board-clear">Nothing for ${esc(tab.label.toLowerCase())}</p>`;
-    return;
-  }
-
-  board.innerHTML = mine.map(stickyNote).join('');
+  // Nothing pinned up means bare cork. A board with nothing on it already
+  // says so, and the note to write on is beside the heading either way.
+  $('#rem-board').innerHTML = mine.map(stickyNote).join('');
 }
 
 /* Earliest first, and anything without a time after everything with one —
@@ -2654,7 +2637,6 @@ function wireApp() {
   });
 
   on('#rem-board', 'click', (e) => {
-    if (e.target.closest('[data-act="first-reminder"]')) { openRemSheet(); return; }
     const note = e.target.closest('[data-note]');
     if (note) takeDown(note.dataset.note);
   });

@@ -240,6 +240,14 @@ A reminder set for every day shows on all of them, because that is what every da
 Earliest first, and anything without a time after everything with one. There are no counts on
 the tabs, because the drawing has none.
 
+**An empty board is bare cork.** It used to write *Nothing pinned up yet — tap to write one*
+across the middle of itself, and a day with none of its own said *Nothing for Tuesday*. Both
+were telling you what you could already see. The board is the one thing on the screen whose
+emptiness is legible at a glance, and the note to write on is pinned beside the heading the
+whole time, so there was nothing left for the words to do. The heading lost its second line
+— *Small steps. Big progress.* — for the same reason: it was decoration on a screen that is
+a photograph of a room already.
+
 A note comes off the board with **one tap**, undoably: the drawing gives a note no cross to
 press, and a board covered in crosses is not the drawing. The toast offers it straight back,
 which is the same bargain the homework list makes when something is ticked off.
@@ -247,6 +255,9 @@ which is the same bargain the homework list makes when something is ticked off.
 The + that used to float in the corner is a sticky pinned to the wall beside the heading,
 where the drawing puts it — and it is the drawing itself, pin, plus, handwriting and the
 little lines beside the pin, cut off its background rather than a square built out of CSS.
+It hangs on the heading's own middle. It used to hang above it, level with the top of a
+two-line heading, and once the second line went it was left sitting high on the wall with
+nothing beside it.
 The first attempt at that cut came from a 5KB thumbnail and ate the note, which was only
 fourteen levels from its own background; the full-size one keys cleanly. The timetable button
 is fixed to that same corner, so the sticky is sized to stand clear of it — including on a

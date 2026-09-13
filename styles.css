@@ -814,31 +814,23 @@ button { border: 0; background: none; cursor: pointer; }
    supplied board — every fleck drawn four times so it meets itself at the
    edges — which tiles at any size for under seven kilobytes. */
 
+/* The sticky sits on the heading's own middle, not above it. */
 .rem-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
 }
 
 /* The heading gives way first; the sticky has a fixed size to keep. */
-.rem-titles { min-width: 0; }
-
 .rem-h1 {
+  min-width: 0;
   font-family: var(--font-display);
   font-size: clamp(25px, 7.4vw, 32px);
   font-weight: 600;
   line-height: 1.02;
   letter-spacing: -.012em;
   color: var(--board-ink);
-}
-
-.rem-motto {
-  margin-top: 4px;
-  font-family: var(--font-hand);
-  font-size: 14.5px;
-  line-height: 1.25;
-  color: color-mix(in srgb, var(--board-ink) 84%, var(--ink-2));
 }
 
 /* A pin: a domed head with the light on its top left, and a shadow under it. */
@@ -1036,42 +1028,6 @@ button { border: 0; background: none; cursor: pointer; }
   color: var(--sc, #37403A);
 }
 .stick-mark .ico { width: 15px; height: 15px; stroke-width: 1.7; }
-
-/* A bare board. */
-/* A bare board says so in the middle of itself, not up in a corner. */
-.cork.is-bare { align-content: center; }
-
-.board-empty {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  padding: 20px 12px;
-  border: 0;
-  background: none;
-}
-.board-clear {
-  grid-column: 1 / -1;
-  display: grid;
-  place-items: center;
-  padding: 20px 12px;
-  text-align: center;
-}
-.board-empty-line {
-  font-family: var(--font-hand);
-  font-size: 17px;
-  font-weight: 600;
-  color: #4A3A28;
-  text-shadow: 0 1px 0 rgba(255,246,232,.28);
-}
-.board-empty-sub {
-  font-family: var(--font-hand);
-  font-size: 13px;
-  color: #6E5540;
-  text-shadow: 0 1px 0 rgba(255,246,232,.22);
-}
 
 /* Narrow phones take two across rather than squeezing three, and the sticky
    tucks in so it still clears the timetable button. */
