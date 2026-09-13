@@ -1493,7 +1493,19 @@ function notesFor(tab) {
   return state.notes.filter(n => n.day === null || n.day === tab.day);
 }
 
+/* The room shows only once it has arrived. Half a photograph drawn top-down
+   looks like something went wrong; nothing, and then all of it, does not. */
+function revealRoom() {
+  for (const sel of ['#wall', '#shelf']) {
+    const img = document.querySelector(sel);
+    if (!img) continue;
+    if (img.complete && img.naturalWidth) img.classList.add('is-ready');
+    else img.addEventListener('load', () => img.classList.add('is-ready'), { once: true });
+  }
+}
+
 function renderReminders() {
+  revealRoom();
   const tabs = dayTabs();
   let tab = tabs.find(t => t.key === remScope) || tabs[0];
   remScope = tab.key;

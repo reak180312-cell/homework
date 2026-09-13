@@ -147,6 +147,23 @@ needed to pack a bag.
 
 ## Reminders
 
+### The room
+
+The page is a room: a cream wall with the daylight and the leaf shadows on it, the board
+hung on it, and a shelf at its foot with the books, the pencil cup, the little checklist pad
+and the plant. Both the wall and the shelf are fixed, so the board scrolls between them
+rather than dragging the room along with it, and both live inside the reminders section, so
+the tab switcher takes them away with the page.
+
+The shelf stands **on** the tab bar and its top fades into the wall, so the join never reads
+as an edge. How tall it is comes from the picture's own shape — 1.588 times as wide as it is
+tall, so at full width it stands 63vw high — capped against the height so a short screen is
+not all shelf. The page carries bottom padding of that band plus the tab bar, so the last row
+of notes comes to rest above the shelf instead of behind it.
+
+At night the wall and the shelf dim to the paper, and the board dims with them: left at full
+daylight it looked lit from somewhere the room was not.
+
 ### The board
 
 Reminders are pinned to a cork board rather than listed in rows: a small square of coloured
@@ -189,9 +206,12 @@ press, and a board covered in crosses is not the drawing. The toast offers it st
 which is the same bargain the homework list makes when something is ticked off.
 
 The + that used to float in the corner is a sticky pinned to the wall beside the heading,
-where the drawing puts it. The timetable button is fixed to that same corner, so the sticky
-is sized to stand clear of it — including on a 320px screen, where the button is wider and
-the board drops to two notes across.
+where the drawing puts it — and it is the drawing itself, pin, plus, handwriting and the
+little lines beside the pin, cut off its background rather than a square built out of CSS.
+The first attempt at that cut came from a 5KB thumbnail and ate the note, which was only
+fourteen levels from its own background; the full-size one keys cleanly. The timetable button
+is fixed to that same corner, so the sticky is sized to stand clear of it — including on a
+320px screen, where the button is wider and the board drops to two notes across.
 
 Two things in the drawing are not here. Its tab bar is Home / Calendar / Stats / Profile,
 which is a different app's navigation. And its doodles are chosen to match each reminder's
@@ -330,8 +350,10 @@ styles.css    the whole visual system
 app.js        all behaviour, one file, sectioned
 sw.js         offline cache + notification clicks
 server.js     dependency-free static server
-art/          the desk the homework screen sits on, the cork the reminders are
-              pinned to, and the bag's ten pieces
+art/          the desk the homework screen sits on; the wall, shelf, cork and
+              Add-reminder sticky the reminders are pinned up in; and the bag's
+              ten pieces. About 290KB in all, cached by the service worker on
+              the first launch and never fetched again.
 icons/        app icons, built from the supplied logo. The tab, launcher and 512px
               icons keep the artwork’s rounded tile and its transparent corners; the
               iOS one is opaque edge to edge, because iOS fills transparency with

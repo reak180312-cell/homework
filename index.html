@@ -79,16 +79,21 @@
   </section>
 
   <section id="view-reminders" class="view" data-view="reminders" hidden>
+    <!-- The wall behind the whole page, and the shelf standing at its foot. -->
+    <img id="wall" class="wall-art" src="art/wall.jpg" alt="" width="760" height="1350"
+         decoding="async" draggable="false" />
+    <img id="shelf" class="shelf-art" src="art/shelf.jpg" alt="" width="1180" height="743"
+         decoding="async" draggable="false" />
+
     <header class="head rem-head">
       <div class="rem-titles">
         <h1 class="rem-h1">Reminders</h1>
         <p class="rem-motto">Small steps. Big progress.</p>
       </div>
       <!-- Pinned to the wall beside the heading, where the + used to be. -->
-      <button id="rem-new" class="stick stick-add" aria-label="Add reminder">
-        <span class="pin pin-green" aria-hidden="true"></span>
-        <span class="stick-plus" aria-hidden="true">+</span>
-        <span class="stick-cap">Add reminder</span>
+      <button id="rem-new" class="stick-add" aria-label="Add reminder">
+        <img src="art/addnote.webp" alt="" width="360" height="401"
+             decoding="async" draggable="false" />
       </button>
     </header>
     <div id="rem-scope" class="daytabs"></div>

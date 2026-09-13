@@ -57,6 +57,11 @@
      reads as tucked underneath. */
   --desk-lift:  12px;
 
+  /* The shelf at the foot of the reminders page. The picture is 1.588 times as
+     wide as it is tall, so at full width it stands 63vw high; capped against
+     the height so a short screen is not all shelf. */
+  --shelf-band: min(63vw, 36vh);
+
   color-scheme: light;
 }
 
@@ -698,6 +703,81 @@ button { border: 0; background: none; cursor: pointer; }
 }
 
 
+/* ── The room the reminders are in ─────────────────────────
+   A cream wall with the daylight and the leaf shadows on it, and a shelf at
+   the foot with the books, the cup, the pad and the plant. Both are fixed, so
+   the board scrolls between them rather than dragging the room along with it.
+   Both belong to this page only: they live inside its own section, which the
+   tab switcher hides. */
+
+.wall-art {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .5s ease;
+  -webkit-user-drag: none;
+}
+.wall-art.is-ready { opacity: 1; }
+
+.shelf-art {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+  z-index: 0;
+  width: 100%;
+  height: var(--shelf-band);
+  object-fit: cover;
+  object-position: 50% 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .5s ease;
+  -webkit-user-drag: none;
+  /* The top of it fades into the wall, so the join never shows as an edge. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 22%);
+}
+.shelf-art.is-ready { opacity: 1; }
+
+/* Everything on the page stands in front of the room, and stops short of the
+   shelf rather than sliding behind it. */
+#view-reminders > .head,
+#view-reminders > .daytabs,
+#view-reminders > .board { position: relative; z-index: 1; }
+/* Scrolled to the end, the last row of notes has to come to rest above the
+   shelf, not behind it: the shelf stands on the tab bar, so the page has to
+   clear both. */
+#view-reminders {
+  padding-bottom: calc(var(--shelf-band) + var(--tabbar-h)
+                       + env(safe-area-inset-bottom) + 18px);
+}
+
+/* At night the room dims to the paper, as the desk does. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .wall-art,
+  :root:not([data-theme="light"]) .shelf-art {
+    filter: brightness(.4) saturate(.7) contrast(1.05) opacity(.9);
+  }
+}
+:root[data-theme="dark"] .wall-art,
+:root[data-theme="dark"] .shelf-art {
+  filter: brightness(.4) saturate(.7) contrast(1.05) opacity(.9);
+}
+
+
+
+/* The board is in the same room, so it takes some of the same evening with
+   it — left at full daylight it looked lit from somewhere the room was not. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) #view-reminders > .board { filter: brightness(.78) saturate(.9); }
+}
+:root[data-theme="dark"] #view-reminders > .board { filter: brightness(.78) saturate(.9); }
+
 /* ── Reminders: a cork board ───────────────────────────────
    Notes are pinned to a board rather than listed in rows. Paper, pin and tilt
    come from each note's own id, so a note keeps its look between redraws
@@ -753,36 +833,22 @@ button { border: 0; background: none; cursor: pointer; }
 .pin-blue   { --pin: #3E72A8; }
 .pin-yellow { --pin: #D9B03F; }
 
-/* The sticky pinned beside the heading, in place of the floating +. */
+/* The sticky pinned beside the heading, in place of the floating +. It is the
+   drawing itself — pin, plus, handwriting and the little lines beside the
+   pin — cut off its background, rather than a square built out of CSS. */
 .stick-add {
-  position: relative;
   flex: none;
-  width: 102px;
+  width: 108px;
   /* Clear of the timetable button, which is fixed to this same corner. */
-  margin-right: 48px;
-  padding: 15px 6px 11px;
+  margin-right: 46px;
+  padding: 0;
   border: 0;
-  border-radius: 2px;
-  background: #FCF0D8;
-  color: #33423A;
-  box-shadow: 0 3px 8px -2px rgba(80,60,30,.34);
-  transform: rotate(2.5deg);
+  background: none;
+  line-height: 0;
   transition: transform .2s var(--spring);
 }
-.stick-add:active { transform: rotate(2.5deg) scale(.95); }
-.stick-plus {
-  display: block;
-  font-size: 30px;
-  line-height: .9;
-  font-weight: 300;
-}
-.stick-cap {
-  display: block;
-  margin-top: 3px;
-  font-family: var(--font-hand);
-  font-size: 12px;
-  white-space: nowrap;
-}
+.stick-add img { width: 100%; height: auto; }
+.stick-add:active { transform: scale(.94); }
 
 /* The days across the top. */
 .daytabs {
@@ -968,9 +1034,7 @@ button { border: 0; background: none; cursor: pointer; }
 @media (max-width: 350px) {
   .cork { grid-template-columns: repeat(2, 1fr); }
   .rem-h1 { font-size: 27px; }
-  .stick-add { width: 88px; margin-right: 54px; padding: 13px 5px 10px; }
-  .stick-plus { font-size: 25px; }
-  .stick-cap { font-size: 11px; }
+  .stick-add { width: 92px; margin-right: 52px; }
 }
 
 
