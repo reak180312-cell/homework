@@ -151,15 +151,27 @@ needed to pack a bag.
 
 The page is a room: a cream wall with the daylight and the leaf shadows on it, the board
 hung on it, and a shelf at its foot with the books, the pencil cup, the little checklist pad
-and the plant. Both the wall and the shelf are fixed, so the board scrolls between them
-rather than dragging the room along with it, and both live inside the reminders section, so
-the tab switcher takes them away with the page.
+and the plant.
 
-The shelf stands **on** the tab bar and its top fades into the wall, so the join never reads
-as an edge. How tall it is comes from the picture's own shape — 1.588 times as wide as it is
-tall, so at full width it stands 63vw high — capped against the height so a short screen is
-not all shelf. The page carries bottom padding of that band plus the tab bar, so the last row
-of notes comes to rest above the shelf instead of behind it.
+**It is one screen, and it stays put.** The heading, the tabs, the board and the shelf share
+exactly what the window gives them, and the page itself does not scroll — so the room is
+always whole, and nothing can be dragged out from under anything else.
+
+That is the second attempt. The first fixed the shelf to the foot of the screen and let the
+board grow down the page, which is fine on a tall screen and wrong on a short one: measured
+on the 390x664 a phone browser actually leaves once its own bars are in, the page came to
+786px in a 664px window and the board ran **104px straight through the shelf**. Now the shelf
+is the last thing in the column rather than a picture floating over it, so the two meet
+exactly instead of overlapping, at every size.
+
+The board takes what is left between the tabs and the shelf — 170px on that short screen, 303
+installed — and when there are more notes than fit, they scroll **inside the board** rather
+than pushing the shelf off the bottom. The foot of the cork is shaded, so a row the board
+cannot fit fades into shadow instead of being sliced off mid-note.
+
+The shelf's height comes from the picture's own shape — 1.588 times as wide as it is tall, so
+at full width it stands 63vw high — capped at 30vh so a short screen gives the board its room
+back. Its top fades into the wall, so the join never reads as an edge.
 
 At night the wall and the shelf dim to the paper, and the board dims with them: left at full
 daylight it looked lit from somewhere the room was not.

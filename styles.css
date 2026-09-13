@@ -60,7 +60,7 @@
   /* The shelf at the foot of the reminders page. The picture is 1.588 times as
      wide as it is tall, so at full width it stands 63vw high; capped against
      the height so a short screen is not all shelf. */
-  --shelf-band: min(63vw, 36vh);
+  --shelf-band: min(63vw, 30vh);
 
   color-scheme: light;
 }
@@ -725,12 +725,14 @@ button { border: 0; background: none; cursor: pointer; }
 }
 .wall-art.is-ready { opacity: 1; }
 
+/* The shelf is the last thing in the column, not a picture floating over it,
+   so the board always meets it exactly instead of running through it. It
+   bleeds to both edges the way the desk does on the homework screen. */
 .shelf-art {
-  position: fixed;
-  left: 0; right: 0;
-  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
-  z-index: 0;
-  width: 100%;
+  flex: none;
+  z-index: 1;
+  width: auto;
+  margin-inline: calc(var(--gutter) * -1);
   height: var(--shelf-band);
   object-fit: cover;
   object-position: 50% 100%;
@@ -739,23 +741,42 @@ button { border: 0; background: none; cursor: pointer; }
   transition: opacity .5s ease;
   -webkit-user-drag: none;
   /* The top of it fades into the wall, so the join never shows as an edge. */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 22%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 26%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 26%);
 }
 .shelf-art.is-ready { opacity: 1; }
 
-/* Everything on the page stands in front of the room, and stops short of the
-   shelf rather than sliding behind it. */
-#view-reminders > .head,
-#view-reminders > .daytabs,
-#view-reminders > .board { position: relative; z-index: 1; }
-/* Scrolled to the end, the last row of notes has to come to rest above the
-   shelf, not behind it: the shelf stands on the tab bar, so the page has to
-   clear both. */
+/* One screen, and it stays put: heading, tabs, board and shelf share exactly
+   what the window gives them, and nothing here scrolls. */
 #view-reminders {
-  padding-bottom: calc(var(--shelf-band) + var(--tabbar-h)
-                       + env(safe-area-inset-bottom) + 18px);
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  min-height: 0;
+  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+  overflow: hidden;
 }
+#view-reminders > .head,
+#view-reminders > .daytabs { position: relative; z-index: 1; flex: none; }
+#view-reminders > .head { margin-bottom: 14px; }
+
+/* The board takes what is left, and its notes scroll inside it rather than
+   pushing the shelf off the bottom of the screen. */
+#view-reminders > .board {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  margin-bottom: 10px;
+}
+#view-reminders > .board > .cork {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+#view-reminders > .board > .cork::-webkit-scrollbar { display: none; }
 
 /* At night the room dims to the paper, as the desk does. */
 @media (prefers-color-scheme: dark) {
@@ -902,12 +923,14 @@ button { border: 0; background: none; cursor: pointer; }
   grid-template-columns: repeat(3, 1fr);
   gap: 15px 13px;
   align-content: start;
-  min-height: 232px;
   padding: 22px 15px 20px;
   border-radius: 10px;
   background: var(--cork) url("art/cork.webp") repeat;
   background-size: 160px 160px;
-  box-shadow: inset 0 2px 12px -2px rgba(60,34,10,.46);
+  /* Shaded along the foot as well, so a row the board cannot fit fades into
+     the shadow rather than being sliced off mid-note. */
+  box-shadow: inset 0 2px 12px -2px rgba(60,34,10,.46),
+              inset 0 -20px 20px -16px rgba(60,34,10,.62);
 }
 
 /* One note. */
