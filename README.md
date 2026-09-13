@@ -159,20 +159,45 @@ hashes** of that id, not three slices of one: sliced, they agreed with each othe
 the first hash merely scaled and took a remainder, ids a character apart moved by a fixed
 step — a board of eight notes came out in three colours. The hash mixes its bits now.
 
-The cork is a 160px tile generated to the colour and grain measured off the supplied board —
-rgb(198, 148, 100) with a grain of about fifteen levels — with every fleck drawn four times
-so the pattern meets itself at the edges. It tiles at any size for under seven kilobytes,
-which a cut of the real board could not: every clean patch of it is small, and the notes
-cover the rest. Rebuild it with `scratchpad/make-cork.js`.
+Every colour on this page was **read off the drawing** rather than matched by eye: the most
+common tone in each region, which is the paper or the cork itself rather than a highlight on
+it or the shadow under it. The cork is `#C89868`, the frame `#D8B084`, and the eight papers
+run from `#F8F0E8` through `#FCD4CC` to `#FCECC0`. `scratchpad/mock-mode.js` is what read
+them.
 
-Across the top: today, tomorrow, then the school days neither of those covers, then all of
-them. A reminder set for every day shows on all of them, because that is what every day
-means. Earliest first, and anything without a time after everything with one.
+The cork itself is a 160px tile generated to that colour and to the grain measured beside it
+— about fifteen levels — with every fleck drawn four times so the pattern meets itself at the
+edges. It tiles at any size for under seven kilobytes, which a cut of the real board could
+not: every clean patch of it is small, and the notes cover the rest. Rebuild it with
+`scratchpad/make-cork.js`.
+
+The ruled note is a leaf out of a spiral pad, punched holes and all, and the cream one is
+torn down its left edge — both drawn, so they cost nothing and stay sharp.
+
+Across the top: today, tomorrow, as many of the following school days **as actually fit**,
+and then *More*, which opens the rest of the week and everything at once. How many fit
+depends on what the days are called — Sunday and Monday fit where Wednesday and Thursday do
+not — so the row is filled and then trimmed back to what the width allows, rather than
+guessing at a number that is right one week and wrong the next.
+
+A reminder set for every day shows on all of them, because that is what every day means.
+Earliest first, and anything without a time after everything with one. There are no counts on
+the tabs, because the drawing has none.
+
+A note comes off the board with **one tap**, undoably: the drawing gives a note no cross to
+press, and a board covered in crosses is not the drawing. The toast offers it straight back,
+which is the same bargain the homework list makes when something is ticked off.
 
 The + that used to float in the corner is a sticky pinned to the wall beside the heading,
 where the drawing puts it. The timetable button is fixed to that same corner, so the sticky
 is sized to stand clear of it — including on a 320px screen, where the button is wider and
 the board drops to two notes across.
+
+Two things in the drawing are not here. Its tab bar is Home / Calendar / Stats / Profile,
+which is a different app's navigation. And its doodles are chosen to match each reminder's
+words — a book for the maths test, a cart for the milk — which nothing in the app can infer
+from what you type; where a reminder belongs to a lesson it shows that subject's own mark
+instead.
 
 ### Writing one down
 

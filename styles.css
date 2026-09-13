@@ -30,8 +30,8 @@
 
   /* The board reminders are pinned to. The cork is a tile generated to the
      colour and grain measured off the supplied picture. */
-  --cork:       #C69464;
-  --cork-frame: #D6AA78;
+  --cork:       #C89868;   /* measured off the drawing */
+  --cork-frame: #D8B084;
   --board-ink:  #2F5D45;   /* the green the heading is written in */
 
   --font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino,
@@ -321,7 +321,7 @@ button { border: 0; background: none; cursor: pointer; }
   letter-spacing: -.016em;
   line-height: 1.25;
   color: var(--ink);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .hw-note {
@@ -329,7 +329,7 @@ button { border: 0; background: none; cursor: pointer; }
   line-height: 1.3;
   letter-spacing: -.008em;
   color: var(--ink-3);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 /* The circle. Big target, quiet until it matters. */
@@ -719,7 +719,7 @@ button { border: 0; background: none; cursor: pointer; }
 
 .rem-h1 {
   font-family: var(--font-hand);
-  font-size: clamp(29px, 8.6vw, 38px);
+  font-size: clamp(31px, 9.6vw, 42px);
   font-weight: 400;
   line-height: 1;
   letter-spacing: -.005em;
@@ -763,7 +763,7 @@ button { border: 0; background: none; cursor: pointer; }
   padding: 15px 6px 11px;
   border: 0;
   border-radius: 2px;
-  background: #FAF0C8;
+  background: #FCF0D8;
   color: #33423A;
   box-shadow: 0 3px 8px -2px rgba(80,60,30,.34);
   transform: rotate(2.5deg);
@@ -787,7 +787,7 @@ button { border: 0; background: none; cursor: pointer; }
 /* The days across the top. */
 .daytabs {
   display: flex;
-  gap: 4px;
+  gap: 2px;
   margin: 14px 0 12px;
   overflow-x: auto;
   scrollbar-width: none;
@@ -799,18 +799,20 @@ button { border: 0; background: none; cursor: pointer; }
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 8px 14px;
+  padding: 8px 11px;
   border: 0;
   border-radius: var(--r-pill);
   background: transparent;
-  font-size: 15px;
+  font-size: 14.5px;
   color: var(--ink-2);
 }
-.daytab i {
-  font-style: normal;
-  font-size: 11px;
-  opacity: .62;
+.daytab-more .ico {
+  width: 13px; height: 13px;
+  stroke-width: 2.6;
+  transform: rotate(90deg);
+  transition: transform .2s var(--ease);
 }
+.daytabs.is-open .daytab-more .ico { transform: rotate(-90deg); }
 .daytab.is-on {
   background: color-mix(in srgb, var(--board-ink) 17%, transparent);
   color: color-mix(in srgb, var(--board-ink) 84%, var(--ink));
@@ -832,10 +834,10 @@ button { border: 0; background: none; cursor: pointer; }
 .cork {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px 8px;
+  gap: 15px 13px;
   align-content: start;
   min-height: 232px;
-  padding: 20px 10px 16px;
+  padding: 22px 15px 20px;
   border-radius: 10px;
   background: var(--cork) url("art/cork.webp") repeat;
   background-size: 160px 160px;
@@ -845,33 +847,52 @@ button { border: 0; background: none; cursor: pointer; }
 /* One note. */
 .stick {
   position: relative;
+  border: 0;
+  font: inherit;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1px;
   min-height: 92px;
-  padding: 14px 7px 9px;
+  padding: 14px 5px 9px;
   border-radius: 1px;
   color: #2B2F2C;
   text-align: center;
   box-shadow: 0 3px 7px -2px rgba(70,44,16,.44);
   transform: rotate(var(--tilt, 0deg));
+  transition: transform .18s var(--spring);
 }
+.stick:active { transform: rotate(var(--tilt, 0deg)) scale(.95); }
 
-.stick-lined  { background: #FBF7EE; }
-.stick-pink   { background: #F6CDC8; }
-.stick-grid   { background: #F7F7F4; }
-.stick-mint   { background: #D8E7D2; }
-.stick-torn   { background: #F6EFE1; }
-.stick-sky    { background: #CBDFF0; }
-.stick-butter { background: #FAECBA; }
+.stick[data-note] { width: 100%; }
+
+.stick-lined  { background: #F8F0E8; }
+.stick-pink   { background: #FCD4CC; }
+.stick-grid   { background: #F2EEEA; }
+.stick-mint   { background: #E0E8D8; }
+.stick-torn   { background: #F8F0E4; }
+.stick-torn {
+  -webkit-mask-image: radial-gradient(circle at 0 4px, transparent 3px, #000 3.4px);
+  mask-image: radial-gradient(circle at 0 4px, transparent 3px, #000 3.4px);
+  -webkit-mask-size: 100% 8px;
+  mask-size: 100% 8px;
+  -webkit-mask-repeat: repeat-y;
+  mask-repeat: repeat-y;
+  padding-left: 10px;
+}
+.stick-sky    { background: #D8E8F0; }
+.stick-butter { background: #FCECC0; }
 
 /* Ruled and squared papers, drawn rather than photographed so they stay
    crisp and cost nothing. */
 .stick-lined {
-  background-image: repeating-linear-gradient(
-    #D9E0EA 0 1px, transparent 1px 13px);
-  background-position: 0 12px;
+  background-image:
+    radial-gradient(circle at 6px 6px, rgba(150,132,112,.5) 2.4px, transparent 3px),
+    repeating-linear-gradient(#D9E0EA 0 1px, transparent 1px 13px);
+  background-size: 12px 19px, auto;
+  background-position: 1px 14px, 0 12px;
+  background-repeat: repeat-y, repeat;
+  padding-left: 12px;
 }
 .stick-grid {
   background-image:
@@ -892,7 +913,7 @@ button { border: 0; background: none; cursor: pointer; }
   font-family: var(--font-hand);
   font-size: 14px;
   line-height: 1.18;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .stick-note {
@@ -900,42 +921,21 @@ button { border: 0; background: none; cursor: pointer; }
   font-size: 11.5px;
   line-height: 1.15;
   opacity: .66;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 /* The lesson it belongs to, in that subject's own mark and colour. */
+/* The doodle, down in the corner where the drawing puts it. */
 .stick-mark {
+  align-self: flex-end;
   margin-top: auto;
-  padding-top: 3px;
-  font-size: 13px;
+  padding: 2px 1px 0;
+  font-size: 14px;
   font-weight: 700;
-  color: var(--sc, #2B2F2C);
+  line-height: 1;
+  color: var(--sc, #37403A);
 }
-
-.stick-every {
-  margin-top: auto;
-  padding-top: 3px;
-  font-size: 9px;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  opacity: .5;
-}
-
-/* Taking one down. Small, in the corner, out of the way of the writing. */
-.stick-off {
-  position: absolute;
-  top: 1px;
-  right: 1px;
-  width: 22px; height: 22px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  background: none;
-  color: currentColor;
-  opacity: .3;
-}
-.stick-off .ico { width: 12px; height: 12px; stroke-width: 2.4; }
-.stick-off:active { opacity: .75; }
+.stick-mark .ico { width: 17px; height: 17px; stroke-width: 1.7; }
 
 /* A bare board. */
 .board-empty {
@@ -1080,7 +1080,7 @@ button { border: 0; background: none; cursor: pointer; }
   font-weight: 700;
   letter-spacing: -.03em;
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 
@@ -1374,7 +1374,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
   line-height: 1.3;
   letter-spacing: -.012em;
   color: var(--ink-2);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .done-time {
@@ -1623,7 +1623,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
   font-size: 15.5px;
   line-height: 1.35;
   letter-spacing: -.01em;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .note-tag {
@@ -1802,7 +1802,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
   line-height: 1.25;
   letter-spacing: -.01em;
   color: color-mix(in srgb, var(--sc) 78%, var(--ink));
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .tt-grid tbody td.tt-free {
@@ -1900,7 +1900,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
   line-height: 1.3;
   letter-spacing: -.004em;
   color: var(--ink-2);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 /* Everything arrives, one after another, and then stays put. */
@@ -1954,14 +1954,14 @@ input.hw-title::placeholder { color: var(--ink-3); }
 .pack-item {
   font-size: 16.5px;
   letter-spacing: -.012em;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .pack-for {
   font-size: 12.5px;
   line-height: 1.3;
   color: var(--ink-3);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 
@@ -2561,7 +2561,7 @@ button.mon-slot:active { transform: scale(.93); }
   font-size: 12.5px;
   line-height: 1.33;
   letter-spacing: -.004em;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 /* The shell they came out of, kept at the bottom of their own page. */

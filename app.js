@@ -1386,7 +1386,8 @@ function renderTtButton() {
 
 /* ── Reminders, on their own page ──────────────────────────── */
 
-let remScope = 'today';    // the list starts on today, "All" shows the rest
+let remScope = 'today';    // the board starts on today
+let remMore = false;       // whether the rest of the week is showing
 
 /* What is being written on the notebook page. null day means every day. */
 let remDraft = null;
@@ -1427,20 +1428,22 @@ function stickyNote(x) {
   const sub = x.lesson ? subjectForLesson(x.lesson) : null;
 
   return `
-    <div class="stick stick-${paper}" data-note="${x.id}"
-         style="--tilt:${tilt}deg${sub ? `; --sc:${sub.color}` : ''}">
+    <button class="stick stick-${paper}" data-note="${x.id}"
+           style="--tilt:${tilt}deg${sub ? `; --sc:${sub.color}` : ''}"
+           aria-label="Take down ${esc(x.text)}">
       <span class="pin pin-${pin}" aria-hidden="true"></span>
-      ${x.at ? `<span class="stick-at">${esc(x.at)}</span>` : ''}
+      ${x.at ? `<span class="stick-at">${esc(shortTime(x.at))}</span>` : ''}
       <span class="stick-text">${esc(x.text)}</span>
       ${x.note ? `<span class="stick-note">${esc(x.note)}</span>` : ''}
       ${sub ? `<span class="stick-mark">${sub.icon
         ? `<svg class="ico" aria-hidden="true"><use href="#${sub.icon}" /></svg>`
         : esc(sub.glyph || sub.name.slice(0, 1))}</span>` : ''}
-      ${!sub && x.day === null ? '<span class="stick-every">every day</span>' : ''}
-      <button class="stick-off" data-act="del-note" aria-label="Take down ${esc(x.text)}">
-        <svg class="ico" aria-hidden="true"><use href="#i-close" /></svg>
-      </button>
-    </div>`;
+    </button>`;
+}
+
+/* The drawing writes eight o'clock as 8:00, not 08:00. */
+function shortTime(at) {
+  return String(at).replace(/^0/, '');
 }
 
 /* The tabs across the top: today, tomorrow, then the school days neither of
@@ -1454,12 +1457,32 @@ function dayTabs() {
 
   const tabs = [{ key: 'today', label: 'Today', day: today }];
   tabs.push({ key: 'tomorrow', label: 'Tomorrow', day: tomorrow });
-  SCHOOL_DAYS.forEach((d, i) => {
-    if (i === today || i === tomorrow) return;
-    tabs.push({ key: String(i), label: d.en, day: i });
-  });
-  tabs.push({ key: 'all', label: 'All', day: null });
-  return tabs;
+
+  // The rest of the week, starting from the day after tomorrow and wrapping,
+  // so the two the drawing shows are the two that come next.
+  const rest = [];
+  for (let n = 1; n <= SCHOOL_DAYS.length; n++) {
+    const i = ((tomorrow < 0 ? 0 : tomorrow) + n) % SCHOOL_DAYS.length;
+    if (i === today || i === tomorrow) continue;
+    rest.push({ key: String(i), label: SCHOOL_DAYS[i].en, day: i });
+  }
+  rest.push({ key: 'all', label: 'All', day: null });
+
+  return tabs.concat(rest);
+}
+
+/* Drop day tabs off the end until the row fits. Today, tomorrow and More
+   always stay: they are what the row is for. */
+function trimTabs() {
+  const row = $('#rem-scope');
+  if (!row || remMore) return;
+  for (let guard = 0; guard < 12; guard++) {
+    if (row.scrollWidth <= row.clientWidth + 1) return;
+    const droppable = [...row.querySelectorAll('[data-scope]')].slice(2);
+    const last = droppable[droppable.length - 1];
+    if (!last) return;
+    last.remove();
+  }
 }
 
 /** Which reminders belong on a given tab. */
@@ -1475,11 +1498,15 @@ function renderReminders() {
   let tab = tabs.find(t => t.key === remScope) || tabs[0];
   remScope = tab.key;
 
-  $('#rem-scope').innerHTML = tabs.map(t => {
-    const n = notesFor(t).length;
-    return `<button class="daytab ${t.key === tab.key ? 'is-on' : ''}" data-scope="${t.key}">
-      ${esc(t.label)}${n ? `<i>${n}</i>` : ''}</button>`;
-  }).join('');
+  $('#rem-scope').classList.toggle('is-open', remMore);
+  $('#rem-scope').innerHTML = tabs.map(t =>
+    `<button class="daytab ${t.key === tab.key ? 'is-on' : ''}" data-scope="${t.key}">`
+    + esc(t.label) + '</button>').join('')
+    + `<button class="daytab daytab-more" data-more="1">
+        ${remMore ? 'Less' : 'More'}
+        <svg class="ico" aria-hidden="true"><use href="#i-chevron" /></svg>
+      </button>`;
+  trimTabs();
 
   const mine = notesFor(tab).slice().sort(byTime);
   const board = $('#rem-board');
@@ -1547,6 +1574,24 @@ function drawRemSheet() {
     }).join('')}` : '';
 
   $('#rem-save').disabled = !$('#rem-title').value.trim();
+}
+
+/* A note comes off the board with one tap, because the drawing gives it no
+   cross to press and a board covered in crosses is not the drawing. The tap
+   is undoable for as long as the toast is up, which is the same bargain the
+   homework list makes when something is ticked off. */
+function takeDown(id) {
+  const i = state.notes.findIndex(n => n.id === id);
+  if (i < 0) return;
+  const [gone] = state.notes.splice(i, 1);
+  save();
+  renderReminders();
+  showToast('Taken down', () => {
+    state.notes.splice(i, 0, gone);
+    save();
+    renderReminders();
+    hideToast();
+  });
 }
 
 function saveReminder() {
@@ -2534,13 +2579,6 @@ function wireApp() {
 
   // Reminders page
 
-  on('#rem-scope', 'click', (e) => {
-    const seg = e.target.closest('[data-scope]');
-    if (!seg) return;
-    remScope = seg.dataset.scope;
-    renderReminders();
-  });
-
   // The notebook page
   on('#rem-cancel', 'click', closeSheet);
   on('#rem-save', 'click', saveReminder);
@@ -2568,12 +2606,20 @@ function wireApp() {
   });
 
   on('#rem-board', 'click', (e) => {
-    if (e.target.closest('[data-act=\"first-reminder\"]')) { openRemSheet(); return; }
-    const act = e.target.closest('[data-act=\"del-note\"]');
-    if (!act) return;
-    const id = act.closest('[data-note]').dataset.note;
-    state.notes = state.notes.filter(n => n.id !== id);
-    save();
+    if (e.target.closest('[data-act="first-reminder"]')) { openRemSheet(); return; }
+    const note = e.target.closest('[data-note]');
+    if (note) takeDown(note.dataset.note);
+  });
+
+  on('#rem-scope', 'click', (e) => {
+    if (e.target.closest('[data-more]')) {
+      remMore = !remMore;
+      renderReminders();
+      return;
+    }
+    const tab = e.target.closest('[data-scope]');
+    if (!tab) return;
+    remScope = tab.dataset.scope;
     renderReminders();
   });
 
