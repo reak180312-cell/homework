@@ -224,6 +224,35 @@
 </div>
 
 <!-- Adding a reminder: a page out of a notebook, ruled and punched. -->
+<!-- Holding a note on the board opens this: the same two rows, on their own,
+     with every tap landing on the note behind the sheet as it is made. -->
+<div id="sheet-paper" class="sheet sheet-paper" hidden role="dialog" aria-modal="true"
+     aria-label="Note paper">
+  <div class="sheet-grip"></div>
+  <div class="paper">
+    <span class="paper-holes" aria-hidden="true"></span>
+    <span class="paper-margin" aria-hidden="true"></span>
+
+    <div class="paper-head">
+      <span class="paper-btn is-blank" aria-hidden="true"></span>
+      <h2 class="paper-title">Paper</h2>
+      <button id="paper-done" class="paper-btn is-save">Done</button>
+    </div>
+
+    <div class="paper-rule paper-field">
+      <span class="paper-label">Style</span>
+      <div id="paper-style" class="paper-chips"></div>
+    </div>
+
+    <div class="paper-rule paper-field">
+      <span class="paper-label">Colour</span>
+      <div id="paper-tint" class="paper-chips"></div>
+    </div>
+
+    <p class="paper-foot" aria-hidden="true">Hold a note to change its paper</p>
+  </div>
+</div>
+
 <div id="sheet-rem" class="sheet sheet-paper" hidden role="dialog" aria-modal="true"
      aria-label="New reminder">
   <div class="sheet-grip"></div>
@@ -267,6 +296,16 @@
     <div id="rem-sheet-lesson" class="paper-rule paper-field">
       <span class="paper-label">Lesson</span>
       <div id="rem-sheet-lessons" class="paper-chips"></div>
+    </div>
+
+    <div class="paper-rule paper-field">
+      <span class="paper-label">Paper</span>
+      <div id="rem-sheet-paper" class="paper-chips"></div>
+    </div>
+
+    <div class="paper-rule paper-field">
+      <span class="paper-label">Colour</span>
+      <div id="rem-sheet-tint" class="paper-chips"></div>
     </div>
 
     <p class="paper-foot" aria-hidden="true">You&#8217;ve got this &#9825;</p>

@@ -47,6 +47,8 @@
 
   --gutter:     20px;
   --tabbar-h:   62px;
+  /* Where every screen starts its heading, under the clock and the island. */
+  --head-top:   calc(env(safe-area-inset-top) + 40px);
   /* How much of the desk shows at the foot of the homework screen. The
      picture is 1.68 times as wide as it is tall, so at full width it stands
      59.5vw high — measured off the width, because that is what sets how big
@@ -164,7 +166,7 @@ button { border: 0; background: none; cursor: pointer; }
 
 .view {
   padding: 0 var(--gutter);
-  padding-top: calc(env(safe-area-inset-top) + 26px);
+  padding-top: var(--head-top);
   padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 40px);
   min-height: 100dvh;
   animation: view-in .22s var(--ease);
@@ -657,7 +659,9 @@ button { border: 0; background: none; cursor: pointer; }
 .paper-chips {
   display: flex;
   gap: 8px;
-  padding-top: 4px;
+  /* Room for a selected swatch ring: the row scrolls sideways, and anything
+     drawn outside the padding box is clipped away by that. */
+  padding: 4px 3px 3px;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -764,7 +768,7 @@ button { border: 0; background: none; cursor: pointer; }
 #view-reminders > .head,
 #view-reminders > .daytabs { position: relative; z-index: 1; flex: none; }
 #view-reminders > .head { margin-bottom: 8px; }
-#view-reminders { padding-top: calc(env(safe-area-inset-top) + 40px); }
+#view-reminders { padding-top: var(--head-top); }
 
 /* The board takes what is left, and its notes scroll inside it rather than
    pushing the shelf off the bottom of the screen. */
@@ -779,8 +783,7 @@ button { border: 0; background: none; cursor: pointer; }
 #view-reminders > .board > .cork {
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
-  scrollbar-width: none;
+  overflow: hidden;
 }
 #view-reminders > .board > .cork::-webkit-scrollbar { display: none; }
 
@@ -814,17 +817,16 @@ button { border: 0; background: none; cursor: pointer; }
    supplied board — every fleck drawn four times so it meets itself at the
    edges — which tiles at any size for under seven kilobytes. */
 
-/* The sticky sits on the heading's own middle, not above it. */
+/* The sticky hangs on the heading's own middle without setting the height of
+   the row, so this screen starts its heading level with every other one. */
 .rem-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  position: relative;
+  display: block;
 }
 
-/* The heading gives way first; the sticky has a fixed size to keep. */
 .rem-h1 {
   min-width: 0;
+  padding-right: 86px;   /* clear of the sticky */
   font-family: var(--font-display);
   font-size: clamp(25px, 7.4vw, 32px);
   font-weight: 600;
@@ -856,7 +858,9 @@ button { border: 0; background: none; cursor: pointer; }
    drawing itself — pin, plus, handwriting and the little lines beside the
    pin — cut off its background, rather than a square built out of CSS. */
 .stick-add {
-  flex: none;
+  position: absolute;
+  top: 50%;
+  right: 0;
   width: 76px;
   margin-right: 0;
   padding: 0;
@@ -866,7 +870,8 @@ button { border: 0; background: none; cursor: pointer; }
   transition: transform .2s var(--spring);
 }
 .stick-add img { width: 100%; height: auto; }
-.stick-add:active { transform: scale(.94); }
+.stick-add { transform: translateY(-50%); }
+.stick-add:active { transform: translateY(-50%) scale(.94); }
 
 /* The days across the top. */
 .daytabs {
@@ -922,11 +927,8 @@ button { border: 0; background: none; cursor: pointer; }
 }
 
 .cork {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px 13px;
-  align-content: start;
-  padding: 22px 15px 20px;
+  position: relative;   /* notes are placed on it, not flowed into it */
+  overflow: hidden;
   border-radius: 10px;
   background: var(--cork) url("art/cork.webp") repeat;
   background-size: 240px 240px;
@@ -950,20 +952,63 @@ button { border: 0; background: none; cursor: pointer; }
   border-radius: 1px;
   color: #2B2F2C;
   text-align: center;
+  background-color: var(--tint, #F8F0E8);
   box-shadow: 0 3px 7px -2px rgba(70,44,16,.44);
   transform: rotate(var(--tilt, 0deg));
   transition: transform .18s var(--spring);
 }
-.stick:active { transform: rotate(var(--tilt, 0deg)) scale(.95); }
+.stick:active:not(.is-lifted) { transform: rotate(var(--tilt, 0deg)) scale(.95); }
 
-.stick[data-note] { width: 100%; }
+/* A note on the board is placed rather than flowed: left and top come from
+   the note's own record, as percentages of the cork, so a note stays where it
+   was put whichever way the phone is held. touch-action keeps the browser
+   from claiming the drag for a scroll it has nowhere to go. */
+.stick[data-note] {
+  position: absolute;
+  width: 28%;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
 
-.stick-lined  { background: #F8F0E8; }
-.stick-pink   { background: #FCD4CC; }
-.stick-grid   { background: #F2EEEA; }
-.stick-mint   { background: #E0E8D8; }
-.stick-torn   { background: #F8F0E4; }
-.stick-torn {
+/* Picked up: bigger, higher, and casting further, with no transition so it
+   keeps up with the finger. */
+.stick.is-lifted {
+  z-index: 5;
+  transform: rotate(var(--tilt, 0deg)) scale(1.07);
+  box-shadow: 0 14px 22px -6px rgba(70,44,16,.52);
+  transition: none;
+}
+
+/* ── Paper: colour and pattern, kept apart ────────────────
+   There used to be eight fixed papers, each one a colour and a pattern
+   welded together. Now the colour sets --tint and the pattern draws on it, so
+   any of the five can be had in any of the six. --rule is the ruling for that
+   colour: a blush page ruled in cold blue looks like two papers at once. */
+.pt-cream  { --tint: #F8F0E8; --rule: #D9E0EA; }
+.pt-blush  { --tint: #FBD8D0; --rule: #E7BCB3; }
+.pt-mint   { --tint: #DFE8D9; --rule: #C1D1BA; }
+.pt-sky    { --tint: #D9E7F1; --rule: #B8CEDE; }
+.pt-butter { --tint: #FBEBC2; --rule: #E3CD9B; }
+.pt-lilac  { --tint: #E5DDEE; --rule: #C8BDD9; }
+
+/* Ruled, squared and speckled papers, drawn rather than photographed so they
+   stay crisp at any size and cost nothing to send. */
+.st-lined {
+  background-image:
+    radial-gradient(circle at 6px 6px, rgba(150,132,112,.42) 2.4px, transparent 3px),
+    repeating-linear-gradient(var(--rule, #D9E0EA) 0 1px, transparent 1px 13px);
+  background-size: 12px 19px, auto;
+  background-position: 1px 14px, 0 12px;
+  background-repeat: repeat-y, repeat;
+  padding-left: 12px;
+}
+.st-grid {
+  background-image:
+    repeating-linear-gradient(var(--rule, #DCE2EC) 0 1px, transparent 1px 11px),
+    repeating-linear-gradient(90deg, var(--rule, #DCE2EC) 0 1px, transparent 1px 11px);
+}
+.st-torn {
   -webkit-mask-image: radial-gradient(circle at 0 4px, transparent 3px, #000 3.4px);
   mask-image: radial-gradient(circle at 0 4px, transparent 3px, #000 3.4px);
   -webkit-mask-size: 100% 8px;
@@ -972,24 +1017,14 @@ button { border: 0; background: none; cursor: pointer; }
   mask-repeat: repeat-y;
   padding-left: 10px;
 }
-.stick-sky    { background: #D8E8F0; }
-.stick-butter { background: #FCECC0; }
-
-/* Ruled and squared papers, drawn rather than photographed so they stay
-   crisp and cost nothing. */
-.stick-lined {
+/* Rag paper: a few soft flecks in the pulp, at three sizes that do not share
+   a factor, so the eye never finds the repeat. */
+.st-texture {
   background-image:
-    radial-gradient(circle at 6px 6px, rgba(150,132,112,.5) 2.4px, transparent 3px),
-    repeating-linear-gradient(#D9E0EA 0 1px, transparent 1px 13px);
-  background-size: 12px 19px, auto;
-  background-position: 1px 14px, 0 12px;
-  background-repeat: repeat-y, repeat;
-  padding-left: 12px;
-}
-.stick-grid {
-  background-image:
-    repeating-linear-gradient(#DCE2EC 0 1px, transparent 1px 11px),
-    repeating-linear-gradient(90deg, #DCE2EC 0 1px, transparent 1px 11px);
+    radial-gradient(circle at 18% 26%, rgba(120,98,72,.11) 1.1px, transparent 1.7px),
+    radial-gradient(circle at 62% 58%, rgba(120,98,72,.09) 1.3px, transparent 1.9px),
+    radial-gradient(circle at 84% 17%, rgba(120,98,72,.08) 1px, transparent 1.5px);
+  background-size: 26px 22px, 34px 31px, 19px 25px;
 }
 
 .stick-at {
@@ -1016,23 +1051,63 @@ button { border: 0; background: none; cursor: pointer; }
   overflow-wrap: break-word;
 }
 
-/* The lesson it belongs to, in that subject's own mark and colour. */
-/* The doodle, down in the corner where the drawing puts it. */
-.stick-mark {
-  align-self: flex-end;
-  margin-top: auto;
-  padding: 2px 1px 0;
-  font-size: 12.5px;
-  font-weight: 700;
+/* The lesson it belongs to, written along the bottom-right corner and rising,
+   the way a name goes on the back of a photograph. It used to be a small
+   icon, which told you a subject was set but never which one. Out of the flow
+   so it cannot push the words about, and hinged on the note's own corner so
+   it runs up into the free space rather than off the paper. */
+.stick-subject {
+  position: absolute;
+  left: 46%;
+  bottom: 9px;
+  transform: rotate(-30deg);
+  transform-origin: 0 100%;
+  max-width: 56px;
+  overflow: hidden;
+  font-family: var(--font-hand);
+  font-size: 8.5px;
   line-height: 1;
-  color: var(--sc, #37403A);
+  letter-spacing: .04em;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--sc, #6B7A70) 58%, #38322B);
+  opacity: .88;
+  pointer-events: none;
 }
-.stick-mark .ico { width: 15px; height: 15px; stroke-width: 1.7; }
+
+/* ── Choosing the paper ───────────────────────────────────
+   Shown as the paper itself rather than named: a swatch says in one look
+   what "torn edge" takes a sentence to explain, and the row stays quiet
+   enough to sit under Days and Lesson without competing with them. */
+.p-swatch, .p-tint {
+  flex: none;
+  padding: 0;
+  border: 1px solid rgba(90,70,45,.24);
+  background-color: var(--tint, #F8F0E8);
+  transition: transform .16s var(--spring);
+}
+.p-swatch {
+  width: 40px;
+  height: 30px;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(70,44,16,.16);
+}
+.p-tint {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+.p-swatch.is-on, .p-tint.is-on {
+  outline: 2px solid var(--board-ink);
+  outline-offset: 2px;
+}
+.p-swatch:active, .p-tint:active { transform: scale(.92); }
+
+/* Balances the Done button, so the title sits in the middle of its row. */
+.paper-btn.is-blank { visibility: hidden; }
 
 /* Narrow phones take two across rather than squeezing three, and the sticky
    tucks in so it still clears the timetable button. */
 @media (max-width: 350px) {
-  .cork { grid-template-columns: repeat(2, 1fr); }
   .rem-h1 { font-size: 27px; }
   .stick-add { width: 66px; }
 }
@@ -1184,7 +1259,7 @@ button { border: 0; background: none; cursor: pointer; }
 /* Floating add button */
 .fab {
   position: fixed;
-  top: calc(env(safe-area-inset-top) + 18px);
+  top: calc(env(safe-area-inset-top) + 32px);
   right: calc(max(calc((100% - 540px) / 2 + var(--gutter)), var(--gutter)) + 56px);
   z-index: 22;
   width: 46px; height: 46px;
@@ -1740,7 +1815,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
 
 .tt-btn {
   position: fixed;
-  top: calc(env(safe-area-inset-top) + 20px);
+  top: calc(env(safe-area-inset-top) + 34px);
   right: max(calc((100% - 540px) / 2 + var(--gutter)), var(--gutter));
   z-index: 22;
   display: grid;

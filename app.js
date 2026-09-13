@@ -1405,8 +1405,55 @@ let remDraft = null;
    random, so a note keeps the same look every time the page is drawn instead
    of shuffling under you on every redraw. */
 
-const STICK_PAPER = ['lined', 'pink', 'grid', 'mint', 'torn', 'sky', 'grid', 'butter'];
+/* Paper is two choices kept apart — what is printed on it, and what colour
+   it was cut from — so any pattern can take any colour instead of the eight
+   fixed combinations there used to be. A note that has not been given either
+   falls back to its own id, which is how every note looked before there was
+   anything to choose, so an existing board keeps its variety. */
+const PAPER_STYLE = [
+  { key: 'plain',   name: 'Plain' },
+  { key: 'lined',   name: 'Lined' },
+  { key: 'grid',    name: 'Grid' },
+  { key: 'torn',    name: 'Torn edge' },
+  { key: 'texture', name: 'Textured' },
+];
+const PAPER_TINT = [
+  { key: 'cream',  name: 'Cream' },
+  { key: 'blush',  name: 'Blush' },
+  { key: 'mint',   name: 'Mint' },
+  { key: 'sky',    name: 'Sky' },
+  { key: 'butter', name: 'Butter' },
+  { key: 'lilac',  name: 'Lilac' },
+];
 const STICK_PIN = ['red', 'green', 'blue', 'yellow'];
+
+function paperStyleOf(x) {
+  if (PAPER_STYLE.some(p => p.key === x.style)) return x.style;
+  return PAPER_STYLE[idHash(x.id + ':style') % PAPER_STYLE.length].key;
+}
+function paperTintOf(x) {
+  if (PAPER_TINT.some(p => p.key === x.tint)) return x.tint;
+  return PAPER_TINT[idHash(x.id + ':tint') % PAPER_TINT.length].key;
+}
+
+/* Where a note goes if it has never been moved. Positions are percentages of
+   the board rather than pixels, so a note stays where it was put when the
+   board changes size. Three across and four down fills the cork; past that
+   they stack with a small offset, the way a real board runs out of room. */
+const SLOT_X = [4, 36, 68];
+const SLOT_Y = [3, 25, 47, 69];
+function slotPos(i) {
+  const per = SLOT_X.length * SLOT_Y.length;
+  const wrap = Math.floor(i / per);
+  return {
+    x: SLOT_X[i % SLOT_X.length] + wrap * 2.5,
+    y: SLOT_Y[Math.floor(i / SLOT_X.length) % SLOT_Y.length] + wrap * 2.5,
+  };
+}
+function posOf(x, slot) {
+  const p = x.pos;
+  return p && typeof p.x === 'number' && typeof p.y === 'number' ? p : slot;
+}
 
 /* A small, stable number from a string, mixed rather than merely scaled: ids
    one character apart have to land far apart, or a board of eight notes comes
@@ -1424,23 +1471,24 @@ function idHash(id) {
   return (h >>> 0) % 100003;
 }
 
-function stickyNote(x) {
-  const paper = STICK_PAPER[idHash(x.id + ':paper') % STICK_PAPER.length];
+function stickyNote(x, slot) {
+  const style = paperStyleOf(x);
+  const tint = paperTintOf(x);
   const pin = STICK_PIN[idHash(x.id + ':pin') % STICK_PIN.length];
   const tilt = (idHash(x.id + ':tilt') % 9) - 4;   // -4 to +4 degrees
   const sub = x.lesson ? subjectForLesson(x.lesson) : null;
+  const at = posOf(x, slot);
 
   return `
-    <button class="stick stick-${paper}" data-note="${x.id}"
-           style="--tilt:${tilt}deg${sub ? `; --sc:${sub.color}` : ''}"
-           aria-label="Take down ${esc(x.text)}">
+    <button class="stick st-${style} pt-${tint}" data-note="${x.id}"
+           style="--tilt:${tilt}deg; left:${at.x.toFixed(2)}%; top:${at.y.toFixed(2)}%${
+             sub ? `; --sc:${sub.color}` : ''}"
+           aria-label="${esc(x.text)}, ${esc(sub ? sub.name : 'no lesson')}. Tap to take down.">
       <span class="pin pin-${pin}" aria-hidden="true"></span>
       ${x.at ? `<span class="stick-at">${esc(shortTime(x.at))}</span>` : ''}
       <span class="stick-text">${esc(x.text)}</span>
       ${x.note ? `<span class="stick-note">${esc(x.note)}</span>` : ''}
-      ${sub ? `<span class="stick-mark">${sub.icon
-        ? `<svg class="ico" aria-hidden="true"><use href="#${sub.icon}" /></svg>`
-        : esc(sub.glyph || sub.name.slice(0, 1))}</span>` : ''}
+      ${sub ? `<span class="stick-subject">${esc(sub.name)}</span>` : ''}
     </button>`;
 }
 
@@ -1540,7 +1588,12 @@ function renderReminders() {
   const mine = notesFor(tab).slice().sort(byTime);
   // Nothing pinned up means bare cork. A board with nothing on it already
   // says so, and the note to write on is beside the heading either way.
-  $('#rem-board').innerHTML = mine.map(stickyNote).join('');
+  // Notes that have been moved keep where they were put; the rest fall into
+  // the next free slot, so a board nobody has arranged still reads in order.
+  let slot = 0;
+  $('#rem-board').innerHTML = mine
+    .map(n => stickyNote(n, n.pos ? null : slotPos(slot++)))
+    .join('');
 }
 
 /* Earliest first, and anything without a time after everything with one —
@@ -1554,7 +1607,8 @@ function byTime(a, b) {
 }
 
 function openRemSheet() {
-  remDraft = { text: '', note: '', day: schoolDayIndex(), lesson: null };
+  remDraft = { text: '', note: '', day: schoolDayIndex(), lesson: null,
+               style: 'plain', tint: 'butter' };
   if (remDraft.day < 0) remDraft.day = null;
 
   $('#rem-title').value = '';
@@ -1587,13 +1641,111 @@ function drawRemSheet() {
         <span class="chip-dot"></span>${esc(shortName(l.name))}</button>`;
     }).join('')}` : '';
 
+  drawPaperPicker(remDraft, '#rem-sheet-paper', '#rem-sheet-tint');
+
   $('#rem-save').disabled = !$('#rem-title').value.trim();
+}
+
+/* The paper itself: five patterns and six colours, shown as the paper rather
+   than named, because a swatch says what a word cannot. Two small rows, and
+   nothing else added to the page. */
+function drawPaperPicker(on, styleSel, tintSel) {
+  const style = $(styleSel);
+  const tint = $(tintSel);
+  if (!style || !tint) return;
+  style.innerHTML = PAPER_STYLE.map(p => `
+    <button class="p-swatch st-${p.key} pt-${on.tint} ${on.style === p.key ? 'is-on' : ''}"
+            data-rempaper="${p.key}" title="${esc(p.name)}"
+            aria-label="${esc(p.name)}" aria-pressed="${on.style === p.key}"></button>`).join('');
+  tint.innerHTML = PAPER_TINT.map(t => `
+    <button class="p-tint pt-${t.key} ${on.tint === t.key ? 'is-on' : ''}"
+            data-remtint="${t.key}" title="${esc(t.name)}"
+            aria-label="${esc(t.name)}" aria-pressed="${on.tint === t.key}"></button>`).join('');
 }
 
 /* A note comes off the board with one tap, because the drawing gives it no
    cross to press and a board covered in crosses is not the drawing. The tap
    is undoable for as long as the toast is up, which is the same bargain the
    homework list makes when something is ticked off. */
+/* A note can be picked up and put down anywhere on the cork, and it stays
+   where it was left. Percentages rather than pixels, so turning the phone or
+   opening it on a bigger screen does not scatter the board.
+
+   The three things a finger can mean are told apart by what it does: a press
+   that goes nowhere and lifts is a tap, which takes the note down; a press
+   that moves more than 8px is a drag; a press that stays still for half a
+   second is a hold, which opens the note's paper. Eight pixels is small
+   enough that dragging feels immediate and large enough that a tap on a
+   moving bus is still a tap. */
+function wireBoard() {
+  const board = $('#rem-board');
+  if (!board) return;
+
+  let drag = null;
+  let hold = null;
+  const stopHold = () => { clearTimeout(hold); hold = null; };
+  const drop = (el) => { if (el) el.classList.remove('is-lifted'); };
+
+  board.addEventListener('pointerdown', (e) => {
+    const el = e.target.closest('[data-note]');
+    if (!el || e.button > 0) return;
+    const b = board.getBoundingClientRect();
+    const n = el.getBoundingClientRect();
+    drag = {
+      el, id: el.dataset.note, b,
+      dx: e.clientX - n.left, dy: e.clientY - n.top,
+      x0: e.clientX, y0: e.clientY,
+      w: n.width, h: n.height,
+      moved: false, x: null, y: null,
+    };
+    // Keeps the moves coming to this note even when the finger outruns it.
+    try { el.setPointerCapture(e.pointerId); } catch { /* not supported */ }
+    hold = setTimeout(() => {
+      stopHold();
+      if (!drag || drag.moved) return;
+      const id = drag.id;
+      drop(drag.el);
+      drag = null;
+      openPaperSheet(id);
+    }, 480);
+  });
+
+  board.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    if (!drag.moved) {
+      if (Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0) < 8) return;
+      drag.moved = true;
+      stopHold();
+      drag.el.classList.add('is-lifted');
+    }
+    e.preventDefault();
+    const along = (v, size, whole) =>
+      Math.max(0, Math.min(100 - (size / whole) * 100, (v / whole) * 100));
+    drag.x = along(e.clientX - drag.dx - drag.b.left, drag.w, drag.b.width);
+    drag.y = along(e.clientY - drag.dy - drag.b.top, drag.h, drag.b.height);
+    drag.el.style.left = drag.x.toFixed(2) + '%';
+    drag.el.style.top = drag.y.toFixed(2) + '%';
+  });
+
+  board.addEventListener('pointerup', () => {
+    stopHold();
+    if (!drag) return;
+    const { el, id, moved, x, y } = drag;
+    drag = null;
+    drop(el);
+    if (!moved) { takeDown(id); return; }
+    const note = state.notes.find(n => n.id === id);
+    if (note && x !== null) { note.pos = { x, y }; save(); }
+  });
+
+  board.addEventListener('pointercancel', () => {
+    stopHold();
+    if (!drag) return;
+    drop(drag.el);
+    drag = null;
+  });
+}
+
 function takeDown(id) {
   const i = state.notes.findIndex(n => n.id === id);
   if (i < 0) return;
@@ -1608,6 +1760,25 @@ function takeDown(id) {
   });
 }
 
+/* Hold a note that is already up and its paper opens, with every change
+   landing on the board behind the sheet as it is made. There is no button
+   for this on the note: a note the size of a stamp has no room for one, and
+   the board is meant to be handled rather than operated. */
+let paperTarget = null;
+
+function openPaperSheet(id) {
+  const note = state.notes.find(n => n.id === id);
+  if (!note) return;
+  paperTarget = { id, style: paperStyleOf(note), tint: paperTintOf(note) };
+  drawPaperSheet();
+  showSheet('#sheet-paper');
+}
+
+function drawPaperSheet() {
+  if (!paperTarget) return;
+  drawPaperPicker(paperTarget, '#paper-style', '#paper-tint');
+}
+
 function saveReminder() {
   if (!remDraft) return;
   const text = $('#rem-title').value.trim();
@@ -1618,6 +1789,7 @@ function saveReminder() {
     note: $('#rem-note').value.trim(),
     at: $('#rem-at').value || '',
     day: remDraft.day, lesson: remDraft.lesson,
+    style: remDraft.style, tint: remDraft.tint,
     createdAt: Date.now(),
   });
   save();
@@ -2636,10 +2808,50 @@ function wireApp() {
     drawRemSheet();
   });
 
+  wireBoard();
+
+  // A keyboard has no pointer to drag with, so Enter or Space on a note
+  // still takes it down. A real click arrives with detail 1 and is already
+  // handled below, by the pointer that made it.
   on('#rem-board', 'click', (e) => {
+    if (e.detail !== 0) return;
     const note = e.target.closest('[data-note]');
     if (note) takeDown(note.dataset.note);
   });
+
+  on('#rem-sheet-paper', 'click', (e) => {
+    const c = e.target.closest('[data-rempaper]');
+    if (!c || !remDraft) return;
+    remDraft.style = c.dataset.rempaper;
+    drawRemSheet();
+  });
+
+  on('#rem-sheet-tint', 'click', (e) => {
+    const c = e.target.closest('[data-remtint]');
+    if (!c || !remDraft) return;
+    remDraft.tint = c.dataset.remtint;
+    drawRemSheet();
+  });
+
+  // The paper sheet works on a note that is already up, so every tap lands
+  // on the board straight away rather than waiting for a Save.
+  on('#sheet-paper', 'click', (e) => {
+    const p = e.target.closest('[data-rempaper]');
+    const t = e.target.closest('[data-remtint]');
+    if (!paperTarget || (!p && !t)) return;
+    if (p) paperTarget.style = p.dataset.rempaper;
+    if (t) paperTarget.tint = t.dataset.remtint;
+    const note = state.notes.find(n => n.id === paperTarget.id);
+    if (note) {
+      note.style = paperTarget.style;
+      note.tint = paperTarget.tint;
+      save();
+      renderReminders();
+    }
+    drawPaperSheet();
+  });
+
+  on('#paper-done', 'click', closeSheet);
 
   on('#rem-scope', 'click', (e) => {
     if (e.target.closest('[data-more]')) {

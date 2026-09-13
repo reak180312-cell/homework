@@ -172,6 +172,18 @@ The page is a room: a cream wall with the daylight and the leaf shadows on it, t
 hung on it, and a shelf at its foot with the books, the pencil cup, the little checklist pad
 and the plant.
 
+**Every screen starts its heading at the same height.** The room needs a little more air
+under the status bar than a list does, so it set its heading 40px down while every other
+screen set theirs at 26px — fourteen pixels, which is nothing to describe and impossible not
+to see when you move between tabs. There is one `--head-top` now, at the lower of the two,
+and the two buttons that float in that same top corner moved down with it.
+
+The sticky beside the heading is half again as tall as the heading is. Left in the flow it
+set the height of the whole row and pushed the heading down its middle, which put this
+screen's first line 22px below every other screen's even after the padding matched. It is
+lifted out of the flow and hung on the heading's own middle instead, so it still lines up
+with the heading without having any say in where the heading starts.
+
 **It is one screen, and it stays put.** The heading, the tabs, the board and the shelf share
 exactly what the window gives them, and the page itself does not scroll — so the room is
 always whole, and nothing can be dragged out from under anything else.
@@ -203,20 +215,35 @@ daylight it looked lit from somewhere the room was not.
 
 ### The board
 
-Reminders are pinned to a cork board rather than listed in rows: a small square of coloured
-paper each, a pin through the top, the time underlined above the words, and the subject's own
-mark in the corner when the reminder belongs to a lesson.
+Reminders are pinned to a cork board rather than listed in rows: a small square of paper
+each, a pin through the top, the time underlined above the words, and — when the reminder
+belongs to a lesson — that subject's name written across the bottom-right corner on a slant,
+rising, the way a name goes on the back of a photograph.
 
-Paper, pin and tilt come from the reminder's own id, so a note keeps its look between
-redraws instead of reshuffling every time the page is drawn. They come from **three separate
-hashes** of that id, not three slices of one: sliced, they agreed with each other, and since
-the first hash merely scaled and took a remainder, ids a character apart moved by a fixed
-step — a board of eight notes came out in three colours. The hash mixes its bits now.
+The corner used to hold a small icon instead. An icon can say that a note belongs to a
+lesson but never which lesson: a book means maths, language and history alike, so the one
+thing it was there to tell you was the one thing it could not. The name costs the same
+corner and says it outright.
+
+It is hinged at its **left-hand** end, which is not where you would first put it. Turning a
+line anti-clockwise about its right-hand end — the note's own corner, the obvious anchor —
+sends its left-hand end downwards, and downwards from the bottom corner of a note is off the
+note: a seven-letter subject hung 13px into the cork. Hinged at the other end every part of
+the line rises from that point and nothing can fall below it, so the corner stays put and
+the name climbs away from it.
+
+Pin and tilt come from the reminder's own id, so a note keeps its look between redraws
+instead of reshuffling every time the page is drawn. They come from **separate hashes** of
+that id, not slices of one: sliced, they agreed with each other, and since the first hash
+merely scaled and took a remainder, ids a character apart moved by a fixed step — a board of
+eight notes came out in three colours. The hash mixes its bits now. A note that has never
+been given a paper of its own falls back to the same hashes, which is how every note looked
+before there was anything to choose, so an old board keeps the variety it had.
 
 Every colour on this page was **read off the drawing** rather than matched by eye: the most
 common tone in each region, which is the paper or the cork itself rather than a highlight on
-it or the shadow under it. The cork is `#C89868`, the frame `#D8B084`, and the eight papers
-run from `#F8F0E8` through `#FCD4CC` to `#FCECC0`. `scratchpad/mock-mode.js` is what read
+it or the shadow under it. The cork is `#C89868`, the frame `#D8B084`, and the six papers
+run from `#F8F0E8` through `#FBD8D0` to `#FBEBC2`. `scratchpad/mock-mode.js` is what read
 them.
 
 The cork itself is a 240px tile generated to that colour, with much finer mottling than the
@@ -227,8 +254,30 @@ edges. It tiles at any size for under seven kilobytes, which a cut of the real b
 not: every clean patch of it is small, and the notes cover the rest. Rebuild it with
 `scratchpad/make-cork.js`.
 
-The ruled note is a leaf out of a spiral pad, punched holes and all, and the cream one is
-torn down its left edge — both drawn, so they cost nothing and stay sharp.
+### The paper
+
+A note is **a pattern and a colour, chosen apart**: five papers — plain, lined, grid, torn
+edge, textured — in any of six colours. There used to be eight fixed papers, each one a
+colour and a pattern welded together, which meant thirty of the forty combinations did not
+exist and none of them was anybody's choice. Pulling the two apart cost one custom property:
+the colour sets `--tint` and the pattern draws on top of it.
+
+Each colour carries its own ruling in `--rule` as well. A blush page ruled in the cold blue
+that suits cream looks like two papers at once; ruled in a warm rose of its own it looks like
+one. The lined paper is a leaf out of a spiral pad, punched holes and all; the torn one is
+ragged down its left edge; the textured one has a few soft flecks in the pulp at three sizes
+that share no factor, so the eye never finds the repeat. All drawn, so they cost nothing to
+send and stay sharp at any size.
+
+They are chosen as **swatches rather than names** — two short rows under Days and Lesson on
+the page you write a note on, the patterns shown in the colour currently picked so the two
+rows preview each other. A swatch says in one look what "torn edge" takes a sentence to
+explain.
+
+To change a note already on the board, **hold it**. The same two rows open on their own, and
+every tap lands on the note behind the sheet as it is made — there is no Save, because there
+is nothing to undo a colour into. There is no button for this on the note itself: a note the
+size of a stamp has no room for one, and a board is meant to be handled rather than operated.
 
 Across the top: today, tomorrow, as many of the following school days **as actually fit**,
 and then *More*, which opens the rest of the week and everything at once. How many fit
@@ -239,6 +288,32 @@ guessing at a number that is right one week and wrong the next.
 A reminder set for every day shows on all of them, because that is what every day means.
 Earliest first, and anything without a time after everything with one. There are no counts on
 the tabs, because the drawing has none.
+
+### Moving them
+
+**A note can be picked up and put down anywhere on the cork**, and it stays where it was
+left. The cork stopped being a grid for this: notes are placed on it rather than flowed into
+it, absolutely positioned, and the board no longer scrolls because there is nowhere to scroll
+to when nothing is stacked.
+
+Where a note sits is kept as a **percentage of the board rather than a pixel count**, so
+turning the phone or opening the app on a wider screen moves the whole board together instead
+of scattering it. A note that has never been moved has no position at all and falls into the
+next free slot — three across and four down — so a board nobody has arranged still reads in
+order, and only the ones you have actually placed are pinned down.
+
+One finger has to mean three things, and they are told apart by what it does rather than by
+where it lands: a press that goes nowhere and lifts is a **tap**, which takes the note down;
+a press that moves more than **8px** is a **drag**; a press that stays still for **480ms** is
+a **hold**, which opens the note's paper. Eight pixels is small enough that dragging feels
+immediate and large enough that a tap on a moving bus is still a tap — a thumb is never
+perfectly still. The note is captured on pointerdown, so a finger that outruns it keeps
+dragging it rather than dropping it, and `touch-action: none` stops the browser claiming the
+gesture for a scroll it has nowhere to go.
+
+A keyboard has no pointer to drag with, so Enter or Space on a note still takes it down: a
+real click arrives with `detail` 1 and is already handled by the pointer that made it, and a
+click generated by a key arrives with `detail` 0.
 
 **An empty board is bare cork.** It used to write *Nothing pinned up yet — tap to write one*
 across the middle of itself, and a day with none of its own said *Nothing for Tuesday*. Both
@@ -266,8 +341,8 @@ is fixed to that same corner, so the sticky is sized to stand clear of it — in
 Two things in the drawing are not here. Its tab bar is Home / Calendar / Stats / Profile,
 which is a different app's navigation. And its doodles are chosen to match each reminder's
 words — a book for the maths test, a cart for the milk — which nothing in the app can infer
-from what you type; where a reminder belongs to a lesson it shows that subject's own mark
-instead.
+from what you type. The corner they sit in carries the lesson's name instead, which is
+something the app does know.
 
 ### Writing one down
 
