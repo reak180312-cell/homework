@@ -158,6 +158,16 @@ needed to pack a bag.
 
 ### The room
 
+The top of the screen is part of the page, not a strip above it. Two things have to be true
+for that. The status bar style is , so iOS draws the page behind the clock
+rather than below an opaque band of its own. And  — which is what a browser
+paints the bar *around* the status bar with — is kept in step with whatever the page is
+standing on: flat paper on every other screen, and the wall's own top band, , on
+this one. Left at the paper colour it sat eleven levels off the wall behind it, and eleven
+levels across a hard horizontal line is exactly a seam.  in
+[app.js](app.js) does it, on every tab change and whenever the hour turns dark.
+
+
 The page is a room: a cream wall with the daylight and the leaf shadows on it, the board
 hung on it, and a shelf at its foot with the books, the pencil cup, the little checklist pad
 and the plant.

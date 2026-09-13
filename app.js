@@ -2090,8 +2090,25 @@ function syncFab() {
   $('#fab').hidden = !belongs || cleared;
 }
 
+/* What the browser paints behind the status bar. Every screen but this one
+   stands on flat paper; this one stands on a photograph of a wall, whose top
+   band is a shade deeper. Matching it is the difference between the top of
+   the screen being part of the page and being a strip above it. */
+const TOP_PAPER = '#F4EEE1';
+const TOP_WALL  = '#F0E3D6';   // measured off the top of art/wall.jpg
+const TOP_NIGHT = '#13171C';
+
+function syncTopColour() {
+  const meta = $('#top-colour');
+  if (!meta) return;
+  const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+  meta.setAttribute('content',
+    dark ? TOP_NIGHT : (currentTab === 'reminders' ? TOP_WALL : TOP_PAPER));
+}
+
 function showTab(tab) {
   currentTab = tab;
+  syncTopColour();
   for (const view of $$('.view')) view.hidden = view.dataset.view !== tab;
   for (const btn of $$('.tab')) {
     const on = btn.dataset.tab === tab;
@@ -2741,6 +2758,8 @@ function boot() {
     setTimeout(() => openHwSheet(), 300);
     history.replaceState(null, '', location.pathname);
   }
+
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncTopColour);
 
   // Dates drift while the app sits open; refresh when it comes back.
   document.addEventListener('visibilitychange', () => {

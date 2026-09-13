@@ -11,8 +11,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="Homework" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="theme-color" content="#F4EEE1" media="(prefers-color-scheme: light)" />
-<meta name="theme-color" content="#13171C" media="(prefers-color-scheme: dark)" />
+<!-- Kept in step with whatever the page is standing on, so the bar around the
+     status bar never reads as a strip of its own. See syncTopColour(). -->
+<meta id="top-colour" name="theme-color" content="#F4EEE1" />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
