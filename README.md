@@ -159,12 +159,12 @@ needed to pack a bag.
 ### The room
 
 The top of the screen is part of the page, not a strip above it. Two things have to be true
-for that. The status bar style is , so iOS draws the page behind the clock
-rather than below an opaque band of its own. And  — which is what a browser
+for that. The status bar style is `black-translucent`, so iOS draws the page behind the clock
+rather than below an opaque band of its own. And `theme-color` — which is what a browser
 paints the bar *around* the status bar with — is kept in step with whatever the page is
-standing on: flat paper on every other screen, and the wall's own top band, , on
+standing on: flat paper on every other screen, and the wall's own top band, `#F0E3D6`, on
 this one. Left at the paper colour it sat eleven levels off the wall behind it, and eleven
-levels across a hard horizontal line is exactly a seam.  in
+levels across a hard horizontal line is exactly a seam. `syncTopColour()` in
 [app.js](app.js) does it, on every tab change and whenever the hour turns dark.
 
 
