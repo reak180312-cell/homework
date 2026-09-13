@@ -22,3 +22,6 @@ WhatsApp Image*
 
 # ...and the bag artwork, which is part of the build
 !art/bag/*.webp
+
+# ...and the cork the reminders are pinned to
+!art/cork.webp

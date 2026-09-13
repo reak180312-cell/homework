@@ -1392,81 +1392,133 @@ let remScope = 'today';    // the list starts on today, "All" shows the rest
 let remDraft = null;
 
 /** One reminder, shared by the Today and All views. */
-function reminderRow(x) {
+/* ── The board ─────────────────────────────────────────────
+   Reminders live pinned to a cork board, the way the drawing has them: a
+   small square of coloured paper each, a pin through the top, the time
+   underlined above the words.
+
+   Paper, pin and tilt are picked from the reminder's own id rather than at
+   random, so a note keeps the same look every time the page is drawn instead
+   of shuffling under you on every redraw. */
+
+const STICK_PAPER = ['lined', 'pink', 'grid', 'mint', 'torn', 'sky', 'grid', 'butter'];
+const STICK_PIN = ['red', 'green', 'blue', 'yellow'];
+
+/* A small, stable number from a string, mixed rather than merely scaled: ids
+   one character apart have to land far apart, or a board of eight notes comes
+   out in three colours. */
+function idHash(id) {
+  let h = 0x811c9dc5;
+  const s = String(id);
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  h ^= h >>> 15;
+  h = Math.imul(h, 0x2545f491);
+  h ^= h >>> 13;
+  return (h >>> 0) % 100003;
+}
+
+function stickyNote(x) {
+  const paper = STICK_PAPER[idHash(x.id + ':paper') % STICK_PAPER.length];
+  const pin = STICK_PIN[idHash(x.id + ':pin') % STICK_PIN.length];
+  const tilt = (idHash(x.id + ':tilt') % 9) - 4;   // -4 to +4 degrees
   const sub = x.lesson ? subjectForLesson(x.lesson) : null;
+
   return `
-    <div class="note-row" data-note="${x.id}" style="--sc:${sub ? sub.color : 'var(--ink-3)'}">
-      <span class="note-main">
-        <span class="note-text">${esc(x.text)}</span>
-        ${x.note ? `<span class="note-sub">${esc(x.note)}</span>` : ''}
-        ${x.lesson ? `<span class="note-lesson"><span class="chip-dot"></span>${esc(shortName(x.lesson))}</span>`
-                   : (x.day === null ? '<span class="note-tag">Every day</span>' : '')}
-      </span>
-      <button class="note-del" data-act="del-note" aria-label="Delete reminder">
+    <div class="stick stick-${paper}" data-note="${x.id}"
+         style="--tilt:${tilt}deg${sub ? `; --sc:${sub.color}` : ''}">
+      <span class="pin pin-${pin}" aria-hidden="true"></span>
+      ${x.at ? `<span class="stick-at">${esc(x.at)}</span>` : ''}
+      <span class="stick-text">${esc(x.text)}</span>
+      ${x.note ? `<span class="stick-note">${esc(x.note)}</span>` : ''}
+      ${sub ? `<span class="stick-mark">${sub.icon
+        ? `<svg class="ico" aria-hidden="true"><use href="#${sub.icon}" /></svg>`
+        : esc(sub.glyph || sub.name.slice(0, 1))}</span>` : ''}
+      ${!sub && x.day === null ? '<span class="stick-every">every day</span>' : ''}
+      <button class="stick-off" data-act="del-note" aria-label="Take down ${esc(x.text)}">
         <svg class="ico" aria-hidden="true"><use href="#i-close" /></svg>
       </button>
     </div>`;
 }
 
-function renderReminders() {
-  const n = state.notes.length;
-  $('#rem-sub').textContent = n ? `${n} saved` : '';
-
+/* The tabs across the top: today, tomorrow, then the school days neither of
+   those covers, and everything at the end. A reminder set for every day shows
+   on all of them, because that is what every day means. */
+function dayTabs() {
   const today = schoolDayIndex();
-  const todayCount = state.notes.filter(x => x.day === null || x.day === today).length;
+  const t = new Date();
+  t.setDate(t.getDate() + 1);
+  const tomorrow = schoolDayIndex(t);
 
-  $('#rem-scope').innerHTML = `
-    <button class="seg ${remScope === 'today' ? 'is-on' : ''}" data-scope="today">
-      Today${todayCount ? ` <span class="seg-count">${todayCount}</span>` : ''}
-    </button>
-    <button class="seg ${remScope === 'all' ? 'is-on' : ''}" data-scope="all">
-      All${n ? ` <span class="seg-count">${n}</span>` : ''}
-    </button>`;
-  $('#rem-scope').hidden = !n;
-
-  if (!n) {
-    $('#rem-list').innerHTML = empty('Nothing to remember',
-      'Tap here and tell it what not to forget.',
-      { icon: 'i-tab-bell', mood: 'ring', act: 'first-reminder' });
-    return;
-  }
-
-  // Today means: pinned to today, or set for every day.
-  if (remScope === 'today') {
-    const mine = state.notes.filter(x => x.day === null || x.day === today);
-    $('#rem-list').innerHTML = mine.length
-      ? `<h3 class="day-title">${today >= 0 ? esc(SCHOOL_DAYS[today].en) : 'Today'}</h3>
-         <div class="list">${mine.map(reminderRow).join('')}</div>`
-      : empty('Nothing for today', 'Tap All to see the rest.', { icon: 'i-tab-bell', mood: 'ring' });
-    return;
-  }
-
-  // Every day first, then Sunday through Thursday.
-  const groups = [{ key: null, label: 'Every day' }]
-    .concat(SCHOOL_DAYS.map((d, i) => ({ key: i, label: d.en })));
-
-  $('#rem-list').innerHTML = groups.map(g => {
-    const mine = state.notes.filter(x => x.day === g.key);
-    if (!mine.length) return '';
-    return `
-      <h3 class="day-title">${esc(g.label)}</h3>
-      <div class="list">${mine.map(reminderRow).join('')}</div>`;
-  }).join('');
+  const tabs = [{ key: 'today', label: 'Today', day: today }];
+  tabs.push({ key: 'tomorrow', label: 'Tomorrow', day: tomorrow });
+  SCHOOL_DAYS.forEach((d, i) => {
+    if (i === today || i === tomorrow) return;
+    tabs.push({ key: String(i), label: d.en, day: i });
+  });
+  tabs.push({ key: 'all', label: 'All', day: null });
+  return tabs;
 }
 
-/* A page out of a notebook. The fields are the ones the app can act on: what
-   to remember, a line about it, which day, and which lesson of that day. A
-   time of its own is deliberately not among them — the app cannot wake a
-   closed browser to ring at half past seven, and a field that looks like an
-   alarm but is only a label would be a promise it cannot keep. The lesson
-   says when, and says it more precisely, because it comes from the
-   timetable. */
+/** Which reminders belong on a given tab. */
+function notesFor(tab) {
+  if (tab.key === 'all') return state.notes;
+  // Not a school day: only the ones set for every day are due.
+  if (tab.day < 0) return state.notes.filter(n => n.day === null);
+  return state.notes.filter(n => n.day === null || n.day === tab.day);
+}
+
+function renderReminders() {
+  const tabs = dayTabs();
+  let tab = tabs.find(t => t.key === remScope) || tabs[0];
+  remScope = tab.key;
+
+  $('#rem-scope').innerHTML = tabs.map(t => {
+    const n = notesFor(t).length;
+    return `<button class="daytab ${t.key === tab.key ? 'is-on' : ''}" data-scope="${t.key}">
+      ${esc(t.label)}${n ? `<i>${n}</i>` : ''}</button>`;
+  }).join('');
+
+  const mine = notesFor(tab).slice().sort(byTime);
+  const board = $('#rem-board');
+
+  if (!state.notes.length) {
+    board.innerHTML = `
+      <button class="board-empty" data-act="first-reminder">
+        <span class="board-empty-line">Nothing pinned up yet</span>
+        <span class="board-empty-sub">Tap to write one</span>
+      </button>`;
+    return;
+  }
+
+  if (!mine.length) {
+    board.innerHTML = `
+      <p class="board-empty-line board-clear">Nothing for ${esc(tab.label.toLowerCase())}</p>`;
+    return;
+  }
+
+  board.innerHTML = mine.map(stickyNote).join('');
+}
+
+/* Earliest first, and anything without a time after everything with one —
+   a note that says when it is wanted is more use at the top of the board. */
+function byTime(a, b) {
+  const ta = a.at || null, tb = b.at || null;
+  if (ta && tb) return ta < tb ? -1 : ta > tb ? 1 : a.createdAt - b.createdAt;
+  if (ta) return -1;
+  if (tb) return 1;
+  return a.createdAt - b.createdAt;
+}
+
 function openRemSheet() {
   remDraft = { text: '', note: '', day: schoolDayIndex(), lesson: null };
   if (remDraft.day < 0) remDraft.day = null;
 
   $('#rem-title').value = '';
   $('#rem-note').value = '';
+  $('#rem-at').value = '';
   drawRemSheet();
   showSheet('#sheet-rem');
 
@@ -1505,6 +1557,7 @@ function saveReminder() {
   state.notes.push({
     id: uid(), text,
     note: $('#rem-note').value.trim(),
+    at: $('#rem-at').value || '',
     day: remDraft.day, lesson: remDraft.lesson,
     createdAt: Date.now(),
   });
@@ -1954,8 +2007,7 @@ function maybeArrival(level, fromLevel) {
    would sit on top of the reminder's own Add button. A cleared homework screen
    is the other exception: the empty state is already holding one. */
 function syncFab() {
-  const belongs = currentTab === 'home' || currentTab === 'subjects'
-    || currentTab === 'reminders';
+  const belongs = currentTab === 'home' || currentTab === 'subjects';
   // A cleared screen carries its own + beside the line, so the header one
   // steps aside and there is only ever one of them.
   const cleared = currentTab === 'home' && !activeHw().length;
@@ -2462,10 +2514,8 @@ function wireLists() {
 function wireApp() {
   for (const btn of $$('.tab')) btn.addEventListener('click', () => showTab(btn.dataset.tab));
 
-  on('#fab', 'click', () => {
-    if (currentTab === 'reminders') openRemSheet();
-    else openHwSheet();
-  });
+  on('#fab', 'click', () => openHwSheet());
+  on('#rem-new', 'click', openRemSheet);
   on('#subject-back', 'click', closeSubjectPage);
   on('#scrim', 'click', closeSheet);
 
@@ -2517,7 +2567,8 @@ function wireApp() {
     drawRemSheet();
   });
 
-  on('#rem-list', 'click', (e) => {
+  on('#rem-board', 'click', (e) => {
+    if (e.target.closest('[data-act=\"first-reminder\"]')) { openRemSheet(); return; }
     const act = e.target.closest('[data-act=\"del-note\"]');
     if (!act) return;
     const id = act.closest('[data-note]').dataset.note;
@@ -2581,10 +2632,7 @@ function wireApp() {
   on('#home-list', 'click', (e) => {
     if (e.target.closest('[data-act="add-first"]')) openHwSheet();
   });
-  on('#rem-list', 'click', (e) => {
-    if (!e.target.closest('[data-act="first-reminder"]')) return;
-    openRemSheet();
-  });
+
 
   on('#collection', 'click', (e) => {
     const slot = e.target.closest('[data-monster]');

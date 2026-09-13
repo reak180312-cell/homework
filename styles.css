@@ -28,6 +28,12 @@
   --font-script: 'Snell Roundhand', 'Apple Chancery', 'Segoe Script', cursive;
   --font-hand:   'Bradley Hand', 'Segoe Print', cursive;
 
+  /* The board reminders are pinned to. The cork is a tile generated to the
+     colour and grain measured off the supplied picture. */
+  --cork:       #C69464;
+  --cork-frame: #D6AA78;
+  --board-ink:  #2F5D45;   /* the green the heading is written in */
+
   --font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino,
                   'Book Antiqua', Georgia, 'Times New Roman', serif;
 
@@ -75,6 +81,9 @@
     --leaf-red:  #7A4F4C;
     --leaf-hole: #11151A;
     --leaf-pencil:#6C7A90;
+    --cork:      #6E5136;
+    --cork-frame:#7C5D3E;
+    --board-ink: #8FBFA3;
     --shadow:    0 1px 2px rgba(0,0,0,.45), 0 10px 28px -16px rgba(0,0,0,.75);
     --shadow-lift:0 2px 6px rgba(0,0,0,.55), 0 18px 40px -18px rgba(0,0,0,.85);
     color-scheme: dark;
@@ -99,6 +108,9 @@
   --leaf-red:  #7A4F4C;
   --leaf-hole: #11151A;
   --leaf-pencil:#6C7A90;
+  --cork:      #6E5136;
+  --cork-frame:#7C5D3E;
+  --board-ink: #8FBFA3;
   --shadow:    0 1px 2px rgba(0,0,0,.45), 0 10px 28px -16px rgba(0,0,0,.75);
   --shadow-lift:0 2px 6px rgba(0,0,0,.55), 0 18px 40px -18px rgba(0,0,0,.85);
   color-scheme: dark;
@@ -683,6 +695,282 @@ button { border: 0; background: none; cursor: pointer; }
   font-size: 13px;
   color: var(--ink-3);
   margin-top: 1px;
+}
+
+
+/* ── Reminders: a cork board ───────────────────────────────
+   Notes are pinned to a board rather than listed in rows. Paper, pin and tilt
+   come from each note's own id, so a note keeps its look between redraws
+   instead of reshuffling every time the page is drawn.
+
+   The cork is a 160px tile generated to the colour and grain measured off the
+   supplied board — every fleck drawn four times so it meets itself at the
+   edges — which tiles at any size for under seven kilobytes. */
+
+.rem-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* The heading gives way first; the sticky has a fixed size to keep. */
+.rem-titles { min-width: 0; }
+
+.rem-h1 {
+  font-family: var(--font-hand);
+  font-size: clamp(29px, 8.6vw, 38px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -.005em;
+  color: var(--board-ink);
+}
+
+.rem-motto {
+  margin-top: 5px;
+  font-family: var(--font-hand);
+  font-size: 13.5px;
+  line-height: 1.25;
+  color: color-mix(in srgb, var(--board-ink) 62%, var(--ink-2));
+}
+
+/* A pin: a domed head with the light on its top left, and a shadow under it. */
+.pin {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 15px;
+  height: 15px;
+  margin-left: -7.5px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 30%, rgba(255,255,255,.75), transparent 52%),
+    var(--pin, #C0554B);
+  box-shadow: 0 2px 3px rgba(60,40,20,.42);
+}
+.pin-red    { --pin: #C0554B; }
+.pin-green  { --pin: #3E6B52; }
+.pin-blue   { --pin: #3E72A8; }
+.pin-yellow { --pin: #D9B03F; }
+
+/* The sticky pinned beside the heading, in place of the floating +. */
+.stick-add {
+  position: relative;
+  flex: none;
+  width: 102px;
+  /* Clear of the timetable button, which is fixed to this same corner. */
+  margin-right: 48px;
+  padding: 15px 6px 11px;
+  border: 0;
+  border-radius: 2px;
+  background: #FAF0C8;
+  color: #33423A;
+  box-shadow: 0 3px 8px -2px rgba(80,60,30,.34);
+  transform: rotate(2.5deg);
+  transition: transform .2s var(--spring);
+}
+.stick-add:active { transform: rotate(2.5deg) scale(.95); }
+.stick-plus {
+  display: block;
+  font-size: 30px;
+  line-height: .9;
+  font-weight: 300;
+}
+.stick-cap {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--font-hand);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* The days across the top. */
+.daytabs {
+  display: flex;
+  gap: 4px;
+  margin: 14px 0 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.daytabs::-webkit-scrollbar { display: none; }
+
+.daytab {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  font-size: 15px;
+  color: var(--ink-2);
+}
+.daytab i {
+  font-style: normal;
+  font-size: 11px;
+  opacity: .62;
+}
+.daytab.is-on {
+  background: color-mix(in srgb, var(--board-ink) 17%, transparent);
+  color: color-mix(in srgb, var(--board-ink) 84%, var(--ink));
+  font-weight: 700;
+}
+
+/* The board itself: a wooden frame around a sheet of cork. */
+.board {
+  border-radius: 18px;
+  padding: 9px;
+  background:
+    linear-gradient(160deg,
+      color-mix(in srgb, var(--cork-frame) 100%, #fff 12%),
+      var(--cork-frame) 44%,
+      color-mix(in srgb, var(--cork-frame) 86%, #000 8%));
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.34);
+}
+
+.cork {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px 8px;
+  align-content: start;
+  min-height: 232px;
+  padding: 20px 10px 16px;
+  border-radius: 10px;
+  background: var(--cork) url("art/cork.webp") repeat;
+  background-size: 160px 160px;
+  box-shadow: inset 0 2px 12px -2px rgba(60,34,10,.46);
+}
+
+/* One note. */
+.stick {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-height: 92px;
+  padding: 14px 7px 9px;
+  border-radius: 1px;
+  color: #2B2F2C;
+  text-align: center;
+  box-shadow: 0 3px 7px -2px rgba(70,44,16,.44);
+  transform: rotate(var(--tilt, 0deg));
+}
+
+.stick-lined  { background: #FBF7EE; }
+.stick-pink   { background: #F6CDC8; }
+.stick-grid   { background: #F7F7F4; }
+.stick-mint   { background: #D8E7D2; }
+.stick-torn   { background: #F6EFE1; }
+.stick-sky    { background: #CBDFF0; }
+.stick-butter { background: #FAECBA; }
+
+/* Ruled and squared papers, drawn rather than photographed so they stay
+   crisp and cost nothing. */
+.stick-lined {
+  background-image: repeating-linear-gradient(
+    #D9E0EA 0 1px, transparent 1px 13px);
+  background-position: 0 12px;
+}
+.stick-grid {
+  background-image:
+    repeating-linear-gradient(#DCE2EC 0 1px, transparent 1px 11px),
+    repeating-linear-gradient(90deg, #DCE2EC 0 1px, transparent 1px 11px);
+}
+
+.stick-at {
+  font-family: var(--font-hand);
+  font-size: 13px;
+  line-height: 1.15;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 1px;
+  margin-bottom: 3px;
+}
+
+.stick-text {
+  font-family: var(--font-hand);
+  font-size: 14px;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+}
+
+.stick-note {
+  font-family: var(--font-hand);
+  font-size: 11.5px;
+  line-height: 1.15;
+  opacity: .66;
+  overflow-wrap: anywhere;
+}
+
+/* The lesson it belongs to, in that subject's own mark and colour. */
+.stick-mark {
+  margin-top: auto;
+  padding-top: 3px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sc, #2B2F2C);
+}
+
+.stick-every {
+  margin-top: auto;
+  padding-top: 3px;
+  font-size: 9px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  opacity: .5;
+}
+
+/* Taking one down. Small, in the corner, out of the way of the writing. */
+.stick-off {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 22px; height: 22px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  color: currentColor;
+  opacity: .3;
+}
+.stick-off .ico { width: 12px; height: 12px; stroke-width: 2.4; }
+.stick-off:active { opacity: .75; }
+
+/* A bare board. */
+.board-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 40px 12px;
+  border: 0;
+  background: none;
+}
+.board-clear { grid-column: 1 / -1; padding: 46px 12px; text-align: center; }
+.board-empty-line {
+  font-family: var(--font-hand);
+  font-size: 17px;
+  color: #FBF3E6;
+  text-shadow: 0 1px 2px rgba(60,34,10,.5);
+}
+.board-empty-sub {
+  font-family: var(--font-hand);
+  font-size: 13px;
+  color: #FBF3E6;
+  opacity: .72;
+  text-shadow: 0 1px 2px rgba(60,34,10,.5);
+}
+
+/* Narrow phones take two across rather than squeezing three, and the sticky
+   tucks in so it still clears the timetable button. */
+@media (max-width: 350px) {
+  .cork { grid-template-columns: repeat(2, 1fr); }
+  .rem-h1 { font-size: 27px; }
+  .stick-add { width: 88px; margin-right: 54px; padding: 13px 5px 10px; }
+  .stick-plus { font-size: 25px; }
+  .stick-cap { font-size: 11px; }
 }
 
 
@@ -1402,6 +1690,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
 }
 .tt-btn .ico { width: 20px; height: 20px; }
 .tt-btn:active { transform: scale(.9); }
+
 
 .timetable {
   position: fixed;

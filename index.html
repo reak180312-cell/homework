@@ -79,12 +79,22 @@
   </section>
 
   <section id="view-reminders" class="view" data-view="reminders" hidden>
-    <header class="head">
-      <h1>Reminders</h1>
-      <p id="rem-sub" class="head-sub"></p>
+    <header class="head rem-head">
+      <div class="rem-titles">
+        <h1 class="rem-h1">Reminders</h1>
+        <p class="rem-motto">Small steps. Big progress.</p>
+      </div>
+      <!-- Pinned to the wall beside the heading, where the + used to be. -->
+      <button id="rem-new" class="stick stick-add" aria-label="Add reminder">
+        <span class="pin pin-green" aria-hidden="true"></span>
+        <span class="stick-plus" aria-hidden="true">+</span>
+        <span class="stick-cap">Add reminder</span>
+      </button>
     </header>
-    <div id="rem-scope" class="segmented"></div>
-    <div id="rem-list"></div>
+    <div id="rem-scope" class="daytabs"></div>
+    <div class="board">
+      <div id="rem-board" class="cork"></div>
+    </div>
   </section>
 
   <section id="view-subjects" class="view" data-view="subjects" hidden>
@@ -239,6 +249,11 @@
       <span class="paper-label">Notes</span>
       <input id="rem-note" type="text" autocomplete="off" autocapitalize="sentences"
              enterkeyhint="done" placeholder="Anything else (optional)" />
+    </label>
+
+    <label class="paper-rule paper-field">
+      <span class="paper-label">Time <i>optional</i></span>
+      <input id="rem-at" type="time" step="300" />
     </label>
 
     <div class="paper-rule paper-field">

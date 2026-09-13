@@ -147,6 +147,33 @@ needed to pack a bag.
 
 ## Reminders
 
+### The board
+
+Reminders are pinned to a cork board rather than listed in rows: a small square of coloured
+paper each, a pin through the top, the time underlined above the words, and the subject's own
+mark in the corner when the reminder belongs to a lesson.
+
+Paper, pin and tilt come from the reminder's own id, so a note keeps its look between
+redraws instead of reshuffling every time the page is drawn. They come from **three separate
+hashes** of that id, not three slices of one: sliced, they agreed with each other, and since
+the first hash merely scaled and took a remainder, ids a character apart moved by a fixed
+step — a board of eight notes came out in three colours. The hash mixes its bits now.
+
+The cork is a 160px tile generated to the colour and grain measured off the supplied board —
+rgb(198, 148, 100) with a grain of about fifteen levels — with every fleck drawn four times
+so the pattern meets itself at the edges. It tiles at any size for under seven kilobytes,
+which a cut of the real board could not: every clean patch of it is small, and the notes
+cover the rest. Rebuild it with `scratchpad/make-cork.js`.
+
+Across the top: today, tomorrow, then the school days neither of those covers, then all of
+them. A reminder set for every day shows on all of them, because that is what every day
+means. Earliest first, and anything without a time after everything with one.
+
+The + that used to float in the corner is a sticky pinned to the wall beside the heading,
+where the drawing puts it. The timetable button is fixed to that same corner, so the sticky
+is sized to stand clear of it — including on a 320px screen, where the button is wider and
+the board drops to two notes across.
+
 ### Writing one down
 
 The + on the Reminders page opens a page torn out of a notebook: punched down the side, a
@@ -158,18 +185,18 @@ The handwriting is whatever script the phone already has: an iPhone has Snell Ro
 the title and Bradley Hand for the notes in the margins, which is what the design uses.
 Anything else falls back to its own cursive. No font is downloaded for it.
 
-Four fields, and they are the four the app can act on: what to remember, a line about it,
-which day, and which lesson of that day. The five school days come first so they are all in
-view at once, with *Every day* after them; a lesson can only be picked once a particular day
-is, because lessons differ from day to day.
+Five fields: what to remember, a line about it, an optional time, which day, and which lesson
+of that day. The five school days come first so they are all in view at once, with *Every
+day* after them; a lesson can only be picked once a particular day is, because lessons differ
+from day to day.
 
-**A time of its own is deliberately not among them.** The app cannot wake a closed browser to
-ring at half past seven — see the limits below — so a field that looked like an alarm but was
-only a label would be a promise it could not keep. The lesson says when, and says it more
-precisely, because it comes from the timetable.
+**The time is a label, not an alarm.** It is what the note says at the top and what the board
+sorts by. It does not ring: the app cannot wake a closed browser at half past seven — see the
+limits below — and nothing in the interface suggests it will. It is optional, and a note
+without one simply sits after the ones that have them.
 
-Nor is there a *Repeat*: the day already is the repeat. *Every day* or *Tuesday* says
-everything a weekly repeat would.
+There is no *Repeat*: the day already is the repeat. *Every day* or *Tuesday* says everything
+a weekly repeat would.
 
 This replaced a compose box that sat at the top of the list. The + matches how homework is
 added, and the list is left to be a list.
@@ -256,7 +283,8 @@ Stored under the `homework.v1` key in local storage:
 ```js
 Subject      — not stored: taken from the timetable, keyed by the lesson's own name
 Homework     { id, subjectId, title, dueDate, createdAt, completed, completedAt }
-Note         { id, text, note, day, lesson, createdAt }  // day 0-4 = Sun-Thu, null = every day
+Note         { id, text, note, at, day, lesson, createdAt }  // day 0-4 = Sun-Thu, null = every day
+             //  at is "HH:MM" or "" — a label on the note, not an alarm
 UserProgress { xp, level, shownUpTo,    // +10 XP per homework, 100 XP per level, fifty of them
                metAt }                  // shownUpTo stops a hatching replaying
 Settings     { dailyReminderEnabled, dailyReminderTime,
@@ -277,7 +305,8 @@ styles.css    the whole visual system
 app.js        all behaviour, one file, sectioned
 sw.js         offline cache + notification clicks
 server.js     dependency-free static server
-art/          the desk the homework screen sits on, and the bag's ten pieces
+art/          the desk the homework screen sits on, the cork the reminders are
+              pinned to, and the bag's ten pieces
 icons/        app icons, built from the supplied logo. The tab, launcher and 512px
               icons keep the artwork’s rounded tile and its transparent corners; the
               iOS one is opaque edge to edge, because iOS fills transparency with
