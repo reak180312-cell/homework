@@ -18,6 +18,15 @@ reminders need a real origin.
 
 ## Put it on your phone
 
+**Add it to the Home Screen.** In a browser tab the app is not running full screen: Safari
+keeps its own bar at the top — with the white strip and the back-link to whatever app you
+opened it from — and its toolbar at the bottom, which together cost about 180px of height.
+That is the difference between the board having 300px to fill and having 170. Added to the
+Home Screen there is no browser chrome at all, and the wall runs the whole way to the top of
+the screen, under the clock and the Dynamic Island: the status bar style is
+`black-translucent`, so the page is drawn behind it rather than below an opaque band, and
+every screen pads itself by `env(safe-area-inset-top)` so nothing ends up under the clock.
+
 1. Make sure your phone and this computer are on the same Wi-Fi.
 2. Find this computer's LAN address (`ipconfig` → IPv4 Address, e.g. `192.168.1.20`).
 3. On the phone, open `http://192.168.1.20:5173`.
@@ -156,6 +165,12 @@ and the plant.
 **It is one screen, and it stays put.** The heading, the tabs, the board and the shelf share
 exactly what the window gives them, and the page itself does not scroll — so the room is
 always whole, and nothing can be dragged out from under anything else.
+
+The page is `position: fixed` to the window rather than merely `100dvh` tall. A page with a
+height still has a scroll position to rubber-band against, and a phone will happily drag the
+whole room up and down against nothing; one fixed to the window has no page behind it to
+pull. The timetable button is off this page too — that corner belongs to the sticky, and the
+timetable has nothing to do with what is pinned to the board.
 
 That is the second attempt. The first fixed the shelf to the foot of the screen and let the
 board grow down the page, which is fine on a tall screen and wrong on a short one: measured

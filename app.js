@@ -1372,6 +1372,9 @@ let ttButtonKey = '';
 function renderTtButton() {
   const btn = $('#tt-btn');
   if (!btn) return;
+  // Not on the reminders page: that corner belongs to the sticky, and the
+  // timetable is nothing to do with what is pinned to the board.
+  btn.hidden = currentTab === 'reminders';
   // Redrawn only when the subjects behind its colours change, not every render.
   if (btn.firstChild) return;                      // the week never changes
   btn.innerHTML = '<span class="tt-mini">' + SCHOOL_DAYS.map((d, i) =>

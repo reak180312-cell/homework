@@ -749,16 +749,22 @@ button { border: 0; background: none; cursor: pointer; }
 /* One screen, and it stays put: heading, tabs, board and shelf share exactly
    what the window gives them, and nothing here scrolls. */
 #view-reminders {
+  position: fixed;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  height: 100dvh;
   min-height: 0;
   padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
   overflow: hidden;
+  overscroll-behavior: none;
+  /* Fixed to the window, so there is no page behind it to drag: the room
+     cannot be pulled up and down the way it could when it had a height and
+     a scroll position. */
 }
 #view-reminders > .head,
 #view-reminders > .daytabs { position: relative; z-index: 1; flex: none; }
 #view-reminders > .head { margin-bottom: 14px; }
+#view-reminders { padding-top: calc(env(safe-area-inset-top) + 54px); }
 
 /* The board takes what is left, and its notes scroll inside it rather than
    pushing the shelf off the bottom of the screen. */
