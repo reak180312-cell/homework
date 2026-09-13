@@ -47,11 +47,18 @@
 
   --gutter:     20px;
   --tabbar-h:   62px;
+  /* The notches, read once and named once. Everything that has to clear the
+     clock, the island or the home indicator is measured from these two and
+     from nothing else — twenty separate env() calls were twenty chances for
+     one screen to allow for the phone differently from the next. */
+  --safe-t:     env(safe-area-inset-top, 0px);
+  --safe-b:     env(safe-area-inset-bottom, 0px);
+
   /* Where every screen starts its heading, under the clock and the island. */
-  --head-top:   calc(env(safe-area-inset-top) + 40px);
+  --head-top:   calc(var(--safe-t) + 40px);
   /* And where every screen stops, above the bar. The bar is one fixed thing
      shared by the whole app, so what stands on it has to stop in one place. */
-  --content-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 40px);
+  --content-bottom: calc(var(--tabbar-h) + var(--safe-b) + 40px);
   /* How much of the desk shows at the foot of the homework screen. The
      picture is 1.68 times as wide as it is tall, so at full width it stands
      59.5vw high — measured off the width, because that is what sets how big
@@ -127,9 +134,31 @@
 }
 
 * { box-sizing: border-box; }
-html, body { height: 100%; }
+/* ── The shell ─────────────────────────────────────────────
+   The document does not scroll. It cannot: the body is pinned to the window
+   and each screen scrolls inside itself instead.
+
+   This is what the bottom bar was moving for. A bar fixed to the bottom of a
+   scrolling document is fixed to the *layout* viewport, and on iOS — in a
+   Home Screen app especially — the visual viewport slides against the layout
+   one while a flick is still carrying, and at the ends of a rubber-band. A
+   screen with nothing to scroll never went out of step; a long list of
+   subjects did, and settled with the bar somewhere lower than the screen
+   before it. Nothing about the bar itself differed, which is why it measured
+   the same everywhere and still did not look it.
+
+   With no document scroll there is no second viewport to slide, and the bar
+   is nailed to the window on every screen. The reminders room already worked
+   this way and was the one screen that never moved. */
+html, body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
 
 body {
+  position: fixed;
+  inset: 0;
   margin: 0;
   background: var(--paper);
   color: var(--ink);
@@ -162,18 +191,34 @@ button { border: 0; background: none; cursor: pointer; }
 
 /* ── App frame ───────────────────────────────────────────── */
 
-.app, .subject-page {
+.subject-page {
   max-width: 540px;
   margin-inline: auto;
 }
 
+/* The shell is the window. The column inside it is still 540px at most, but
+   that is now the padding of each screen rather than a width on the shell,
+   so a screen can scroll edge to edge while its content stays in the middle. */
+.app {
+  position: fixed;
+  inset: 0;
+}
+
+/* Every screen is its own scroller, filling the shell. None of them sets its
+   own height, and none of them can scroll the page behind it. */
 .view {
-  padding: 0 var(--gutter);
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  padding-inline: max(calc((100% - 540px) / 2 + var(--gutter)), var(--gutter));
   padding-top: var(--head-top);
   padding-bottom: var(--content-bottom);
-  min-height: 100dvh;
   animation: view-in .22s var(--ease);
 }
+.view::-webkit-scrollbar { display: none; }
 
 @keyframes view-in {
   from { opacity: 0; transform: translateY(6px); }
@@ -439,7 +484,7 @@ button { border: 0; background: none; cursor: pointer; }
   /* The desk is behind the whole screen now, so this only has to stand clear
      of it — the same band, off the same figure, so the two cannot drift apart
      on a screen shaped differently from a phone. */
-  min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+  min-height: calc(100dvh - var(--safe-t) - var(--safe-b)
                    - 134px - var(--tabbar-h) - var(--desk-lift) - var(--desk-band));
   padding-bottom: 22px;
 }
@@ -480,7 +525,7 @@ button { border: 0; background: none; cursor: pointer; }
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--desk-lift));
+  bottom: calc(var(--tabbar-h) + var(--safe-b) + var(--desk-lift));
   z-index: 0;
   width: 100%;
   /* A band of the photograph rather than the whole of it, so that what shows
@@ -579,7 +624,7 @@ button { border: 0; background: none; cursor: pointer; }
   position: relative;
   /* Tall enough to hold the fields, never so tall that the top of it ends up
      behind the clock and the island. */
-  max-height: min(86dvh, calc(100dvh - env(safe-area-inset-top) - 24px));
+  max-height: min(86dvh, calc(100dvh - var(--safe-t) - 24px));
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 8px;
@@ -794,24 +839,19 @@ button { border: 0; background: none; cursor: pointer; }
 
 /* One screen, and it stays put: heading, tabs, board and shelf share exactly
    what the window gives them, and nothing here scrolls. */
+/* The room is the one screen that does not scroll at all: it is a column the
+   height of the shell, with the board taking whatever the heading and the
+   shelf leave. Everything else about it — where it starts, where it stops —
+   comes from the same two rules every other screen uses. */
 #view-reminders {
-  position: fixed;
-  inset: 0;
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding-bottom: var(--content-bottom);
   overflow: hidden;
-  overscroll-behavior: none;
-  /* Fixed to the window, so there is no page behind it to drag: the room
-     cannot be pulled up and down the way it could when it had a height and
-     a scroll position. */
 }
 #view-reminders > .head,
 #view-reminders > .daytabs { position: relative; z-index: 1; flex: none; }
 #view-reminders > .head { margin-bottom: 8px; }
-#view-reminders { padding-top: var(--head-top); }
-
 /* The board takes what is left, and its notes scroll inside it rather than
    pushing the shelf off the bottom of the screen. */
 #view-reminders > .board {
@@ -1263,7 +1303,7 @@ button { border: 0; background: none; cursor: pointer; }
 #subject-page-body {
   max-width: 540px;
   margin-inline: auto;
-  padding: 0 var(--gutter) calc(env(safe-area-inset-bottom) + 48px);
+  padding: 0 var(--gutter) calc(var(--safe-b) + 48px);
 }
 
 .back-btn {
@@ -1273,7 +1313,7 @@ button { border: 0; background: none; cursor: pointer; }
   display: grid;
   place-items: center;
   width: 44px; height: 44px;
-  margin: calc(env(safe-area-inset-top) + 10px) 0 0 max(calc((100% - 540px)/2 + 12px), 12px);
+  margin: calc(var(--safe-t) + 10px) 0 0 max(calc((100% - 540px)/2 + 12px), 12px);
   border-radius: 50%;
   color: var(--ink);
   background: var(--paper);
@@ -1333,7 +1373,7 @@ button { border: 0; background: none; cursor: pointer; }
 /* Floating add button */
 .fab {
   position: fixed;
-  top: calc(env(safe-area-inset-top) + 32px);
+  top: calc(var(--safe-t) + 32px);
   right: calc(max(calc((100% - 540px) / 2 + var(--gutter)), var(--gutter)) + 56px);
   z-index: 22;
   width: 46px; height: 46px;
@@ -1356,10 +1396,10 @@ button { border: 0; background: none; cursor: pointer; }
   left: 0; right: 0; bottom: 0;
   z-index: 25;
   display: flex;
-  height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+  height: calc(var(--tabbar-h) + var(--safe-b));
   /* Bar spans the screen; the tabs stay over the content column. */
   padding-inline: max(calc((100% - 540px) / 2), 0px);
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: var(--safe-b);
   background: var(--paper);
   border-top: 1px solid var(--line);
   /* The bar is the same cream as the pages that stand on it, so on a page
@@ -1411,7 +1451,7 @@ button { border: 0; background: none; cursor: pointer; }
   border-radius: 24px 24px 0 0;
   box-shadow: 0 -8px 40px -12px rgba(0,0,0,.28);
   animation: sheet-in .28s var(--ease);
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: var(--safe-b);
 }
 .sheet.is-leaving { animation: sheet-out .2s var(--ease) forwards; }
 @keyframes sheet-in { from { transform: translateY(101%); } }
@@ -1714,7 +1754,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 20px);
+  bottom: calc(var(--tabbar-h) + var(--safe-b) + 20px);
   transform: translateX(-50%);
   z-index: 50;
   display: flex;
@@ -1895,7 +1935,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
 
 .tt-btn {
   position: fixed;
-  top: calc(env(safe-area-inset-top) + 34px);
+  top: calc(var(--safe-t) + 34px);
   right: max(calc((100% - 540px) / 2 + var(--gutter)), var(--gutter));
   z-index: 22;
   display: grid;
@@ -1929,7 +1969,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: calc(env(safe-area-inset-top) + 18px) var(--gutter) 14px;
+  padding: calc(var(--safe-t) + 18px) var(--gutter) 14px;
   max-width: 900px;
   width: 100%;
   margin-inline: auto;
@@ -1954,7 +1994,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
 .tt-body {
   flex: 1;
   overflow: auto;
-  padding: 0 var(--gutter) calc(env(safe-area-inset-bottom) + 28px);
+  padding: 0 var(--gutter) calc(var(--safe-b) + 28px);
   max-width: 900px;
   width: 100%;
   margin-inline: auto;
@@ -2385,7 +2425,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
   display: grid;
   place-items: center;
   width: 40px; height: 40px;
-  margin: calc(env(safe-area-inset-top) + 12px) 0 0
+  margin: calc(var(--safe-t) + 12px) 0 0
           max(calc((100% - 540px) / 2 + var(--gutter)), var(--gutter));
   border-radius: 50%;
   color: var(--ink);
@@ -2397,7 +2437,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
 .dv-body {
   max-width: 540px;
   margin-inline: auto;
-  padding: 6px var(--gutter) calc(env(safe-area-inset-bottom) + 44px);
+  padding: 6px var(--gutter) calc(var(--safe-b) + 44px);
 }
 
 .dv-body .bar { margin-top: 12px; }
@@ -2676,7 +2716,7 @@ button.mon-slot:active { transform: scale(.93); }
 
 .book .dv-close {
   position: absolute;
-  top: calc(env(safe-area-inset-top) + 12px);
+  top: calc(var(--safe-t) + 12px);
   right: 14px;
   z-index: 4;
 }
@@ -2686,7 +2726,7 @@ button.mon-slot:active { transform: scale(.93); }
   min-height: 0;
   display: grid;
   place-items: center;
-  padding: calc(env(safe-area-inset-top) + 64px) 12px 4px;
+  padding: calc(var(--safe-t) + 64px) 12px 4px;
   touch-action: none;
 }
 
@@ -2853,7 +2893,7 @@ button.mon-slot:active { transform: scale(.93); }
   align-items: center;
   justify-content: center;
   gap: 18px;
-  padding: 12px var(--gutter) calc(env(safe-area-inset-bottom) + 20px);
+  padding: 12px var(--gutter) calc(var(--safe-b) + 20px);
 }
 
 .page-btn {

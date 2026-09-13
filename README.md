@@ -172,14 +172,47 @@ The page is a room: a cream wall with the daylight and the leaf shadows on it, t
 hung on it, and a shelf at its foot with the books, the pencil cup, the little checklist pad
 and the plant.
 
-**The bottom bar is one thing, shared by the whole app.** It always was — one rule, `position:
-fixed; bottom: 0`, no page allowed to override it — and measuring it on all five screens gives
-the same top edge, the same height, and the same line of icons whether a tab is the active one
-or not. What was not shared was **the room left above it**: a list screen stopped 102px from
-the bottom and the room stopped at 62px, so the band of cream under the content was forty
-pixels taller on four screens out of five. There is one `--content-bottom` now and every
-screen uses it, which costs the room the way its shelf used to stand directly on the bar — a
-little wall shows under it instead, and it stops where a list of homework stops.
+### The shell, and why the bottom bar moved
+
+**The document does not scroll.** It cannot: the body is pinned to the window and each screen
+scrolls inside itself instead. That one rule is what the bottom bar was moving for.
+
+The bar had always been a single `position: fixed; bottom: 0` rule that no page was allowed to
+override, and measuring it on all five screens in a browser gave the same top edge, the same
+height and the same line of icons every time. It still looked wrong on the phone, and it was:
+a bar fixed to the bottom of a **scrolling document** is fixed to the *layout* viewport, and on
+iOS — in a Home Screen app especially — the visual viewport slides against the layout one while
+a flick is still carrying and at the ends of a rubber-band. A screen with nothing to scroll
+never went out of step. A long list of subjects did, and settled with the bar somewhere lower
+than the screen before it. Nothing about the bar differed, which is exactly why it measured the
+same everywhere and still did not look it, and why it was fine in a Safari tab and wrong
+installed.
+
+With no document scroll there is no second viewport to slide, and the bar is nailed to the
+window on every screen. The reminders room already worked this way — fixed to the window, the
+board scrolling inside it — and was the one screen that never moved; the other four have been
+brought to the same shape. `.app` is the window, each `.view` is an absolutely positioned
+scroller filling it, and the 540px column is now padding on the screen rather than a width on
+the shell, so a screen scrolls edge to edge while its content stays in the middle.
+
+**The notches are read once and named once.** `--safe-t` and `--safe-b` hold
+`env(safe-area-inset-top)` and `env(safe-area-inset-bottom)`, and everything that has to clear
+the clock, the island or the home indicator is measured from those two and from nothing else.
+There were twenty separate `env()` calls scattered through the stylesheet, which is twenty
+chances for one screen to allow for the phone differently from the next. It also makes the
+thing testable: Chrome cannot be put into iOS standalone mode and will not report real insets,
+but it can be *told* what an iPhone would have said — `scratchpad/test-shell.js` overrides the
+two variables and lays the whole app out as though there were a 59px island above and a 34px
+home indicator below, on four phone shapes and on its side.
+
+There are no `@media (display-mode: standalone)` rules anywhere in the stylesheet, and there
+should not be: a bar that needs to be told it is installed is a bar that is positioned wrongly.
+
+What was also not shared was **the room left above it**: a list screen stopped 102px from the
+bottom and the room stopped at 62px, so the band of cream under the content was forty pixels
+taller on four screens out of five. There is one `--content-bottom` now and every screen uses
+it, which costs the room the way its shelf used to stand directly on the bar — a little wall
+shows under it instead, and it stops where a list of homework stops.
 
 The bar is also the same cream as the pages that stand on it, so on a page made of paper it
 had no edge of its own and read as part of the page, while against the room it read as a band
