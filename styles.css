@@ -49,6 +49,9 @@
   --tabbar-h:   62px;
   /* Where every screen starts its heading, under the clock and the island. */
   --head-top:   calc(env(safe-area-inset-top) + 40px);
+  /* And where every screen stops, above the bar. The bar is one fixed thing
+     shared by the whole app, so what stands on it has to stop in one place. */
+  --content-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 40px);
   /* How much of the desk shows at the foot of the homework screen. The
      picture is 1.68 times as wide as it is tall, so at full width it stands
      59.5vw high — measured off the width, because that is what sets how big
@@ -167,7 +170,7 @@ button { border: 0; background: none; cursor: pointer; }
 .view {
   padding: 0 var(--gutter);
   padding-top: var(--head-top);
-  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 40px);
+  padding-bottom: var(--content-bottom);
   min-height: 100dvh;
   animation: view-in .22s var(--ease);
 }
@@ -532,12 +535,51 @@ button { border: 0; background: none; cursor: pointer; }
    what the drawing uses; anything else falls back to its own cursive. No font
    is downloaded for it. */
 
-.sheet-paper { background: var(--leaf); }
 .sheet-paper .sheet-grip { background: var(--leaf-rule); }
+
+/* The page you write on becomes the paper you picked, rather than showing a
+   swatch of it beside a page that stays the same. It wears the very classes
+   the note will wear, so there is no second description to drift.
+
+   The fine ruling is left off at this size: the page already reads as ruled
+   paper — every field sits on its own rule — and 13px lines under those would
+   be two rulings at once. Colour, grid, fleck and torn edge are what carry
+   the difference here, and all of them are what the note gets too. */
+.sheet.sheet-paper {
+  background-color: var(--tint, var(--leaf));
+  background-image: none;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.sheet.sheet-paper.st-grid {
+  background-image:
+    repeating-linear-gradient(var(--rule, #DCE2EC) 0 1px, transparent 1px 24px),
+    repeating-linear-gradient(90deg, var(--rule, #DCE2EC) 0 1px, transparent 1px 24px);
+}
+.sheet.sheet-paper.st-texture {
+  background-image:
+    radial-gradient(circle at 18% 26%, rgba(120,98,72,.10) 1.5px, transparent 2.2px),
+    radial-gradient(circle at 62% 58%, rgba(120,98,72,.08) 1.7px, transparent 2.4px),
+    radial-gradient(circle at 84% 17%, rgba(120,98,72,.07) 1.3px, transparent 1.9px);
+  background-size: 52px 44px, 68px 62px, 38px 50px;
+}
+.sheet.sheet-paper.st-torn {
+  -webkit-mask-image: radial-gradient(circle at 0 3.5px, transparent 2.6px, #000 3px);
+  mask-image: radial-gradient(circle at 0 3.5px, transparent 2.6px, #000 3px);
+  -webkit-mask-size: 100% 7px;
+  mask-size: 100% 7px;
+  -webkit-mask-repeat: repeat-y;
+  mask-repeat: repeat-y;
+}
+/* Punch holes belong to a notebook, not to a sticky or a torn-off scrap. */
+.sheet-paper.st-plain .paper-holes,
+.sheet-paper.st-torn .paper-holes { display: none; }
 
 .paper {
   position: relative;
-  max-height: 86dvh;
+  /* Tall enough to hold the fields, never so tall that the top of it ends up
+     behind the clock and the island. */
+  max-height: min(86dvh, calc(100dvh - env(safe-area-inset-top) - 24px));
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 8px;
@@ -758,7 +800,7 @@ button { border: 0; background: none; cursor: pointer; }
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+  padding-bottom: var(--content-bottom);
   overflow: hidden;
   overscroll-behavior: none;
   /* Fixed to the window, so there is no page behind it to drag: the room
@@ -994,7 +1036,9 @@ button { border: 0; background: none; cursor: pointer; }
 
 /* Ruled, squared and speckled papers, drawn rather than photographed so they
    stay crisp at any size and cost nothing to send. */
-.st-lined {
+/* The punch holes and the ruling are drawn at note size, so they belong to a
+   note; the page you write on takes the same paper at its own scale. */
+.stick.st-lined {
   background-image:
     radial-gradient(circle at 6px 6px, rgba(150,132,112,.42) 2.4px, transparent 3px),
     repeating-linear-gradient(var(--rule, #D9E0EA) 0 1px, transparent 1px 13px);
@@ -1015,8 +1059,8 @@ button { border: 0; background: none; cursor: pointer; }
   mask-size: 100% 8px;
   -webkit-mask-repeat: repeat-y;
   mask-repeat: repeat-y;
-  padding-left: 10px;
 }
+.stick.st-torn { padding-left: 10px; }
 /* Rag paper: a few soft flecks in the pulp, at three sizes that do not share
    a factor, so the eye never finds the repeat. */
 .st-texture {
@@ -1065,45 +1109,75 @@ button { border: 0; background: none; cursor: pointer; }
   max-width: 56px;
   overflow: hidden;
   font-family: var(--font-hand);
-  font-size: 8.5px;
+  font-size: 7.5px;
   line-height: 1;
-  letter-spacing: .04em;
+  letter-spacing: .05em;
   white-space: nowrap;
-  color: color-mix(in srgb, var(--sc, #6B7A70) 58%, #38322B);
-  opacity: .88;
+  /* Printed into the paper rather than laid on top of it: enough of the
+     subject's colour to tell them apart, and faint enough that the words
+     above it are read first. */
+  color: color-mix(in srgb, var(--sc, #6B7A70) 42%, #4A443C);
+  opacity: .62;
   pointer-events: none;
 }
 
 /* ── Choosing the paper ───────────────────────────────────
-   Shown as the paper itself rather than named: a swatch says in one look
-   what "torn edge" takes a sentence to explain, and the row stays quiet
-   enough to sit under Days and Lesson without competing with them. */
-.p-swatch, .p-tint {
-  flex: none;
-  padding: 0;
-  border: 1px solid rgba(90,70,45,.24);
-  background-color: var(--tint, #F8F0E8);
+   One arrow, and the page you are writing on turns into the next made-up
+   paper. There were two rows of swatches here — a pattern row and a colour
+   row — which is a parts bin, and a parts bin asks you to design a note
+   before you can write one. */
+.paper-flip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 3px;
+  padding: 5px 11px 5px 13px;
+  border: 1px solid var(--leaf-rule);
+  border-radius: var(--r-pill);
+  background: transparent;
+  font-family: var(--font-hand);
+  font-size: 15px;
+  line-height: 1;
+  color: var(--ink);
   transition: transform .16s var(--spring);
 }
-.p-swatch {
-  width: 40px;
-  height: 30px;
-  border-radius: 2px;
-  box-shadow: 0 1px 2px rgba(70,44,16,.16);
+.paper-flip .ico {
+  width: 13px;
+  height: 13px;
+  opacity: .7;   /* the chevron in the sprite already points on */
 }
-.p-tint {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-}
-.p-swatch.is-on, .p-tint.is-on {
-  outline: 2px solid var(--board-ink);
-  outline-offset: 2px;
-}
-.p-swatch:active, .p-tint:active { transform: scale(.92); }
+.paper-flip:active { transform: scale(.96); }
 
-/* Balances the Done button, so the title sits in the middle of its row. */
-.paper-btn.is-blank { visibility: hidden; }
+/* A bare board says so in the middle of itself, and the whole of it is the
+   way in — the notes are placed on the cork, so the message can have all of
+   it rather than a cell in a grid. */
+.board-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 20px 12px;
+  border: 0;
+  background: none;
+}
+.board-empty-line {
+  font-family: var(--font-hand);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  color: #463624;
+  text-shadow: 0 1px 0 rgba(255,246,232,.34);
+}
+.board-empty-sub {
+  font-family: var(--font-hand);
+  font-size: 14px;
+  color: #6B5240;
+  text-shadow: 0 1px 0 rgba(255,246,232,.28);
+}
+.board-empty:active { opacity: .74; }
 
 /* Narrow phones take two across rather than squeezing three, and the sticky
    tucks in so it still clears the timetable button. */
@@ -1288,6 +1362,12 @@ button { border: 0; background: none; cursor: pointer; }
   padding-bottom: env(safe-area-inset-bottom);
   background: var(--paper);
   border-top: 1px solid var(--line);
+  /* The bar is the same cream as the pages that stand on it, so on a page
+     made of paper it had no edge of its own and read as part of the page —
+     while against the room it read as a band. A hairline of light above the
+     rule, and the faintest lift under it, give it the same edge everywhere. */
+  box-shadow: 0 -1px 0 rgba(255,252,246,.7),
+              0 -7px 16px -13px rgba(62,46,26,.42);
 }
 
 .tab {

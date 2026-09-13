@@ -172,6 +172,20 @@ The page is a room: a cream wall with the daylight and the leaf shadows on it, t
 hung on it, and a shelf at its foot with the books, the pencil cup, the little checklist pad
 and the plant.
 
+**The bottom bar is one thing, shared by the whole app.** It always was — one rule, `position:
+fixed; bottom: 0`, no page allowed to override it — and measuring it on all five screens gives
+the same top edge, the same height, and the same line of icons whether a tab is the active one
+or not. What was not shared was **the room left above it**: a list screen stopped 102px from
+the bottom and the room stopped at 62px, so the band of cream under the content was forty
+pixels taller on four screens out of five. There is one `--content-bottom` now and every
+screen uses it, which costs the room the way its shelf used to stand directly on the bar — a
+little wall shows under it instead, and it stops where a list of homework stops.
+
+The bar is also the same cream as the pages that stand on it, so on a page made of paper it
+had no edge of its own and read as part of the page, while against the room it read as a band
+of its own. A hairline of light above the rule and the faintest lift under it give it the same
+edge on every screen.
+
 **Every screen starts its heading at the same height.** The room needs a little more air
 under the status bar than a list does, so it set its heading 40px down while every other
 screen set theirs at 26px — fourteen pixels, which is nothing to describe and impossible not
@@ -232,6 +246,11 @@ note: a seven-letter subject hung 13px into the cork. Hinged at the other end ev
 the line rises from that point and nothing can fall below it, so the corner stays put and
 the name climbs away from it.
 
+It is printed into the paper rather than laid on top of it: small, letter-spaced, and mixed
+well back towards the ink of the page — enough of the subject's own colour left to tell one
+from another, faint enough that the words above it are read first. It is out of the flow
+entirely, so however long a subject is called it cannot push the reminder about.
+
 Pin and tilt come from the reminder's own id, so a note keeps its look between redraws
 instead of reshuffling every time the page is drawn. They come from **separate hashes** of
 that id, not slices of one: sliced, they agreed with each other, and since the first hash
@@ -256,34 +275,48 @@ not: every clean patch of it is small, and the notes cover the rest. Rebuild it 
 
 ### The paper
 
-A note is **a pattern and a colour, chosen apart**: five papers — plain, lined, grid, torn
-edge, textured — in any of six colours. There used to be eight fixed papers, each one a
-colour and a pattern welded together, which meant thirty of the forty combinations did not
-exist and none of them was anybody's choice. Pulling the two apart cost one custom property:
-the colour sets `--tint` and the pattern draws on top of it.
+There is **one arrow**, and each tap of it turns the page you are writing on into the next
+made-up paper: lined cream, soft yellow, grid notebook, pastel sticky, torn edge, textured.
+Keep tapping until one of them is right, then stop.
 
-Each colour carries its own ruling in `--rule` as well. A blush page ruled in the cold blue
-that suits cream looks like two papers at once; ruled in a warm rose of its own it looks like
-one. The lined paper is a leaf out of a spiral pad, punched holes and all; the torn one is
-ragged down its left edge; the textured one has a few soft flecks in the pulp at three sizes
-that share no factor, so the eye never finds the repeat. All drawn, so they cost nothing to
-send and stay sharp at any size.
+It was two rows of swatches before — a row of patterns and a row of colours. That is a parts
+bin, and a parts bin asks you to design a note before you are allowed to write one. Six made
+papers ask nothing.
 
-They are chosen as **swatches rather than names** — two short rows under Days and Lesson on
-the page you write a note on, the patterns shown in the colour currently picked so the two
-rows preview each other. A swatch says in one look what "torn edge" takes a sentence to
-explain.
+Underneath, a paper is still **a pattern and a colour kept apart** — the colour sets `--tint`
+and the pattern draws on top of it — because that is what makes six papers cost no more than
+one, and because a note written before any of this existed still has to know what it is. Each
+colour carries its own ruling in `--rule` as well: a blush page ruled in the cold blue that
+suits cream looks like two papers at once; ruled in a warm rose of its own it looks like one.
 
-To change a note already on the board, **hold it**. The same two rows open on their own, and
-every tap lands on the note behind the sheet as it is made — there is no Save, because there
-is nothing to undo a colour into. There is no button for this on the note itself: a note the
-size of a stamp has no room for one, and a board is meant to be handled rather than operated.
+**The page you write on becomes the paper**, rather than showing a swatch of it beside a page
+that stays the same. It wears the very classes the note will wear, so there is no second
+description of a paper anywhere to drift out of step with the first. What it does not take is
+the fine ruling: the page already reads as ruled paper — every field sits on its own rule —
+and 13px lines under those would be two rulings at once. Colour, grid, fleck and torn edge
+carry the difference at that size, and the punch holes are left off a sticky and a torn scrap,
+which do not have them.
+
+The patterns themselves are drawn, not photographed, so they cost nothing to send and stay
+sharp at any size. The lined paper is a leaf out of a spiral pad, punched holes and all; the
+torn one is ragged down its left edge; the textured one has a few soft flecks in the pulp at
+three sizes that share no factor, so the eye never finds the repeat.
+
+To change a note already on the board, **hold it** and it turns over to the next paper where
+it lies. That used to open a sheet of its own with the two rows in it, which is a settings
+panel for one square of paper. There is no button for this on the note either: a note the size
+of a stamp has no room for one, and a board is meant to be handled rather than operated.
 
 Across the top: today, tomorrow, as many of the following school days **as actually fit**,
 and then *More*, which opens the rest of the week and everything at once. How many fit
 depends on what the days are called — Sunday and Monday fit where Wednesday and Thursday do
 not — so the row is filled and then trimmed back to what the width allows, rather than
 guessing at a number that is right one week and wrong the next.
+
+**Days keep their full names.** The row used to shorten them when they would not fit, which
+left it reading *Today, Tomorrow, Tue, Wed* — two naming systems in five words. A day that
+will not go is dropped now rather than abbreviated, and *More* still has it. On a 390px phone
+that is Today, Tomorrow, Tuesday, More; on a wider one Wednesday comes back.
 
 A reminder set for every day shows on all of them, because that is what every day means.
 Earliest first, and anything without a time after everything with one. There are no counts on
@@ -315,13 +348,16 @@ A keyboard has no pointer to drag with, so Enter or Space on a note still takes 
 real click arrives with `detail` 1 and is already handled by the pointer that made it, and a
 click generated by a key arrives with `detail` 0.
 
-**An empty board is bare cork.** It used to write *Nothing pinned up yet — tap to write one*
-across the middle of itself, and a day with none of its own said *Nothing for Tuesday*. Both
-were telling you what you could already see. The board is the one thing on the screen whose
-emptiness is legible at a glance, and the note to write on is pinned beside the heading the
-whole time, so there was nothing left for the words to do. The heading lost its second line
-— *Small steps. Big progress.* — for the same reason: it was decoration on a screen that is
-a photograph of a room already.
+**An empty board says so in the middle of itself** — *Nothing pinned up yet*, and under it
+*Tap to write one*; a day with none of its own says *Nothing for Tuesday* instead. The whole
+of the board is the way in, not a target inside it: notes are placed on the cork rather than
+flowed into a grid, so the message can have all of it.
+
+It was taken away once, on the reasoning that a bare corkboard already says it is bare. That
+is true of the board and not of the tap — nothing about bare cork suggests you can touch it —
+and an empty screen with no words on it reads as much like a fault as like an invitation. The
+heading did lose its second line for that reason and has not wanted it back: *Small steps. Big
+progress.* was decoration on a screen that is a photograph of a room already.
 
 A note comes off the board with **one tap**, undoably: the drawing gives a note no cross to
 press, and a board covered in crosses is not the drawing. The toast offers it straight back,

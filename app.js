@@ -1425,6 +1425,39 @@ const PAPER_TINT = [
   { key: 'butter', name: 'Butter' },
   { key: 'lilac',  name: 'Lilac' },
 ];
+
+/* Pattern and colour are what a paper is made of; nobody wants to assemble
+   one out of parts. These are the made-up papers — one tap of the arrow moves
+   to the next, and the page you are writing on becomes it. The pieces above
+   are still what gets stored, so a note written before there was anything to
+   choose still knows what it is. */
+const PAPER_LOOKS = [
+  { name: 'Lined cream',   style: 'lined',   tint: 'cream'  },
+  { name: 'Soft yellow',   style: 'lined',   tint: 'butter' },
+  { name: 'Grid notebook', style: 'grid',    tint: 'sky'    },
+  { name: 'Pastel sticky', style: 'plain',   tint: 'blush'  },
+  { name: 'Torn edge',     style: 'torn',    tint: 'cream'  },
+  { name: 'Textured',      style: 'texture', tint: 'mint'   },
+];
+
+/* Which made-up paper a note is already on, so the arrow carries on from
+   there rather than starting over. */
+function lookIndexOf(x) {
+  const style = paperStyleOf(x);
+  const tint = paperTintOf(x);
+  const i = PAPER_LOOKS.findIndex(p => p.style === style && p.tint === tint);
+  return i < 0 ? 0 : i;
+}
+
+/* Dress an element in a paper: the note on the board and the page you write
+   on wear the same two classes, which is what keeps them the same paper. */
+function wearPaper(el, look) {
+  if (!el) return;
+  for (const c of [...el.classList]) {
+    if (c.startsWith('st-') || c.startsWith('pt-')) el.classList.remove(c);
+  }
+  el.classList.add('st-' + look.style, 'pt-' + look.tint);
+}
 const STICK_PIN = ['red', 'green', 'blue', 'yellow'];
 
 function paperStyleOf(x) {
@@ -1532,14 +1565,9 @@ function trimTabs() {
   const fits = () => row.scrollWidth <= row.clientWidth + 1;
   if (fits()) return;
 
-  // The named days give up their full spelling — all of them together, since
-  // one shortened beside one written out looks like a mistake rather than a
-  // measurement.
-  const named = [...row.querySelectorAll('[data-short]')];
-  for (const tab of named) tab.textContent = tab.dataset.short;
-  if (fits()) return;
-
-  // Then, only if it still will not go, a day comes off the end.
+  // Days keep their full names. Shortening some of them and not others left
+  // the row reading Today, Tomorrow, Tue, Wed — two naming systems in five
+  // words. A day that will not fit is dropped instead, and More still has it.
   for (let guard = 0; guard < 12; guard++) {
     if (fits()) return;
     const droppable = [...row.querySelectorAll('[data-scope]')].slice(2);
@@ -1586,12 +1614,26 @@ function renderReminders() {
   trimTabs();
 
   const mine = notesFor(tab).slice().sort(byTime);
-  // Nothing pinned up means bare cork. A board with nothing on it already
-  // says so, and the note to write on is beside the heading either way.
+  const board = $('#rem-board');
+
+  // An empty board says so in the middle of itself, and the whole of it is
+  // the way in — a board you have to aim at is worse than one you can tap.
+  if (!mine.length) {
+    const first = !state.notes.length;
+    board.innerHTML = `
+      <button class="board-empty" data-act="first-reminder">
+        <span class="board-empty-line">${first
+          ? 'Nothing pinned up yet'
+          : `Nothing for ${esc(tab.label.toLowerCase())}`}</span>
+        <span class="board-empty-sub">Tap to write one</span>
+      </button>`;
+    return;
+  }
+
   // Notes that have been moved keep where they were put; the rest fall into
   // the next free slot, so a board nobody has arranged still reads in order.
   let slot = 0;
-  $('#rem-board').innerHTML = mine
+  board.innerHTML = mine
     .map(n => stickyNote(n, n.pos ? null : slotPos(slot++)))
     .join('');
 }
@@ -1607,8 +1649,8 @@ function byTime(a, b) {
 }
 
 function openRemSheet() {
-  remDraft = { text: '', note: '', day: schoolDayIndex(), lesson: null,
-               style: 'plain', tint: 'butter' };
+  remDraft = { text: '', note: '', day: schoolDayIndex(), lesson: null, look: 0,
+               style: PAPER_LOOKS[0].style, tint: PAPER_LOOKS[0].tint };
   if (remDraft.day < 0) remDraft.day = null;
 
   $('#rem-title').value = '';
@@ -1641,26 +1683,28 @@ function drawRemSheet() {
         <span class="chip-dot"></span>${esc(shortName(l.name))}</button>`;
     }).join('')}` : '';
 
-  drawPaperPicker(remDraft, '#rem-sheet-paper', '#rem-sheet-tint');
+  drawRemPaper();
 
   $('#rem-save').disabled = !$('#rem-title').value.trim();
 }
 
-/* The paper itself: five patterns and six colours, shown as the paper rather
-   than named, because a swatch says what a word cannot. Two small rows, and
-   nothing else added to the page. */
-function drawPaperPicker(on, styleSel, tintSel) {
-  const style = $(styleSel);
-  const tint = $(tintSel);
-  if (!style || !tint) return;
-  style.innerHTML = PAPER_STYLE.map(p => `
-    <button class="p-swatch st-${p.key} pt-${on.tint} ${on.style === p.key ? 'is-on' : ''}"
-            data-rempaper="${p.key}" title="${esc(p.name)}"
-            aria-label="${esc(p.name)}" aria-pressed="${on.style === p.key}"></button>`).join('');
-  tint.innerHTML = PAPER_TINT.map(t => `
-    <button class="p-tint pt-${t.key} ${on.tint === t.key ? 'is-on' : ''}"
-            data-remtint="${t.key}" title="${esc(t.name)}"
-            aria-label="${esc(t.name)}" aria-pressed="${on.tint === t.key}"></button>`).join('');
+/* The page you are writing on becomes the paper you picked — not a swatch of
+   it beside a page that stays the same. There is one control, an arrow, and
+   it moves to the next made-up paper. */
+function drawRemPaper() {
+  if (!remDraft) return;
+  const look = PAPER_LOOKS[remDraft.look % PAPER_LOOKS.length];
+  remDraft.style = look.style;
+  remDraft.tint = look.tint;
+  wearPaper($('#sheet-rem'), look);
+  const name = $('#rem-flip-name');
+  if (name) name.textContent = look.name;
+}
+
+function flipRemPaper() {
+  if (!remDraft) return;
+  remDraft.look = (remDraft.look + 1) % PAPER_LOOKS.length;
+  drawRemPaper();
 }
 
 /* A note comes off the board with one tap, because the drawing gives it no
@@ -1696,6 +1740,11 @@ function wireBoard() {
       dx: e.clientX - n.left, dy: e.clientY - n.top,
       x0: e.clientX, y0: e.clientY,
       w: n.width, h: n.height,
+      // A note sits at a few degrees, so what you see is a little wider and
+      // taller than what left and top actually place. Keeping the turned
+      // corners on the cork means allowing for the difference.
+      ox: (n.width - el.offsetWidth) / 2,
+      oy: (n.height - el.offsetHeight) / 2,
       moved: false, x: null, y: null,
     };
     // Keeps the moves coming to this note even when the finger outruns it.
@@ -1706,7 +1755,7 @@ function wireBoard() {
       const id = drag.id;
       drop(drag.el);
       drag = null;
-      openPaperSheet(id);
+      flipNotePaper(id);
     }, 480);
   });
 
@@ -1719,10 +1768,12 @@ function wireBoard() {
       drag.el.classList.add('is-lifted');
     }
     e.preventDefault();
-    const along = (v, size, whole) =>
-      Math.max(0, Math.min(100 - (size / whole) * 100, (v / whole) * 100));
-    drag.x = along(e.clientX - drag.dx - drag.b.left, drag.w, drag.b.width);
-    drag.y = along(e.clientY - drag.dy - drag.b.top, drag.h, drag.b.height);
+    // Clamp what is seen — the turned box — then step back in to what gets
+    // written, so no corner of a note can pass the edge of the cork.
+    const along = (seen, size, whole, back) =>
+      (Math.max(0, Math.min(whole - size, seen)) + back) / whole * 100;
+    drag.x = along(e.clientX - drag.dx - drag.b.left, drag.w, drag.b.width, drag.ox);
+    drag.y = along(e.clientY - drag.dy - drag.b.top, drag.h, drag.b.height, drag.oy);
     drag.el.style.left = drag.x.toFixed(2) + '%';
     drag.el.style.top = drag.y.toFixed(2) + '%';
   });
@@ -1760,23 +1811,19 @@ function takeDown(id) {
   });
 }
 
-/* Hold a note that is already up and its paper opens, with every change
-   landing on the board behind the sheet as it is made. There is no button
-   for this on the note: a note the size of a stamp has no room for one, and
-   the board is meant to be handled rather than operated. */
-let paperTarget = null;
-
-function openPaperSheet(id) {
+/* Hold a note that is already up and it turns over to the next paper where it
+   lies. It used to open a sheet of its own with two rows of swatches in it,
+   which is a settings panel for one square of paper. There is no button for
+   this on the note either: a note the size of a stamp has no room for one,
+   and a board is meant to be handled rather than operated. */
+function flipNotePaper(id) {
   const note = state.notes.find(n => n.id === id);
   if (!note) return;
-  paperTarget = { id, style: paperStyleOf(note), tint: paperTintOf(note) };
-  drawPaperSheet();
-  showSheet('#sheet-paper');
-}
-
-function drawPaperSheet() {
-  if (!paperTarget) return;
-  drawPaperPicker(paperTarget, '#paper-style', '#paper-tint');
+  const look = PAPER_LOOKS[(lookIndexOf(note) + 1) % PAPER_LOOKS.length];
+  note.style = look.style;
+  note.tint = look.tint;
+  save();
+  renderReminders();
 }
 
 function saveReminder() {
@@ -2810,48 +2857,17 @@ function wireApp() {
 
   wireBoard();
 
-  // A keyboard has no pointer to drag with, so Enter or Space on a note
-  // still takes it down. A real click arrives with detail 1 and is already
-  // handled below, by the pointer that made it.
   on('#rem-board', 'click', (e) => {
+    if (e.target.closest('[data-act="first-reminder"]')) { openRemSheet(); return; }
+    // A keyboard has no pointer to drag with, so Enter or Space on a note
+    // still takes it down. A real click arrives with detail 1 and has already
+    // been dealt with by the pointer that made it.
     if (e.detail !== 0) return;
     const note = e.target.closest('[data-note]');
     if (note) takeDown(note.dataset.note);
   });
 
-  on('#rem-sheet-paper', 'click', (e) => {
-    const c = e.target.closest('[data-rempaper]');
-    if (!c || !remDraft) return;
-    remDraft.style = c.dataset.rempaper;
-    drawRemSheet();
-  });
-
-  on('#rem-sheet-tint', 'click', (e) => {
-    const c = e.target.closest('[data-remtint]');
-    if (!c || !remDraft) return;
-    remDraft.tint = c.dataset.remtint;
-    drawRemSheet();
-  });
-
-  // The paper sheet works on a note that is already up, so every tap lands
-  // on the board straight away rather than waiting for a Save.
-  on('#sheet-paper', 'click', (e) => {
-    const p = e.target.closest('[data-rempaper]');
-    const t = e.target.closest('[data-remtint]');
-    if (!paperTarget || (!p && !t)) return;
-    if (p) paperTarget.style = p.dataset.rempaper;
-    if (t) paperTarget.tint = t.dataset.remtint;
-    const note = state.notes.find(n => n.id === paperTarget.id);
-    if (note) {
-      note.style = paperTarget.style;
-      note.tint = paperTarget.tint;
-      save();
-      renderReminders();
-    }
-    drawPaperSheet();
-  });
-
-  on('#paper-done', 'click', closeSheet);
+  on('#rem-flip', 'click', flipRemPaper);
 
   on('#rem-scope', 'click', (e) => {
     if (e.target.closest('[data-more]')) {
