@@ -60,7 +60,7 @@
   /* The shelf at the foot of the reminders page. The picture is 1.588 times as
      wide as it is tall, so at full width it stands 63vw high; capped against
      the height so a short screen is not all shelf. */
-  --shelf-band: min(63vw, 30vh);
+  --shelf-band: min(63vw, 25vh);
 
   color-scheme: light;
 }
@@ -763,8 +763,8 @@ button { border: 0; background: none; cursor: pointer; }
 }
 #view-reminders > .head,
 #view-reminders > .daytabs { position: relative; z-index: 1; flex: none; }
-#view-reminders > .head { margin-bottom: 14px; }
-#view-reminders { padding-top: calc(env(safe-area-inset-top) + 54px); }
+#view-reminders > .head { margin-bottom: 8px; }
+#view-reminders { padding-top: calc(env(safe-area-inset-top) + 40px); }
 
 /* The board takes what is left, and its notes scroll inside it rather than
    pushing the shelf off the bottom of the screen. */
@@ -825,11 +825,11 @@ button { border: 0; background: none; cursor: pointer; }
 .rem-titles { min-width: 0; }
 
 .rem-h1 {
-  font-family: var(--font-hand);
-  font-size: clamp(31px, 9.6vw, 42px);
-  font-weight: 400;
-  line-height: 1;
-  letter-spacing: -.005em;
+  font-family: var(--font-display);
+  font-size: clamp(30px, 9.2vw, 40px);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -.012em;
   color: var(--board-ink);
 }
 
@@ -865,9 +865,8 @@ button { border: 0; background: none; cursor: pointer; }
    pin — cut off its background, rather than a square built out of CSS. */
 .stick-add {
   flex: none;
-  width: 108px;
-  /* Clear of the timetable button, which is fixed to this same corner. */
-  margin-right: 46px;
+  width: 88px;
+  margin-right: 0;
   padding: 0;
   border: 0;
   background: none;
@@ -881,7 +880,7 @@ button { border: 0; background: none; cursor: pointer; }
 .daytabs {
   display: flex;
   gap: 2px;
-  margin: 14px 0 12px;
+  margin: 8px 0 10px;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -892,11 +891,11 @@ button { border: 0; background: none; cursor: pointer; }
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 8px 11px;
+  padding: 7px 9px;
   border: 0;
   border-radius: var(--r-pill);
   background: transparent;
-  font-size: 14.5px;
+  font-size: 13.5px;
   color: var(--ink-2);
 }
 .daytab-more .ico {
@@ -932,7 +931,7 @@ button { border: 0; background: none; cursor: pointer; }
   padding: 22px 15px 20px;
   border-radius: 10px;
   background: var(--cork) url("art/cork.webp") repeat;
-  background-size: 160px 160px;
+  background-size: 240px 240px;
   /* Shaded along the foot as well, so a row the board cannot fit fades into
      the shadow rather than being sliced off mid-note. */
   box-shadow: inset 0 2px 12px -2px rgba(60,34,10,.46),
@@ -1033,17 +1032,27 @@ button { border: 0; background: none; cursor: pointer; }
 .stick-mark .ico { width: 17px; height: 17px; stroke-width: 1.7; }
 
 /* A bare board. */
+/* A bare board says so in the middle of itself, not up in a corner. */
+.cork.is-bare { align-content: center; }
+
 .board-empty {
   grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 3px;
-  padding: 40px 12px;
+  padding: 20px 12px;
   border: 0;
   background: none;
 }
-.board-clear { grid-column: 1 / -1; padding: 46px 12px; text-align: center; }
+.board-clear {
+  grid-column: 1 / -1;
+  display: grid;
+  place-items: center;
+  padding: 20px 12px;
+  text-align: center;
+}
 .board-empty-line {
   font-family: var(--font-hand);
   font-size: 17px;
@@ -1063,7 +1072,7 @@ button { border: 0; background: none; cursor: pointer; }
 @media (max-width: 350px) {
   .cork { grid-template-columns: repeat(2, 1fr); }
   .rem-h1 { font-size: 27px; }
-  .stick-add { width: 92px; margin-right: 52px; }
+  .stick-add { width: 76px; }
 }
 
 

@@ -1467,11 +1467,13 @@ function dayTabs() {
   for (let n = 1; n <= SCHOOL_DAYS.length; n++) {
     const i = ((tomorrow < 0 ? 0 : tomorrow) + n) % SCHOOL_DAYS.length;
     if (i === today || i === tomorrow) continue;
-    rest.push({ key: String(i), label: SCHOOL_DAYS[i].en, day: i });
+    rest.push({ key: String(i), label: SCHOOL_DAYS[i].en, short: SCHOOL_DAYS[i].short, day: i });
   }
   rest.push({ key: 'all', label: 'All', day: null });
 
-  return tabs.concat(rest);
+  // Today, tomorrow and the two days after them, which is the shape the
+  // drawing has; More opens the rest of the week and All.
+  return remMore ? tabs.concat(rest) : tabs.concat(rest.slice(0, 2));
 }
 
 /* Drop day tabs off the end until the row fits. Today, tomorrow and More
@@ -1479,8 +1481,19 @@ function dayTabs() {
 function trimTabs() {
   const row = $('#rem-scope');
   if (!row || remMore) return;
+  const fits = () => row.scrollWidth <= row.clientWidth + 1;
+  if (fits()) return;
+
+  // The named days give up their full spelling — all of them together, since
+  // one shortened beside one written out looks like a mistake rather than a
+  // measurement.
+  const named = [...row.querySelectorAll('[data-short]')];
+  for (const tab of named) tab.textContent = tab.dataset.short;
+  if (fits()) return;
+
+  // Then, only if it still will not go, a day comes off the end.
   for (let guard = 0; guard < 12; guard++) {
-    if (row.scrollWidth <= row.clientWidth + 1) return;
+    if (fits()) return;
     const droppable = [...row.querySelectorAll('[data-scope]')].slice(2);
     const last = droppable[droppable.length - 1];
     if (!last) return;
@@ -1515,7 +1528,8 @@ function renderReminders() {
 
   $('#rem-scope').classList.toggle('is-open', remMore);
   $('#rem-scope').innerHTML = tabs.map(t =>
-    `<button class="daytab ${t.key === tab.key ? 'is-on' : ''}" data-scope="${t.key}">`
+    `<button class="daytab ${t.key === tab.key ? 'is-on' : ''}" data-scope="${t.key}"`
+    + (t.short ? ` data-short="${esc(t.short)}"` : '') + '>'
     + esc(t.label) + '</button>').join('')
     + `<button class="daytab daytab-more" data-more="1">
         ${remMore ? 'Less' : 'More'}
@@ -1525,6 +1539,8 @@ function renderReminders() {
 
   const mine = notesFor(tab).slice().sort(byTime);
   const board = $('#rem-board');
+
+  board.classList.toggle('is-bare', !mine.length);
 
   if (!state.notes.length) {
     board.innerHTML = `
