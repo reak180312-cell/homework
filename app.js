@@ -5,6 +5,281 @@
 (() => {
 'use strict';
 
+/* ── Words ─────────────────────────────────────────────────
+   The app speaks one language at a time, chosen in Profile. Every word the
+   app says for itself lives here; nothing the user typed and no subject name
+   is translated, because those are their words and not ours.
+
+   Hebrew reads right to left, so choosing it turns the whole page over —
+   dir="rtl" on the root — rather than leaving Hebrew sentences running the
+   wrong way in a left-handed layout. */
+
+const LANGS = [
+  { key: 'en', name: 'English',  dir: 'ltr' },
+  { key: 'he', name: 'עברית',    dir: 'rtl' },
+];
+
+const STRINGS = {
+  en: {
+    'app.name': 'Homework',
+
+    'tab.home': 'Homework', 'tab.bag': 'Bag', 'tab.reminders': 'Reminders',
+    'tab.subjects': 'Subjects', 'tab.profile': 'Profile',
+
+    'home.left': '{n} left',
+    'home.none': 'Nothing here yet',
+    'home.allDone': 'You finished all',
+    'home.add': 'Add homework',
+    'home.fresh': 'Add today’s homework while it’s fresh.',
+
+    'due.today': 'For today', 'due.tomorrow': 'For tomorrow',
+    'due.overdue': 'Overdue', 'due.yesterday': 'Yesterday',
+    'due.wasYesterday': 'Was yesterday', 'due.none': 'No date yet',
+    'due.pick': 'Pick a date', 'due.todayShort': 'Today', 'due.tomorrowShort': 'Tomorrow',
+    'due.forDay': 'For {day}', 'due.nextDay': 'Next {day}', 'due.forDate': 'For {date}',
+    'bag.packFor': 'Pack for {day}',
+
+    'hw.what': 'What’s the homework?',
+    'hw.else': 'Anything else? (optional)',
+    'hw.save': 'Save', 'hw.delete': 'Delete homework',
+    'hw.title': 'Homework', 'hw.completed': 'Completed',
+    'hw.nothingFinished': 'Nothing finished yet.',
+    'hw.nothingFor': 'Nothing for {name} right now',
+    'hw.enjoy': 'Enjoy it while it lasts.',
+    'hw.done': 'Completed  ·  +{n} XP',
+
+    'bag.title': 'Bag', 'bag.also': 'Also',
+    'bag.noLessons': 'No lessons',
+    'bag.nothingToPack': 'Nothing to pack for {day}.',
+    'bag.pencil': 'Pencil bag', 'bag.bottle': 'Bottle', 'bag.lunch': 'Lunch box',
+    'bag.shoes': 'Sports shoes', 'bag.notebooks': 'Notebooks', 'bag.books': 'Books',
+
+    'rem.title': 'Reminders', 'rem.new': 'New reminder', 'rem.add': 'Add reminder',
+    'rem.cancel': 'Cancel', 'rem.save': 'Save',
+    'rem.fTitle': 'Title', 'rem.fNotes': 'Notes', 'rem.fTime': 'Time',
+    'rem.optional': 'optional', 'rem.fDays': 'Days', 'rem.fLesson': 'Lesson',
+    'rem.fPaper': 'Paper', 'rem.nextPaper': 'Next paper',
+    'rem.everyDay': 'Every day', 'rem.wholeDay': 'Whole day',
+    'rem.empty': 'Nothing pinned up yet', 'rem.emptySub': 'Tap to write one',
+    'rem.nothingFor': 'Nothing for {day}',
+    'rem.taken': 'Taken down',
+    'rem.whatNot': 'What not to forget', 'rem.elseOpt': 'Anything else (optional)',
+    'rem.marginA': 'Small steps matter ♡', 'rem.marginB': 'A brighter tomorrow',
+    'rem.foot': 'You’ve got this ♡',
+    'rem.more': 'More', 'rem.less': 'Less', 'rem.all': 'All',
+
+    'paper.lined-cream': 'Lined cream', 'paper.soft-yellow': 'Soft yellow',
+    'paper.grid': 'Grid notebook', 'paper.sticky': 'Pastel sticky',
+    'paper.torn': 'Torn edge', 'paper.textured': 'Textured',
+
+    'sub.title': 'Subjects', 'sub.add': 'Add subject', 'sub.back': 'Back',
+    'sub.left': '{n} left',
+
+    'tt.title': 'Timetable', 'tt.close': 'Close timetable',
+    'tt.nothing': 'Nothing scheduled.',
+
+    'pro.title': 'Profile', 'pro.book': 'Your creature book',
+    'pro.creatures': 'Creatures', 'pro.open': 'Open',
+    'pro.completed': 'Completed', 'pro.reminder': 'Reminder',
+    'pro.daily': 'Daily reminder',
+    'pro.dailyNote': 'A nudge to write down today’s homework.',
+    'pro.pack': 'Pack your bag',
+    'pro.packNote': 'Tomorrow’s lessons and reminders, the evening before.',
+    'pro.time': 'Time', 'pro.language': 'Language',
+
+    'book.title': 'Creature book', 'book.close': 'Close',
+    'book.prev': 'Page back', 'book.next': 'Page on',
+    'book.size': 'Size', 'book.hobbies': 'Hobbies', 'book.found': 'Found',
+    'book.lives': 'Lives', 'book.eats': 'Eats', 'book.says': 'Says',
+    'book.best': 'Best at', 'book.worst': 'Not so good at',
+    'book.allFound': 'All found', 'book.withYou': '{name} is with you',
+    'book.everyEgg': 'Every egg is a different one. You cannot choose.',
+    'book.nextEgg': 'The next egg is on its way.',
+    'book.hello': 'Say hello',
+    'book.firstEgg': 'Your first egg is on the way',
+    'book.finishSome': 'Finish some homework and an egg will turn up.',
+    'book.allFifty': 'All fifty have turned up.',
+    'book.everyone': 'That is everyone. Tap any of them to read their page.',
+
+    'rarity.common': 'Common', 'rarity.uncommon': 'Uncommon', 'rarity.rare': 'Rare',
+    'rarity.epic': 'Epic', 'rarity.legendary': 'Legendary',
+
+    'notif.optional': 'Optional. One nudge to write down homework, one to pack your bag.',
+    'notif.homeScreen': 'Reminders need the app on your Home Screen.',
+    'notif.howTo': 'Tap Share, then Add to Home Screen, and open it from there.',
+    'notif.install': 'Install the app, or open it in its own tab.',
+    'notif.addHome': 'Add the app to your home screen so it can still reach you after school.',
+    'notif.off': 'Notifications are switched off for this app.',
+    'notif.turnBack': 'Turn them back on in your phone’s settings, under Notifications.',
+    'notif.noSupport': 'This browser can’t show notifications.',
+    'notif.anyHomework': 'Any homework today?',
+    'notif.dontForget': 'Don’t forget: ',
+
+    'bag.dayToday': '{day} · today',
+    'sub.count': '{n} left',
+    'lvl.level': 'Level {n}',
+    'lvl.xp': '{into} / {of} XP',
+    'lvl.untilEgg': '{n} XP until the next egg',
+    'book.allOut': 'All {n} are out there. Finish some homework and the first egg will turn up.',
+    'book.stillOut': '{n} still out there. Tap a creature to open their page.',
+    'book.countFound': '{have} of {all} found',
+    'book.allFoundOf': 'All {n} found',
+    'toast.undo': 'Undo',
+    'time.aWhileAgo': 'a while ago',
+  },
+
+  he: {
+    'app.name': 'שיעורי בית',
+
+    'tab.home': 'שיעורי בית', 'tab.bag': 'תיק', 'tab.reminders': 'תזכורות',
+    'tab.subjects': 'מקצועות', 'tab.profile': 'פרופיל',
+
+    'home.left': 'נשארו {n}',
+    'home.none': 'אין כאן עדיין כלום',
+    'home.allDone': 'סיימת הכול',
+    'home.add': 'הוספת שיעורי בית',
+    'home.fresh': 'כדאי לרשום את שיעורי הבית כל עוד הם טריים.',
+
+    'due.today': 'להיום', 'due.tomorrow': 'למחר',
+    'due.overdue': 'באיחור', 'due.yesterday': 'אתמול',
+    'due.wasYesterday': 'היה אתמול', 'due.none': 'בלי תאריך',
+    'due.pick': 'בחירת תאריך', 'due.todayShort': 'היום', 'due.tomorrowShort': 'מחר',
+    'due.forDay': 'ליום {day}', 'due.nextDay': 'ליום {day} הבא', 'due.forDate': 'ל{date}',
+    'bag.packFor': 'לארוז ליום {day}',
+
+    'hw.what': 'מה שיעורי הבית?',
+    'hw.else': 'עוד משהו? (רשות)',
+    'hw.save': 'שמירה', 'hw.delete': 'מחיקת שיעורי בית',
+    'hw.title': 'שיעורי בית', 'hw.completed': 'הושלמו',
+    'hw.nothingFinished': 'עוד לא הושלם כלום.',
+    'hw.nothingFor': 'אין כרגע כלום ב{name}',
+    'hw.enjoy': 'תיהנו כל עוד אפשר.',
+    'hw.done': 'הושלם  ·  ‎+{n}‎ נק׳',
+
+    'bag.title': 'תיק', 'bag.also': 'בנוסף',
+    'bag.noLessons': 'אין שיעורים',
+    'bag.nothingToPack': 'אין מה לארוז ל{day}.',
+    'bag.pencil': 'קלמר', 'bag.bottle': 'בקבוק', 'bag.lunch': 'קופסת אוכל',
+    'bag.shoes': 'נעלי ספורט', 'bag.notebooks': 'מחברות', 'bag.books': 'ספרים',
+
+    'rem.title': 'תזכורות', 'rem.new': 'תזכורת חדשה', 'rem.add': 'הוספת תזכורת',
+    'rem.cancel': 'ביטול', 'rem.save': 'שמירה',
+    'rem.fTitle': 'כותרת', 'rem.fNotes': 'הערות', 'rem.fTime': 'שעה',
+    'rem.optional': 'רשות', 'rem.fDays': 'ימים', 'rem.fLesson': 'שיעור',
+    'rem.fPaper': 'נייר', 'rem.nextPaper': 'הנייר הבא',
+    'rem.everyDay': 'כל יום', 'rem.wholeDay': 'כל היום',
+    'rem.empty': 'עוד לא נתלה כאן כלום', 'rem.emptySub': 'הקישו כדי לכתוב',
+    'rem.nothingFor': 'אין כלום ל{day}',
+    'rem.taken': 'הורד',
+    'rem.whatNot': 'מה לא לשכוח', 'rem.elseOpt': 'עוד משהו (רשות)',
+    'rem.marginA': 'צעדים קטנים חשובים ♡', 'rem.marginB': 'מחר יהיה מואר יותר',
+    'rem.foot': 'אתם מסוגלים ♡',
+    'rem.more': 'עוד', 'rem.less': 'פחות', 'rem.all': 'הכול',
+
+    'paper.lined-cream': 'שורות על קרם', 'paper.soft-yellow': 'צהוב רך',
+    'paper.grid': 'משבצות', 'paper.sticky': 'פתק פסטל',
+    'paper.torn': 'קצה קרוע', 'paper.textured': 'נייר מרקם',
+
+    'sub.title': 'מקצועות', 'sub.add': 'הוספת מקצוע', 'sub.back': 'חזרה',
+    'sub.left': 'נשארו {n}',
+
+    'tt.title': 'מערכת שעות', 'tt.close': 'סגירת מערכת השעות',
+    'tt.nothing': 'אין שיעורים.',
+
+    'pro.title': 'פרופיל', 'pro.book': 'ספר היצורים שלך',
+    'pro.creatures': 'יצורים', 'pro.open': 'פתיחה',
+    'pro.completed': 'הושלמו', 'pro.reminder': 'תזכורת',
+    'pro.daily': 'תזכורת יומית',
+    'pro.dailyNote': 'תזכורת קטנה לרשום את שיעורי הבית של היום.',
+    'pro.pack': 'לארוז את התיק',
+    'pro.packNote': 'השיעורים והתזכורות של מחר, בערב שלפני.',
+    'pro.time': 'שעה', 'pro.language': 'שפה',
+
+    'book.title': 'ספר היצורים', 'book.close': 'סגירה',
+    'book.prev': 'עמוד אחורה', 'book.next': 'עמוד קדימה',
+    'book.size': 'גודל', 'book.hobbies': 'תחביבים', 'book.found': 'נמצא',
+    'book.lives': 'גר', 'book.eats': 'אוכל', 'book.says': 'אומר',
+    'book.best': 'הכי טוב ב', 'book.worst': 'פחות טוב ב',
+    'book.allFound': 'כולם נמצאו', 'book.withYou': '{name} אתך',
+    'book.everyEgg': 'כל ביצה היא אחרת. אי אפשר לבחור.',
+    'book.nextEgg': 'הביצה הבאה בדרך.',
+    'book.hello': 'לומר שלום',
+    'book.firstEgg': 'הביצה הראשונה שלך בדרך',
+    'book.finishSome': 'סיימו כמה שיעורי בית ותגיע ביצה.',
+    'book.allFifty': 'כל החמישים הגיעו.',
+    'book.everyone': 'זהו כולם. הקישו על כל אחד כדי לקרוא עליו.',
+
+    'rarity.common': 'רגיל', 'rarity.uncommon': 'לא שכיח', 'rarity.rare': 'נדיר',
+    'rarity.epic': 'אגדי', 'rarity.legendary': 'אגדתי',
+
+    'notif.optional': 'רשות. תזכורת אחת לרשום שיעורי בית, ואחת לארוז את התיק.',
+    'notif.homeScreen': 'תזכורות דורשות שהאפליקציה תהיה במסך הבית.',
+    'notif.howTo': 'הקישו שיתוף, ואז הוספה למסך הבית, ופתחו משם.',
+    'notif.install': 'התקינו את האפליקציה, או פתחו אותה בלשונית משלה.',
+    'notif.addHome': 'הוסיפו את האפליקציה למסך הבית כדי שתוכל להגיע אליכם גם אחרי הלימודים.',
+    'notif.off': 'ההתראות כבויות עבור האפליקציה הזו.',
+    'notif.turnBack': 'אפשר להדליק אותן שוב בהגדרות הטלפון, תחת התראות.',
+    'notif.noSupport': 'הדפדפן הזה לא יודע להציג התראות.',
+    'notif.anyHomework': 'יש שיעורי בית היום?',
+    'notif.dontForget': 'לא לשכוח: ',
+
+    'bag.dayToday': 'יום {day} · היום',
+    'sub.count': 'נשארו {n}',
+    'lvl.level': 'רמה {n}',
+    'lvl.xp': '{into} / {of} נק׳',
+    'lvl.untilEgg': 'עוד {n} נק׳ עד הביצה הבאה',
+    'book.allOut': 'כל {n} מסתובבים שם בחוץ. סיימו כמה שיעורי בית והביצה הראשונה תגיע.',
+    'book.stillOut': 'עוד {n} מסתובבים שם בחוץ. הקישו על יצור כדי לפתוח את העמוד שלו.',
+    'book.countFound': 'נמצאו {have} מתוך {all}',
+    'book.allFoundOf': 'כל {n} נמצאו',
+    'toast.undo': 'ביטול',
+    'time.aWhileAgo': 'לפני זמן מה',
+  },
+};
+
+let lang = 'en';
+
+/* One word, in the language chosen. {name} in a string is filled from the
+   second argument, so a sentence can be worded differently in each language
+   without the caller knowing where the blank falls. */
+/* Named tr rather than t: a one-letter name for something every screen
+   calls is a name a loop variable will shadow sooner or later, and it did —
+   dayTabs() keeps a `const t = new Date()` and every lookup inside it was
+   calling a date instead. */
+function tr(key, vars) {
+  const table = STRINGS[lang] || STRINGS.en;
+  let out = table[key];
+  if (out === undefined) out = STRINGS.en[key];
+  if (out === undefined) return key;
+  if (vars) {
+    for (const k of Object.keys(vars)) out = out.split('{' + k + '}').join(vars[k]);
+  }
+  return out;
+}
+
+/* What to ask the browser for when it writes a date we have no word for. */
+function locale() {
+  return lang === 'he' ? 'he-IL' : 'en-GB';
+}
+
+function langDir(key) {
+  const l = LANGS.find(x => x.key === key);
+  return l ? l.dir : 'ltr';
+}
+
+/* A day's name in whichever language is on. The timetable already carries
+   both, because the school writes one and the app says the other. */
+function dayName(i) {
+  const d = SCHOOL_DAYS[i];
+  if (!d) return '';
+  return lang === 'he' ? d.he : d.en;
+}
+function dayShort(i) {
+  const d = SCHOOL_DAYS[i];
+  if (!d) return '';
+  return lang === 'he' ? d.he : d.short;
+}
+
 /* ── Data ──────────────────────────────────────────────────── */
 
 /* ── Timetable ─────────────────────────────────────────────
@@ -145,20 +420,20 @@ function bagThings(dayIndex) {
   };
 
   const things = [
-    { key: 'pencil', label: 'Pencil bag' },
-    { key: 'bottle', label: 'Bottle' },
-    { key: 'lunch',  label: 'Lunch box' },
+    { key: 'pencil', label: tr('bag.pencil') },
+    { key: 'bottle', label: tr('bag.bottle') },
+    { key: 'lunch',  label: tr('bag.lunch') },
   ];
 
-  if (names.includes(SPORT)) things.push({ key: 'shoes', label: 'Sports shoes' });
+  if (names.includes(SPORT)) things.push({ key: 'shoes', label: tr('bag.shoes') });
 
   const notebooks = list(n => !NO_NOTEBOOK.includes(n));
   if (notebooks.length) {
-    things.push({ key: 'notebook', label: 'Notebooks', detail: notebooks.join(' · ') });
+    things.push({ key: 'notebook', label: tr('bag.notebooks'), detail: notebooks.join(' · ') });
   }
   const books = list(n => NEEDS_BOOK.includes(n));
   if (books.length) {
-    things.push({ key: 'books', label: 'Books', detail: books.join(' · ') });
+    things.push({ key: 'books', label: tr('bag.books'), detail: books.join(' · ') });
   }
 
   // Sport and the special lessons never fall on the same day, so the one slot
@@ -981,36 +1256,36 @@ function addDays(n) {
 /** "Today", "Tomorrow", "Monday", "12 Mar" — never a raw date if we can help it. */
 function dueLabel(key) {
   const diff = daysFromToday(key);
-  if (diff < -1) return 'Overdue';
-  if (diff === -1) return 'Yesterday';
-  if (diff === 0) return 'Today';
-  if (diff === 1) return 'Tomorrow';
-  if (diff <= 6) return keyToDate(key).toLocaleDateString([], { weekday: 'long' });
-  return keyToDate(key).toLocaleDateString([], { day: 'numeric', month: 'short' });
+  if (diff < -1) return tr('due.overdue');
+  if (diff === -1) return tr('due.yesterday');
+  if (diff === 0) return tr('due.todayShort');
+  if (diff === 1) return tr('due.tomorrowShort');
+  if (diff <= 6) return keyToDate(key).toLocaleDateString(locale(), { weekday: 'long' });
+  return keyToDate(key).toLocaleDateString(locale(), { day: 'numeric', month: 'short' });
 }
 
 /** The card reads as a sentence: "for thursday", "for next monday". */
 function duePhrase(key) {
   const diff = daysFromToday(key);
-  const weekday = () => keyToDate(key).toLocaleDateString([], { weekday: 'long' }).toLowerCase();
+  const weekday = () => keyToDate(key).toLocaleDateString(locale(), { weekday: 'long' }).toLowerCase();
   if (diff < -1) return 'overdue';
   if (diff === -1) return 'was for yesterday';
   if (diff === 0) return 'for today';
   if (diff === 1) return 'for tomorrow';
   if (diff <= 6) return `for ${weekday()}`;
   if (diff <= 13) return `for next ${weekday()}`;
-  return `for ${keyToDate(key).toLocaleDateString([], { day: 'numeric', month: 'long' })}`;
+  return `for ${keyToDate(key).toLocaleDateString(locale(), { day: 'numeric', month: 'long' })}`;
 }
 
 function dayHeading(ts) {
   const key = dayKey(new Date(ts));
   const diff = daysFromToday(key);
-  if (diff === 0) return 'Today';
-  if (diff === -1) return 'Yesterday';
+  if (diff === 0) return tr('due.todayShort');
+  if (diff === -1) return tr('due.yesterday');
   const d = new Date(ts);
   const opts = { weekday: 'long', day: 'numeric', month: 'short' };
   if (d.getFullYear() !== new Date().getFullYear()) opts.year = 'numeric';
-  return d.toLocaleDateString([], opts);
+  return d.toLocaleDateString(locale(), opts);
 }
 
 const timeLabel = (ts) =>
@@ -1030,6 +1305,8 @@ const blank = () => ({
   settings: {
     dailyReminderEnabled: false, dailyReminderTime: '15:00',
     bagReminderEnabled: false, bagReminderTime: '20:00',
+    // null until somebody chooses; the phone is asked the first time.
+    lang: null,
   },
   lastSubjectId: null,
 });
@@ -1086,6 +1363,8 @@ function hydrate(saved) {
   delete next.subjects;
   delete next.onboarded;
   next.progress = Object.assign({ xp: 0, level: 1, shownUpTo: 1 }, next.progress);
+  // Anyone who was here before there was a choice gets the phone asked for them.
+  if (!LANGS.some(l => l.key === next.settings.lang)) next.settings.lang = null;
   // Anyone already part way through should not be shown a burst of arrivals.
   if (typeof next.progress.shownUpTo !== 'number') next.progress.shownUpTo = levelFor(next.progress.xp || 0);
   return next;
@@ -1194,24 +1473,66 @@ function monogram(name) {
 
 /* ── Shared markup ─────────────────────────────────────────── */
 
+/* The colour a subject is FILLED with, as against the colour it is written
+   in. The palette is tuned for ink — deep enough to read as text on cream —
+   and a deep colour used as a fill leaves a black mark on it barely legible,
+   worst on the browns. Measured off the drawing, its tiles keep the hue and
+   take it up to about 73% lightness at 82% saturation, which is where
+   black sits comfortably. At night it goes the other way: the same hue
+   darkened, so white sits comfortably instead.
+
+   Derived rather than listed, so a subject somebody adds themselves gets a
+   tile of its own without anyone having to pick a second colour for it. */
+function hexToHsl(hex) {
+  const n = String(hex).replace('#', '');
+  const full = n.length === 3 ? n.split('').map(c => c + c).join('') : n;
+  const r = parseInt(full.slice(0, 2), 16) / 255;
+  const g = parseInt(full.slice(2, 4), 16) / 255;
+  const b = parseInt(full.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  if (!d) return [0, 0, l];
+  const sat = d / (1 - Math.abs(2 * l - 1));
+  let h;
+  if (max === r) h = ((g - b) / d) % 6;
+  else if (max === g) h = (b - r) / d + 2;
+  else h = (r - g) / d + 4;
+  h = Math.round(h * 60);
+  return [h < 0 ? h + 360 : h, sat, l];
+}
+
+function tileFill(hex, dark) {
+  const [h, sat] = hexToHsl(hex);
+  // A grey subject has no hue worth saturating; it stays a grey.
+  if (sat < 0.08) return dark ? 'hsl(0 0% 34%)' : 'hsl(0 0% 76%)';
+  return dark ? `hsl(${h} ${Math.round(sat * 62)}% 38%)` : `hsl(${h} 82% 73%)`;
+}
+
+/* Both at once, so the stylesheet can pick the one the hour calls for. */
+function fillVars(hex) {
+  return `--sc:${hex}; --sct:${tileFill(hex, false)}; --sctd:${tileFill(hex, true)}`;
+}
+
 function tile(sub, extraClass = '') {
   const body = sub.icon
     ? `<svg class="ico" aria-hidden="true"><use href="#${sub.icon}" /></svg>`
     : esc(sub.glyph || monogram(sub.name));
-  return `<span class="subject-tile ${extraClass}" style="--sc:${sub.color}">${body}</span>`;
+  return `<span class="subject-tile ${extraClass}" style="${fillVars(sub.color)}">${body}</span>`;
 }
 
 /** When it is for, short enough for a chip. */
 function dueChip(key) {
   const diff = daysFromToday(key);
-  const weekday = () => keyToDate(key).toLocaleDateString([], { weekday: 'long' });
-  if (diff < -1) return 'Overdue';
-  if (diff === -1) return 'Was yesterday';
-  if (diff === 0) return 'For today';
-  if (diff === 1) return 'For tomorrow';
-  if (diff <= 6) return `For ${weekday()}`;
-  if (diff <= 13) return `Next ${weekday()}`;
-  return `For ${keyToDate(key).toLocaleDateString([], { day: 'numeric', month: 'short' })}`;
+  const weekday = () => keyToDate(key).toLocaleDateString(locale(), { weekday: 'long' });
+  if (diff < -1) return tr('due.overdue');
+  if (diff === -1) return tr('due.wasYesterday');
+  if (diff === 0) return tr('due.today');
+  if (diff === 1) return tr('due.tomorrow');
+  if (diff <= 6) return tr('due.forDay', { day: weekday() });
+  if (diff <= 13) return tr('due.nextDay', { day: weekday() });
+  return tr('due.forDate',
+    { date: keyToDate(key).toLocaleDateString(locale(), { day: 'numeric', month: 'short' }) });
 }
 
 function hwRow(hw) {
@@ -1231,7 +1552,7 @@ function hwRow(hw) {
               <span class="hw-subject">${esc(sub ? sub.name : 'Subject')}</span>
               <span class="hw-when">
                 <svg class="ico" aria-hidden="true"><use href="#i-calendar" /></svg>
-                ${hw.dueDate ? esc(dueChip(hw.dueDate)) : 'No date yet'}
+                ${hw.dueDate ? esc(dueChip(hw.dueDate)) : tr('due.none')}
               </span>
             </span>
             <span class="hw-title">${esc(hw.title)}</span>
@@ -1299,6 +1620,48 @@ const emptyHome = (title) => `
 
 let currentTab = 'home';
 
+/* What the phone is set to, if it is one of ours; English if not. */
+function phoneLang() {
+  const want = (navigator.languages || [navigator.language || 'en'])
+    .map(x => String(x).toLowerCase().slice(0, 2));
+  for (const w of want) if (LANGS.some(l => l.key === w)) return w;
+  return 'en';
+}
+
+/* Put the whole app into a language: the root element says which it is and
+   which way it reads, every fixed word in the markup is looked up again, and
+   everything drawn from data is drawn again. Nothing is reloaded — a language
+   is not a different app. */
+function applyLang() {
+  lang = state.settings.lang || phoneLang();
+  const root = document.documentElement;
+  root.setAttribute('lang', lang);
+  root.setAttribute('dir', langDir(lang));
+
+  for (const el of $$('[data-t]')) el.textContent = tr(el.dataset.t);
+  for (const el of $$('[data-t-ph]')) el.setAttribute('placeholder', tr(el.dataset.tPh));
+  for (const el of $$('[data-t-aria]')) el.setAttribute('aria-label', tr(el.dataset.tAria));
+  document.title = tr('app.name');
+}
+
+function setLang(next) {
+  if (!LANGS.some(l => l.key === next)) return;
+  state.settings.lang = next;
+  save();
+  applyLang();
+  render();
+}
+
+/* Each language names itself, so you can find your own without reading the
+   one you cannot. */
+function renderLangPick() {
+  const box = $('#lang-pick');
+  if (!box) return;
+  box.innerHTML = LANGS.map(l => `
+    <button class="lang-btn ${l.key === lang ? 'is-on' : ''}" data-lang="${l.key}"
+            lang="${l.key}" dir="${l.dir}" aria-pressed="${l.key === lang}">${esc(l.name)}</button>`).join('');
+}
+
 function render() {
   renderTtButton();
   syncFab();
@@ -1306,19 +1669,19 @@ function render() {
   if (currentTab === 'bag') renderBag();
   if (currentTab === 'reminders') renderReminders();
   if (currentTab === 'subjects') renderSubjects();
-  if (currentTab === 'profile') renderProfile();
+  if (currentTab === 'profile') { renderProfile(); renderLangPick(); }
   if (!$('#subject-page').hidden) renderSubjectPage(openSubjectId);
 }
 
 function renderHome() {
   const list = sortForList(activeHw());
-  $('#home-count').textContent = list.length ? `${list.length} left` : '';
+  $('#home-count').textContent = list.length ? tr('home.left', { n: list.length }) : '';
 
   const box = $('#home-list');
   box.classList.add('list-hw');
   box.innerHTML = list.length
     ? list.map(hwRow).join('')
-    : emptyHome(state.homework.length ? 'You finished all' : 'Nothing here yet');
+    : emptyHome(state.homework.length ? tr('home.allDone') : tr('home.none'));
   revealArt();
   syncFab();
 }
@@ -1335,23 +1698,25 @@ function renderBag() {
   const today = schoolDayIndex();
   const day = SCHOOL_DAYS[bagDay];
 
-  $('#bag-sub').textContent = bagDay === today ? `${day.en} · today` : day.en;
+  $('#bag-sub').textContent = bagDay === today
+    ? tr('bag.dayToday', { day: dayName(day.js) })
+    : dayName(day.js);
 
   $('#bag-days').innerHTML = SCHOOL_DAYS.map((d, i) => `
     <button class="chip chip-day ${i === bagDay ? 'is-on' : ''}" data-day="${i}">
-      ${esc(d.short)}${i === today ? '<span class="today-dot"></span>' : ''}
+      ${esc(dayShort(i))}${i === today ? '<span class="today-dot"></span>' : ''}
     </button>`).join('');
 
   if (!lessonsFor(bagDay).length) {
     $('#bag-body').innerHTML =
-      empty('No lessons', `Nothing to pack for ${day.en}.`, { icon: 'i-tab-bag', mood: 'rest' });
+      empty(tr('bag.noLessons'), tr('bag.nothingToPack', { day: dayName(day.js) }), { icon: 'i-tab-bag', mood: 'rest' });
     return;
   }
 
   // Your own notes for the day are things to put in the bag too.
   const notes = state.notes.filter(n => n.day === null || n.day === bagDay);
   const remember = notes.length ? `
-    <h2 class="section-title">Also</h2>
+    <h2 class="section-title">${tr('bag.also')}</h2>
     <ul class="pack-list">
       ${notes.map(n => `
         <li class="pack-line">
@@ -1432,12 +1797,12 @@ const PAPER_TINT = [
    are still what gets stored, so a note written before there was anything to
    choose still knows what it is. */
 const PAPER_LOOKS = [
-  { name: 'Lined cream',   style: 'lined',   tint: 'cream'  },
-  { name: 'Soft yellow',   style: 'lined',   tint: 'butter' },
-  { name: 'Grid notebook', style: 'grid',    tint: 'sky'    },
-  { name: 'Pastel sticky', style: 'plain',   tint: 'blush'  },
-  { name: 'Torn edge',     style: 'torn',    tint: 'cream'  },
-  { name: 'Textured',      style: 'texture', tint: 'mint'   },
+  { key: 'lined-cream',  style: 'lined',   tint: 'cream'  },
+  { key: 'soft-yellow',  style: 'lined',   tint: 'butter' },
+  { key: 'grid',         style: 'grid',    tint: 'sky'    },
+  { key: 'sticky',       style: 'plain',   tint: 'blush'  },
+  { key: 'torn',         style: 'torn',    tint: 'cream'  },
+  { key: 'textured',     style: 'texture', tint: 'mint'   },
 ];
 
 /* Which made-up paper a note is already on, so the arrow carries on from
@@ -1539,8 +1904,8 @@ function dayTabs() {
   t.setDate(t.getDate() + 1);
   const tomorrow = schoolDayIndex(t);
 
-  const tabs = [{ key: 'today', label: 'Today', day: today }];
-  tabs.push({ key: 'tomorrow', label: 'Tomorrow', day: tomorrow });
+  const tabs = [{ key: 'today', label: tr('due.todayShort'), day: today }];
+  tabs.push({ key: 'tomorrow', label: tr('due.tomorrowShort'), day: tomorrow });
 
   // The rest of the week, starting from the day after tomorrow and wrapping,
   // so the two the drawing shows are the two that come next.
@@ -1548,9 +1913,9 @@ function dayTabs() {
   for (let n = 1; n <= SCHOOL_DAYS.length; n++) {
     const i = ((tomorrow < 0 ? 0 : tomorrow) + n) % SCHOOL_DAYS.length;
     if (i === today || i === tomorrow) continue;
-    rest.push({ key: String(i), label: SCHOOL_DAYS[i].en, short: SCHOOL_DAYS[i].short, day: i });
+    rest.push({ key: String(i), label: dayName(i), short: dayShort(i), day: i });
   }
-  rest.push({ key: 'all', label: 'All', day: null });
+  rest.push({ key: 'all', label: tr('rem.all'), day: null });
 
   // Today, tomorrow and the two days after them, which is the shape the
   // drawing has; More opens the rest of the week and All.
@@ -1608,7 +1973,7 @@ function renderReminders() {
     + (t.short ? ` data-short="${esc(t.short)}"` : '') + '>'
     + esc(t.label) + '</button>').join('')
     + `<button class="daytab daytab-more" data-more="1">
-        ${remMore ? 'Less' : 'More'}
+        ${remMore ? tr('rem.less') : tr('rem.more')}
         <svg class="ico" aria-hidden="true"><use href="#i-chevron" /></svg>
       </button>`;
   trimTabs();
@@ -1623,9 +1988,9 @@ function renderReminders() {
     board.innerHTML = `
       <button class="board-empty" data-act="first-reminder">
         <span class="board-empty-line">${first
-          ? 'Nothing pinned up yet'
-          : `Nothing for ${esc(tab.label.toLowerCase())}`}</span>
-        <span class="board-empty-sub">Tap to write one</span>
+          ? tr('rem.empty')
+          : tr('rem.nothingFor', { day: esc(tab.label.toLowerCase()) })}</span>
+        <span class="board-empty-sub">${tr('rem.emptySub')}</span>
       </button>`;
     return;
   }
@@ -1668,19 +2033,19 @@ function drawRemSheet() {
 
   $('#rem-sheet-days').innerHTML = `
     ${SCHOOL_DAYS.map((d, i) => `
-      <button class="p-chip ${remDraft.day === i ? 'is-on' : ''}" data-remday="${i}">${esc(d.short)}</button>`).join('')}
-    <button class="p-chip ${remDraft.day === null ? 'is-on' : ''}" data-remday="all">Every day</button>`;
+      <button class="p-chip ${remDraft.day === i ? 'is-on' : ''}" data-remday="${i}">${esc(dayShort(i))}</button>`).join('')}
+    <button class="p-chip ${remDraft.day === null ? 'is-on' : ''}" data-remday="all">${tr('rem.everyDay')}</button>`;
 
   // A lesson can only be chosen once a particular day is.
   const lessons = remDraft.day === null ? [] : lessonsFor(remDraft.day);
   $('#rem-sheet-lesson').hidden = !lessons.length;
   $('#rem-sheet-lessons').innerHTML = lessons.length ? `
-    <button class="p-chip ${remDraft.lesson === null ? 'is-on' : ''}" data-remlesson="">Whole day</button>
+    <button class="p-chip ${remDraft.lesson === null ? 'is-on' : ''}" data-remlesson="">${tr('rem.wholeDay')}</button>
     ${lessons.map(l => {
       const sub = subjectForLesson(l.name);
       return `<button class="p-chip ${remDraft.lesson === l.name ? 'is-on' : ''}"
         data-remlesson="${esc(l.name)}" style="--sc:${sub ? sub.color : 'var(--ink-3)'}">
-        <span class="chip-dot"></span>${esc(shortName(l.name))}</button>`;
+        ${esc(shortName(l.name))}</button>`;
     }).join('')}` : '';
 
   drawRemPaper();
@@ -1698,7 +2063,7 @@ function drawRemPaper() {
   remDraft.tint = look.tint;
   wearPaper($('#sheet-rem'), look);
   const name = $('#rem-flip-name');
-  if (name) name.textContent = look.name;
+  if (name) name.textContent = tr('paper.' + look.key);
 }
 
 function flipRemPaper() {
@@ -1803,7 +2168,7 @@ function takeDown(id) {
   const [gone] = state.notes.splice(i, 1);
   save();
   renderReminders();
-  showToast('Taken down', () => {
+  showToast(tr('rem.taken'), () => {
     state.notes.splice(i, 0, gone);
     save();
     renderReminders();
@@ -1863,8 +2228,8 @@ function renderTimetable() {
             <th class="tt-corner"></th>
             ${SCHOOL_DAYS.map((d, i) => `
               <th class="${i === today ? 'is-today' : ''}">
-                <span class="tt-day">${esc(d.short)}</span>
-                <span class="tt-day-he">${esc(d.he)}</span>
+                <span class="tt-day">${esc(dayShort(d.js))}</span>
+                <span class="tt-day-he">${esc(lang === 'he' ? d.en : d.he)}</span>
               </th>`).join('')}
           </tr>
         </thead>
@@ -1876,7 +2241,8 @@ function renderTimetable() {
                 const name = SCHEDULE[i][p];
                 if (!name) return `<td class="tt-free ${i === today ? 'is-today' : ''}"></td>`;
                 const sub = subjectForLesson(name);
-                return `<td class="${i === today ? 'is-today' : ''}" style="--sc:${sub ? sub.color : 'var(--ink-2)'}"
+                return `<td class="${i === today ? 'is-today' : ''}"
+                            style="${sub ? fillVars(sub.color) : '--sc:var(--ink-2)'}"
                             title="${esc(name)}">
                   <span class="tt-cell">${esc(shortName(name))}</span>
                 </td>`;
@@ -1913,7 +2279,7 @@ function renderSubjects() {
       <button class="subject-row" data-id="${sub.id}" style="--sc:${sub.color}">
         ${tile(sub)}
         <span class="subject-row-name">${esc(sub.name)}</span>
-        <span class="subject-row-count">${n ? `${n} left` : ''}</span>
+        <span class="subject-row-count">${n ? tr('sub.count', { n }) : ''}</span>
         <svg class="ico ico-chevron" aria-hidden="true"><use href="#i-chevron" /></svg>
       </button>`;
   }).join('');
@@ -1932,11 +2298,11 @@ function renderSubjectPage(id) {
   $('#subject-page-body').innerHTML = `
     <div class="subject-hero">${tile(sub)}<h1>${esc(sub.name)}</h1></div>
     ${open.length ? `
-      <h2 class="section-title" style="margin-top:0">Homework</h2>
+      <h2 class="section-title" style="margin-top:0">${tr('hw.title')}</h2>
       <div class="list list-hw">${open.map(hwRow).join('')}</div>
-    ` : empty(`Nothing for ${sub.name} right now`, 'Enjoy it while it lasts.', { mood: 'done' })}
+    ` : empty(tr('hw.nothingFor', { name: sub.name }), tr('hw.enjoy'), { mood: 'done' })}
     ${done.length ? `
-      <h2 class="section-title">Completed</h2>
+      <h2 class="section-title">${tr('hw.completed')}</h2>
       <div class="list">${done.map(h => doneRow(h, sub, false)).join('')}</div>
     ` : ''}`;
 }
@@ -1966,16 +2332,16 @@ function renderProfile() {
 
   $('#level-card').innerHTML = `
     <div class="level-top">
-      <span class="level-name">Level ${level}</span>
-      <span class="level-xp">${allFound ? 'All found' : `${into} / ${XP_PER_LEVEL} XP`}</span>
+      <span class="level-name">${tr('lvl.level', { n: level })}</span>
+      <span class="level-xp">${allFound ? tr('book.allFound') : tr('lvl.xp', { into, of: XP_PER_LEVEL })}</span>
     </div>
     <div class="bar"><div class="bar-fill" style="width:${allFound ? 100 : (into / XP_PER_LEVEL) * 100}%"></div></div>
-    <p class="level-chapter">${here ? esc(here.name) + ' is with you' : 'Your first egg is on the way'}</p>
+    <p class="level-chapter">${here ? tr('book.withYou', { name: esc(here.name) }) : tr('book.firstEgg')}</p>
     <p class="level-note">${allFound
-      ? 'All fifty have turned up.'
+      ? tr('book.allFifty')
       : (xp > 0
-          ? `${XP_PER_LEVEL - into} XP until the next egg`
-          : 'Finish some homework and an egg will turn up.')}</p>`;
+          ? tr('lvl.untilEgg', { n: XP_PER_LEVEL - into })
+          : tr('book.finishSome'))}</p>`;
 
   renderCollection();
 
@@ -1987,7 +2353,7 @@ function renderProfile() {
 
   const box = $('#history-list');
   if (!done.length) {
-    box.innerHTML = `<p class="foot-note">Nothing finished yet.</p>`;
+    box.innerHTML = `<p class="foot-note">${tr('hw.nothingFinished')}</p>`;
   } else {
     let html = '';
     let lastDay = null;
@@ -2032,8 +2398,8 @@ function renderCollection() {
   const cover = $('#book-count');
   if (cover) {
     cover.textContent = have.length >= MONSTER_COUNT
-      ? `All ${MONSTER_COUNT} found`
-      : `${have.length} of ${MONSTER_COUNT} found`;
+      ? tr('book.allFoundOf', { n: MONSTER_COUNT })
+      : tr('book.countFound', { have: have.length, all: MONSTER_COUNT });
   }
   const peek = $('#book-peek');
   if (peek) {
@@ -2049,7 +2415,7 @@ function renderCollection() {
         <button class="mon-slot" data-monster="${m.id}" style="--mc:${m.colour}">
           ${monsterSvg(m)}
           <span class="mon-name">${esc(m.name)}</span>
-          <span class="mon-rank is-${m.rarity}">${esc(rarityOf(m.rarity).label)}</span>
+          <span class="mon-rank is-${m.rarity}">${esc(tr('rarity.' + m.rarity))}</span>
         </button>`).join('')
     : '<span class="mon-slot is-empty" aria-hidden="true"></span>'.repeat(4);
 
@@ -2057,10 +2423,10 @@ function renderCollection() {
   if (note) {
     const left = MONSTER_COUNT - have.length;
     note.textContent = !have.length
-      ? `All ${MONSTER_COUNT} are out there. Finish some homework and the first egg will turn up.`
+      ? tr('book.allOut', { n: MONSTER_COUNT })
       : left
-        ? `${left} still out there. Tap a creature to open their page.`
-        : 'That is everyone. Tap any of them to read their page.';
+        ? tr('book.stillOut', { n: left })
+        : tr('book.everyone');
   }
 }
 
@@ -2084,19 +2450,19 @@ function bookPages() {
 function foundSpread(m) {
   const met = (state.progress.metAt || {})[m.id];
   const found = met
-    ? new Date(met).toLocaleDateString([], { day: 'numeric', month: 'long' })
+    ? new Date(met).toLocaleDateString(locale(), { day: 'numeric', month: 'long' })
     : 'a while ago';
   const rank = rarityOf(m.rarity);
   return `
     <div class="page page-l" style="--mc:${m.colour}">
       <div class="portrait">${monsterSvg(m)}</div>
       <h2 class="page-name">${esc(m.name)}</h2>
-      <p class="page-rank is-${m.rarity}">${esc(rank.label)}</p>
+      <p class="page-rank is-${m.rarity}">${esc(tr('rarity.' + m.rarity))}</p>
       <dl class="page-facts">
         <div><dt>Age</dt><dd>${esc(m.age)}</dd></div>
-        <div><dt>Size</dt><dd>${esc(m.size)}</dd></div>
-        <div><dt>Hobbies</dt><dd>${m.hobbies.map(esc).join(', ')}</dd></div>
-        <div><dt>Found</dt><dd>${esc(found)}</dd></div>
+        <div><dt>${tr('book.size')}</dt><dd>${esc(m.size)}</dd></div>
+        <div><dt>${tr('book.hobbies')}</dt><dd>${m.hobbies.map(esc).join(', ')}</dd></div>
+        <div><dt>${tr('book.found')}</dt><dd>${esc(found)}</dd></div>
       </dl>
       <div class="page-egg">
         ${eggSvg(m)}
@@ -2105,11 +2471,11 @@ function foundSpread(m) {
     </div>
     <div class="page page-r">
       <dl class="page-facts">
-        <div><dt>Lives</dt><dd>${esc(m.lives)}</dd></div>
-        <div><dt>Eats</dt><dd>${esc(m.eats)}</dd></div>
-        <div><dt>Says</dt><dd>${esc(m.says)}</dd></div>
-        <div><dt>Best at</dt><dd>${esc(m.best)}</dd></div>
-        <div><dt>Not so good at</dt><dd>${esc(m.worst)}</dd></div>
+        <div><dt>${tr('book.lives')}</dt><dd>${esc(m.lives)}</dd></div>
+        <div><dt>${tr('book.eats')}</dt><dd>${esc(m.eats)}</dd></div>
+        <div><dt>${tr('book.says')}</dt><dd>${esc(m.says)}</dd></div>
+        <div><dt>${tr('book.best')}</dt><dd>${esc(m.best)}</dd></div>
+        <div><dt>${tr('book.worst')}</dt><dd>${esc(m.worst)}</dd></div>
       </dl>
       <p class="page-fact">${esc(m.fact)}</p>
     </div>`;
@@ -2127,10 +2493,10 @@ function eggSpread(left) {
     <div class="page page-l is-waiting" style="--mc:#8A94A2">
       <div class="portrait portrait-egg">${eggSvg({ colour: '#8A94A2', rarity: 'common' })}</div>
       <h2 class="page-name">${left} still out there</h2>
-      <p class="page-hint">Every egg is a different one. You cannot choose.</p>
+      <p class="page-hint">${tr('book.everyEgg')}</p>
     </div>
     <div class="page page-r is-waiting">
-      <p class="page-wait">The next egg is on its way.</p>
+      <p class="page-wait">${tr('book.nextEgg')}</p>
       <span class="page-rules">${'<i></i>'.repeat(8)}</span>
       <p class="page-fact">${togo} XP to go — about ${pieces} more
         ${pieces === 1 ? 'piece' : 'pieces'} of homework.</p>
@@ -2221,7 +2587,7 @@ function showArrival(m, fromLevel) {
 
   box.innerHTML = `
     <div class="ar-stage">
-      <p class="ar-kicker is-${m.rarity}">${esc(rarityOf(m.rarity).label)}</p>
+      <p class="ar-kicker is-${m.rarity}">${esc(tr('rarity.' + m.rarity))}</p>
       <div class="hatch" style="--mc:${m.colour}; --shell:${m.shell}">
         <span class="hatch-glow"></span>
         <div class="hatch-mon">${monsterSvg(m)}</div>
@@ -2231,7 +2597,7 @@ function showArrival(m, fromLevel) {
       <h2 class="ar-name">${esc(m.name)} hatched</h2>
       <p class="ar-level">Level ${fromLevel} → ${fromLevel + 1}</p>
       <p class="ar-line">${esc(m.age)} · ${esc(m.hobbies[0].toLowerCase())}</p>
-      <button class="ar-continue btn-primary">Say hello</button>
+      <button class="ar-continue btn-primary">${tr('book.hello')}</button>
     </div>`;
 
   box.hidden = false;
@@ -2384,13 +2750,13 @@ function openHwSheet({ id = null, subjectId = null } = {}) {
 function drawSheetChips() {
   $('#hw-subjects').innerHTML = allSubjects().map(s => `
     <button class="chip ${s.id === draft.subjectId ? 'is-on' : ''}" data-sub="${s.id}" style="--sc:${s.color}">
-      <span class="chip-dot"></span>${esc(s.name)}
+      ${esc(s.name)}
     </button>`).join('');
 
   const soon = [
-    { key: addDays(0), label: 'Today' },
-    { key: addDays(1), label: 'Tomorrow' },
-    { key: addDays(2), label: keyToDate(addDays(2)).toLocaleDateString([], { weekday: 'short' }) },
+    { key: addDays(0), label: tr('due.todayShort') },
+    { key: addDays(1), label: tr('due.tomorrowShort') },
+    { key: addDays(2), label: keyToDate(addDays(2)).toLocaleDateString(locale(), { weekday: 'short' }) },
   ];
   // A chosen date outside the quick picks still gets a chip of its own.
   if (draft.dueDate && !soon.some(o => o.key === draft.dueDate)) {
@@ -2406,7 +2772,7 @@ function drawSheetChips() {
     </button>`).join('') + `
     <label class="chip chip-due chip-date">
       <svg class="ico" aria-hidden="true"><use href="#i-calendar" /></svg>
-      <span>Pick a date</span>
+      <span>${tr('due.pick')}</span>
       <input id="hw-date" type="date" value="${draft.dueDate || ''}" aria-label="Pick a date" />
     </label>`;
 }
@@ -2512,7 +2878,7 @@ function completeHw(id, node) {
     render();
   }
 
-  showToast(`Completed  ·  +${XP_PER_HOMEWORK} XP`, () => undoComplete(id));
+  showToast(tr('hw.done', { n: XP_PER_HOMEWORK }), () => undoComplete(id));
   if (after > before) setTimeout(() => showLevelUp(after, before), 520);
 }
 
@@ -2580,7 +2946,7 @@ function showLevelUp(level, from) {
       <h2>Level ${from || level - 1} → ${level}</h2>
       <p>${(() => { const f = collectedMonsters(); return f.length
         ? esc(f[f.length - 1].name) + ' is still with you'
-        : 'All fifty have turned up'; })()}</p>
+        : tr('book.allFifty'); })()}</p>
     </div>`;
   box.hidden = false;
   box.classList.remove('is-leaving');
@@ -2676,16 +3042,16 @@ function reminderAvailability() {
                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     return ios
       ? { ok: false,
-          why: 'Reminders need the app on your Home Screen.',
-          how: 'Tap Share, then Add to Home Screen, and open it from there.' }
+          why: tr('notif.homeScreen'),
+          how: tr('notif.howTo') }
       : { ok: false,
-          why: 'This browser can’t show notifications.',
-          how: 'Install the app, or open it in its own tab.' };
+          why: tr('notif.noSupport'),
+          how: tr('notif.install') };
   }
   if (Notification.permission === 'denied') {
     return { ok: false,
-             why: 'Notifications are switched off for this app.',
-             how: 'Turn them back on in your phone’s settings, under Notifications.' };
+             why: tr('notif.off'),
+             how: tr('notif.turnBack') };
   }
   return { ok: true, why: '', how: '' };
 }
@@ -2694,9 +3060,9 @@ function reminderNote() {
   // Why they can't be used is said on the card itself, not down here.
   if (!reminderAvailability().ok) return '';
   if (state.settings.dailyReminderEnabled || state.settings.bagReminderEnabled) {
-    return 'Add the app to your home screen so it can still reach you after school.';
+    return tr('notif.addHome');
   }
-  return 'Optional. One nudge to write down homework, one to pack your bag.';
+  return tr('notif.optional');
 }
 
 function nextOccurrence(hhmm) {
@@ -2737,7 +3103,7 @@ async function notify(title, body) {
 
 function fireHomeworkReminder() {
   const left = activeHw().length;
-  notify('Any homework today?',
+  notify(tr('notif.anyHomework'),
     left ? `You have ${left} left. Anything new today?` : 'Add today’s homework while it’s fresh.');
 }
 
@@ -2763,7 +3129,7 @@ function fireBagReminder() {
   const parts = [];
   if (lessons.length) parts.push(lessons.join(', '));
   if (notes.length) parts.push('Don’t forget: ' + notes.join('; '));
-  notify(`Pack for ${day.en}`, parts.join(' — ') || 'Nothing scheduled.');
+  notify(tr('bag.packFor', { day: dayName(day.js) }), parts.join(' — ') || tr('tt.nothing'));
 }
 
 async function toggleReminder(enabledKey, on) {
@@ -2869,6 +3235,11 @@ function wireApp() {
 
   on('#rem-flip', 'click', flipRemPaper);
 
+  on('#lang-pick', 'click', (e) => {
+    const btn = e.target.closest('[data-lang]');
+    if (btn) setLang(btn.dataset.lang);
+  });
+
   on('#rem-scope', 'click', (e) => {
     if (e.target.closest('[data-more]')) {
       remMore = !remMore;
@@ -2956,6 +3327,7 @@ function wireApp() {
 function boot() {
   load();
   saveLocal();      // write the migrated shape back, without bumping the sync clock
+  applyLang();      // before anything is drawn, so nothing is drawn twice
   wireApp();
 
   $('#main').hidden = false;

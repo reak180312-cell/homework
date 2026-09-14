@@ -61,7 +61,7 @@
 
   <section id="view-home" class="view" data-view="home">
     <header class="head">
-      <h1>Homework</h1>
+      <h1 data-t="tab.home">Homework</h1>
       <p id="home-count" class="head-sub"></p>
     </header>
     <div id="home-list" class="list"></div>
@@ -72,7 +72,7 @@
 
   <section id="view-bag" class="view" data-view="bag" hidden>
     <header class="head">
-      <h1>Bag</h1>
+      <h1 data-t="tab.bag">Bag</h1>
       <p id="bag-sub" class="head-sub"></p>
     </header>
     <div id="bag-days" class="chips chips-scroll"></div>
@@ -85,9 +85,9 @@
          decoding="async" draggable="false" />
 
     <header class="head rem-head">
-      <h1 class="rem-h1">Reminders</h1>
+      <h1 class="rem-h1" data-t="rem.title">Reminders</h1>
       <!-- Pinned to the wall beside the heading, where the + used to be. -->
-      <button id="rem-new" class="stick-add" aria-label="Add reminder">
+      <button id="rem-new" class="stick-add" data-t-aria="rem.add" aria-label="Add reminder">
         <img src="art/addnote.webp" alt="" width="360" height="401"
              decoding="async" draggable="false" />
       </button>
@@ -101,81 +101,89 @@
   </section>
 
   <section id="view-subjects" class="view" data-view="subjects" hidden>
-    <header class="head"><h1>Subjects</h1></header>
+    <header class="head"><h1 data-t="sub.title">Subjects</h1></header>
     <div id="subject-list" class="list"></div>
   </section>
 
   <section id="view-profile" class="view" data-view="profile" hidden>
-    <header class="head"><h1>Profile</h1></header>
+    <header class="head"><h1 data-t="pro.title">Profile</h1></header>
     <div id="level-card" class="level-card"></div>
 
-    <h2 class="section-title">Your creature book</h2>
+    <h2 class="section-title" data-t="pro.book">Your creature book</h2>
     <button id="book-open" class="book-cover">
       <span class="bc-spine"></span>
       <span class="bc-text">
-        <span class="bc-title">Creatures</span>
+        <span class="bc-title" data-t="pro.creatures">Creatures</span>
         <span id="book-count" class="bc-count"></span>
       </span>
       <span id="book-peek" class="bc-peek-row" aria-hidden="true"></span>
-      <span class="bc-go">Open<svg class="ico" aria-hidden="true"><use href="#i-chevron" /></svg></span>
+      <span class="bc-go"><span data-t="pro.open">Open</span><svg class="ico" aria-hidden="true"><use href="#i-chevron" /></svg></span>
     </button>
     <div id="collection" class="collection"></div>
     <p id="collection-note" class="foot-note"></p>
 
-    <h2 class="section-title">Completed</h2>
+    <h2 class="section-title" data-t="pro.completed">Completed</h2>
     <div id="history-list" class="list"></div>
 
-    <h2 class="section-title">Reminder</h2>
+    <h2 class="section-title" data-t="pro.reminder">Reminder</h2>
     <div id="reminder-card" class="card settings">
       <div id="reminder-blocked" class="blocked" hidden></div>
       <label class="setting">
         <span class="setting-label">
-          Daily reminder
-          <em>A nudge to write down today's homework.</em>
+          <span data-t="pro.daily">Daily reminder</span>
+          <em data-t="pro.dailyNote">A nudge to write down today's homework.</em>
         </span>
         <input id="reminder-toggle" type="checkbox" class="switch" />
       </label>
       <div id="reminder-time-row" class="setting" hidden>
-        <span class="setting-label">Time</span>
+        <span class="setting-label" data-t="pro.time">Time</span>
         <input id="reminder-time" type="time" class="time-input" value="15:00" />
       </div>
       <label class="setting">
         <span class="setting-label">
-          Pack your bag
-          <em>Tomorrow's lessons and reminders, the evening before.</em>
+          <span data-t="pro.pack">Pack your bag</span>
+          <em data-t="pro.packNote">Tomorrow's lessons and reminders, the evening before.</em>
         </span>
         <input id="bag-toggle" type="checkbox" class="switch" />
       </label>
       <div id="bag-time-row" class="setting" hidden>
-        <span class="setting-label">Time</span>
+        <span class="setting-label" data-t="pro.time">Time</span>
         <input id="bag-time" type="time" class="time-input" value="20:00" />
       </div>
     </div>
     <p id="reminder-note" class="foot-note"></p>
+
+    <h2 class="section-title" data-t="pro.language">Language</h2>
+    <div class="card settings">
+      <div class="setting">
+        <span class="setting-label" data-t="pro.language">Language</span>
+        <div id="lang-pick" class="lang-pick"></div>
+      </div>
+    </div>
   </section>
 
-  <button id="fab" class="fab" aria-label="Add homework">
+  <button id="fab" class="fab" data-t-aria="home.add" aria-label="Add homework">
     <svg class="ico" aria-hidden="true"><use href="#i-plus" /></svg>
   </button>
 
   <!-- Timetable is reachable from every screen, never from first-run setup. -->
-  <button id="tt-btn" class="tt-btn" aria-label="Timetable"></button>
+  <button id="tt-btn" class="tt-btn" data-t-aria="tt.title" aria-label="Timetable"></button>
 
   <nav class="tabbar" role="tablist">
     <button class="tab is-active" data-tab="home" role="tab" aria-selected="true">
-      <svg class="ico" aria-hidden="true"><use href="#i-tab-home" /></svg><span>Homework</span>
+      <svg class="ico" aria-hidden="true"><use href="#i-tab-home" /></svg><span data-t="tab.home">Homework</span>
     </button>
     <button class="tab" data-tab="bag" role="tab" aria-selected="false">
-      <svg class="ico" aria-hidden="true"><use href="#i-tab-bag" /></svg><span>Bag</span>
+      <svg class="ico" aria-hidden="true"><use href="#i-tab-bag" /></svg><span data-t="tab.bag">Bag</span>
     </button>
     <button class="tab" data-tab="reminders" role="tab" aria-selected="false">
-      <svg class="ico" aria-hidden="true"><use href="#i-tab-bell" /></svg><span>Reminders</span>
+      <svg class="ico" aria-hidden="true"><use href="#i-tab-bell" /></svg><span data-t="tab.reminders">Reminders</span>
     </button>
     <button class="tab" data-tab="subjects" role="tab" aria-selected="false">
-      <svg class="ico" aria-hidden="true"><use href="#i-tab-subjects" /></svg><span>Subjects</span>
+      <svg class="ico" aria-hidden="true"><use href="#i-tab-subjects" /></svg><span data-t="tab.subjects">Subjects</span>
     </button>
     <button class="tab" data-tab="profile" role="tab" aria-selected="false">
-      <svg class="ico" aria-hidden="true"><use href="#i-tab-profile" /></svg><span>Profile</span>
+      <svg class="ico" aria-hidden="true"><use href="#i-tab-profile" /></svg><span data-t="tab.profile">Profile</span>
     </button>
   </nav>
 </div>
@@ -184,8 +192,8 @@
 <!-- Timetable, over everything -->
 <section id="timetable" class="timetable" hidden>
   <header class="tt-head">
-    <h2>Timetable</h2>
-    <button id="tt-close" class="tt-close" aria-label="Close timetable">
+    <h2 data-t="tt.title">Timetable</h2>
+    <button id="tt-close" class="tt-close" data-t-aria="tt.close" aria-label="Close timetable">
       <svg class="ico" aria-hidden="true"><use href="#i-close" /></svg>
     </button>
   </header>
@@ -195,7 +203,7 @@
 
 <!-- Subject detail, pushed over the tabs -->
 <section id="subject-page" class="subject-page" hidden>
-  <button id="subject-back" class="back-btn" aria-label="Back">
+  <button id="subject-back" class="back-btn" data-t-aria="sub.back" aria-label="Back">
     <svg class="ico" aria-hidden="true"><use href="#i-back" /></svg>
   </button>
   <div id="subject-page-body"></div>
@@ -205,97 +213,97 @@
 <!-- Sheets -->
 <div id="scrim" class="scrim" hidden></div>
 
-<div id="sheet-hw" class="sheet" hidden role="dialog" aria-modal="true" aria-label="Homework">
+<div id="sheet-hw" class="sheet" hidden role="dialog" aria-modal="true" data-t-aria="hw.title" aria-label="Homework">
   <div class="sheet-grip"></div>
   <div class="sheet-body">
     <div id="hw-subjects" class="chips chips-scroll"></div>
-    <input id="hw-title" class="hw-title" type="text" placeholder="What's the homework?"
+    <input id="hw-title" class="hw-title" type="text" data-t-ph="hw.what" placeholder="What's the homework?"
            autocomplete="off" autocapitalize="sentences" enterkeyhint="done" />
-    <input id="hw-note" class="hw-note-input" type="text" placeholder="Anything else? (optional)"
+    <input id="hw-note" class="hw-note-input" type="text" data-t-ph="hw.else" placeholder="Anything else? (optional)"
            autocomplete="off" autocapitalize="sentences" enterkeyhint="done" />
     <div id="hw-due" class="chips chips-scroll"></div>
     <div class="sheet-actions">
-      <button id="hw-delete" class="btn-ghost btn-danger" hidden aria-label="Delete homework">
+      <button id="hw-delete" class="btn-ghost btn-danger" hidden data-t-aria="hw.delete" aria-label="Delete homework">
         <svg class="ico" aria-hidden="true"><use href="#i-trash" /></svg>
       </button>
-      <button id="hw-save" class="btn-primary" disabled>Save</button>
+      <button id="hw-save" class="btn-primary" data-t="hw.save" disabled>Save</button>
     </div>
   </div>
 </div>
 
 <!-- Adding a reminder: a page out of a notebook, ruled and punched. -->
 <div id="sheet-rem" class="sheet sheet-paper" hidden role="dialog" aria-modal="true"
-     aria-label="New reminder">
+     data-t-aria="rem.new" aria-label="New reminder">
   <div class="sheet-grip"></div>
   <div class="paper">
     <span class="paper-holes" aria-hidden="true"></span>
     <span class="paper-margin" aria-hidden="true"></span>
 
     <div class="paper-head">
-      <button id="rem-cancel" class="paper-btn">Cancel</button>
-      <h2 class="paper-title">New reminder</h2>
-      <button id="rem-save" class="paper-btn is-save">Save</button>
+      <button id="rem-cancel" class="paper-btn" data-t="rem.cancel">Cancel</button>
+      <h2 class="paper-title" data-t="rem.new">New reminder</h2>
+      <button id="rem-save" class="paper-btn is-save" data-t="rem.save">Save</button>
     </div>
 
     <div class="paper-rule paper-margins" aria-hidden="true">
-      <i class="is-left">Small steps matter &#9825;</i>
-      <i class="is-right">A brighter tomorrow</i>
+      <i class="is-left" data-t="rem.marginA">Small steps matter &#9825;</i>
+      <i class="is-right" data-t="rem.marginB">A brighter tomorrow</i>
     </div>
 
     <label class="paper-rule paper-field">
-      <span class="paper-label">Title</span>
+      <span class="paper-label" data-t="rem.fTitle">Title</span>
       <input id="rem-title" type="text" autocomplete="off" autocapitalize="sentences"
-             enterkeyhint="next" placeholder="What not to forget" />
+             enterkeyhint="next" data-t-ph="rem.whatNot" placeholder="What not to forget" />
     </label>
 
     <label class="paper-rule paper-field">
-      <span class="paper-label">Notes</span>
+      <span class="paper-label" data-t="rem.fNotes">Notes</span>
       <input id="rem-note" type="text" autocomplete="off" autocapitalize="sentences"
-             enterkeyhint="done" placeholder="Anything else (optional)" />
+             enterkeyhint="done" data-t-ph="rem.elseOpt" placeholder="Anything else (optional)" />
     </label>
 
     <label class="paper-rule paper-field">
-      <span class="paper-label">Time <i>optional</i></span>
+      <span class="paper-label"><span data-t="rem.fTime">Time</span> <i data-t="rem.optional">optional</i></span>
       <input id="rem-at" type="time" step="300" />
     </label>
 
     <div class="paper-rule paper-field">
-      <span class="paper-label">Days</span>
+      <span class="paper-label" data-t="rem.fDays">Days</span>
       <div id="rem-sheet-days" class="paper-chips"></div>
     </div>
 
     <div id="rem-sheet-lesson" class="paper-rule paper-field">
-      <span class="paper-label">Lesson</span>
+      <span class="paper-label" data-t="rem.fLesson">Lesson</span>
       <div id="rem-sheet-lessons" class="paper-chips"></div>
     </div>
 
     <!-- One arrow, and the page you are writing on becomes the next paper. -->
     <div class="paper-rule paper-field">
-      <span class="paper-label">Paper</span>
-      <button id="rem-flip" class="paper-flip" aria-label="Next paper">
+      <span class="paper-label" data-t="rem.fPaper">Paper</span>
+      <button id="rem-flip" class="paper-flip" data-t-aria="rem.nextPaper" aria-label="Next paper">
         <span id="rem-flip-name">Lined cream</span>
         <svg class="ico" aria-hidden="true"><use href="#i-chevron" /></svg>
       </button>
     </div>
 
-    <p class="paper-foot" aria-hidden="true">You&#8217;ve got this &#9825;</p>
+    <p class="paper-foot" aria-hidden="true" data-t="rem.foot">You&#8217;ve got this &#9825;</p>
   </div>
 </div>
 
 <!-- The book of creatures: two facing pages at a time. -->
-<section id="book" class="book" hidden role="dialog" aria-modal="true" aria-label="Creature book">
-  <button id="book-close" class="dv-close" aria-label="Close">
+<section id="book" class="book" hidden role="dialog" aria-modal="true" data-t-aria="book.title" aria-label="Creature book">
+  <button id="book-close" class="dv-close" data-t-aria="book.close" aria-label="Close">
     <svg class="ico" aria-hidden="true"><use href="#i-close" /></svg>
   </button>
   <div id="book-frame" class="book-frame">
     <div id="book-spread" class="spread"></div>
   </div>
   <div class="book-nav">
-    <button id="book-prev" class="page-btn" aria-label="Page back">
+    <button id="book-prev" class="page-btn" data-t-aria="book.prev" aria-label="Page back">
       <svg class="ico" aria-hidden="true"><use href="#i-back" /></svg>
     </button>
     <span id="book-dots" class="book-dots" aria-hidden="true"></span>
-    <button id="book-next" class="page-btn is-next" aria-label="Page on">
+    <button id="book-next" class="page-btn is-next" data-t-aria="book.next" aria-label="Page on">
       <svg class="ico" aria-hidden="true"><use href="#i-back" /></svg>
     </button>
   </div>
@@ -303,7 +311,7 @@
 
 <div id="toast" class="toast" hidden>
   <span id="toast-text"></span>
-  <button id="toast-undo" class="toast-undo">Undo</button>
+  <button id="toast-undo" class="toast-undo" data-t="toast.undo">Undo</button>
 </div>
 
 <!-- Filled in when you level up, or arrive somewhere new. -->

@@ -17,6 +17,11 @@
   --stamp:      #9A4A38;   /* the red-brown of an inked stamp */
   --tint:       14%;       /* subject colour over parchment */
   --on-ink:     #FBF7EE;
+  /* What is drawn ON a subject colour once that colour is at full strength:
+     black by day, white by night. The colour identifies the subject and the
+     ink stays legible on all of them, which a coloured glyph on a pale wash
+     of the same colour never quite did. */
+  --on-sc:      #0E1116;
 
   /* The notebook page a reminder is written on. */
   --leaf:       #FBF7ED;   /* the sheet itself */
@@ -46,7 +51,7 @@
   --spring:     cubic-bezier(.34,1.32,.64,1);
 
   --gutter:     20px;
-  --tabbar-h:   62px;
+  --tabbar-h:   54px;
   /* The notches, read once and named once. Everything that has to clear the
      clock, the island or the home indicator is measured from these two and
      from nothing else — twenty separate env() calls were twenty chances for
@@ -93,6 +98,7 @@
     --stamp:     #C4705A;
     --tint:      24%;
     --on-ink:    #12161B;
+    --on-sc:     #FFFFFF;
     --leaf:      #1A1F26;
     --leaf-rule: #2C3440;
     --leaf-red:  #7A4F4C;
@@ -120,6 +126,7 @@
   --stamp:     #C4705A;
   --tint:      24%;
   --on-ink:    #12161B;
+  --on-sc:     #FFFFFF;
   --leaf:      #1A1F26;
   --leaf-rule: #2C3440;
   --leaf-red:  #7A4F4C;
@@ -339,21 +346,23 @@ button { border: 0; background: none; cursor: pointer; }
   letter-spacing: .075em;
   text-transform: uppercase;
   line-height: 1.2;
-  color: color-mix(in srgb, var(--sc) 76%, var(--ink));
+  /* Plain ink. The tile beside it already carries the colour, and the name
+     written in it as well made two of the same signal and a weaker one. */
+  color: var(--ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 /* When it is for. Grey while that is a long way off, warmer as it closes in. */
+/* No pill around it: a date is a line of writing, not a badge. */
 .hw-when {
   flex: none;
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 9px 4px 8px;
-  border-radius: var(--r-pill);
-  background: var(--line-soft);
+  padding: 2px 0;
+  background: none;
   color: var(--ink-2);
   font-size: 12px;
   font-weight: 600;
@@ -361,14 +370,10 @@ button { border: 0; background: none; cursor: pointer; }
   white-space: nowrap;
 }
 .hw-when .ico { width: 13px; height: 13px; stroke-width: 2; }
-.hw.is-soon .hw-when {
-  background: color-mix(in srgb, var(--stamp) 15%, transparent);
-  color: var(--stamp);
-}
-.hw.is-late .hw-when {
-  background: color-mix(in srgb, var(--late) 18%, transparent);
-  color: var(--late);
-}
+/* Coming up soon darkens rather than colours; already late is the one that
+   still gets a colour of its own, because it is the one you have to see. */
+.hw.is-soon .hw-when { color: var(--ink); }
+.hw.is-late .hw-when { color: var(--late); }
 
 .hw-title {
   font-size: 18px;
@@ -633,7 +638,7 @@ button { border: 0; background: none; cursor: pointer; }
 /* One hole every row-height, so they keep step with the rules. */
 .paper-holes {
   position: absolute;
-  left: 15px;
+  inset-inline-start: 15px;
   top: 62px;
   bottom: 8px;
   width: 13px;
@@ -646,7 +651,7 @@ button { border: 0; background: none; cursor: pointer; }
 
 .paper-margin {
   position: absolute;
-  left: 45px;
+  inset-inline-start: 45px;
   top: 46px;
   bottom: 0;
   width: 1px;
@@ -773,7 +778,6 @@ button { border: 0; background: none; cursor: pointer; }
   color: var(--on-ink);
   font-weight: 600;
 }
-.p-chip.is-on .chip-dot { background: var(--on-ink); }
 .p-chip:active { transform: scale(.94); }
 
 .paper-foot {
@@ -1243,19 +1247,32 @@ button { border: 0; background: none; cursor: pointer; }
 }
 .subject-row:active { transform: scale(.985); }
 
+/* The subject wears its colour at full strength and the mark on it is ink.
+   It used to be the other way about — a coloured mark on a 14% wash of the
+   same colour — which left every tile looking like a rumour of a colour and
+   the marks themselves hard to read on the palest of them. */
 .subject-tile {
   width: 40px; height: 40px;
   border-radius: 12px;
   display: grid;
   place-items: center;
-  background: color-mix(in srgb, var(--sc) var(--tint), var(--card));
-  color: var(--sc);
+  background: var(--sct, var(--sc));
+  color: var(--on-sc);
   flex: none;
   font-size: 15px;
   font-weight: 650;
   letter-spacing: -.02em;
 }
 .subject-tile .ico { width: 21px; height: 21px; }
+
+/* After dark the fill goes down rather than up, because what is written on
+   it is white. A pale tile with white on it is unreadable either way round. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .subject-tile,
+  :root:not([data-theme="light"]) .tt-grid tbody td { background: var(--sctd, var(--sc)); }
+}
+:root[data-theme="dark"] .subject-tile,
+:root[data-theme="dark"] .tt-grid tbody td { background: var(--sctd, var(--sc)); }
 
 .subject-row-name {
   flex: 1;
@@ -1371,10 +1388,12 @@ button { border: 0; background: none; cursor: pointer; }
 
 
 /* Floating add button */
+/* Pinned to the end of the line rather than to the right of the screen, so
+   it moves to the other corner when the app is read the other way. */
 .fab {
   position: fixed;
   top: calc(var(--safe-t) + 32px);
-  right: calc(max(calc((100% - 540px) / 2 + var(--gutter)), var(--gutter)) + 56px);
+  inset-inline-end: calc(max(calc((100% - 540px) / 2 + var(--gutter)), var(--gutter)) + 56px);
   z-index: 22;
   width: 46px; height: 46px;
   border-radius: 50%;
@@ -1389,6 +1408,39 @@ button { border: 0; background: none; cursor: pointer; }
 .fab:active { transform: scale(.9); }
 
 
+/* A chevron means "onwards", and onwards is the other way when the page is
+   read the other way. The day-tabs one points down and is left alone; it is
+   turned by a rule of its own. */
+[dir="rtl"] .bc-go .ico,
+[dir="rtl"] .ico-chevron,
+[dir="rtl"] .page-btn .ico,
+[dir="rtl"] .back-btn .ico { transform: scaleX(-1); }
+
+/* ── Language ─────────────────────────────────────────────
+   Each language is written in itself, so you can find your own without
+   having to read the one you cannot. */
+.lang-pick { display: flex; gap: 8px; }
+
+.lang-btn {
+  flex: none;
+  padding: 7px 14px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--line);
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  transition: box-shadow .16s var(--ease), background-color .16s ease,
+              color .16s ease, transform .16s var(--spring);
+}
+.lang-btn:active { transform: scale(.95); }
+.lang-btn.is-on {
+  background: var(--ink);
+  color: var(--on-ink);
+  box-shadow: none;
+}
+
 /* ── Tab bar ─────────────────────────────────────────────── */
 
 .tabbar {
@@ -1402,12 +1454,10 @@ button { border: 0; background: none; cursor: pointer; }
   padding-bottom: var(--safe-b);
   background: var(--paper);
   border-top: 1px solid var(--line);
-  /* The bar is the same cream as the pages that stand on it, so on a page
-     made of paper it had no edge of its own and read as part of the page —
-     while against the room it read as a band. A hairline of light above the
-     rule, and the faintest lift under it, give it the same edge everywhere. */
-  box-shadow: 0 -1px 0 rgba(255,252,246,.7),
-              0 -7px 16px -13px rgba(62,46,26,.42);
+  /* The rule above it is the whole of its edge. There was a lift under that
+     as well, which on a screen standing on a photograph read as the bar
+     hovering over the picture rather than sitting at the foot of it. */
+  box-shadow: 0 -1px 0 rgba(255,252,246,.55);
 }
 
 .tab {
@@ -1512,16 +1562,13 @@ input.hw-title::placeholder { color: var(--ink-3); }
 }
 .chip:active { transform: scale(.95); }
 
-.chip-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--sc);
-  flex: none;
-}
 
+/* Picked out by a ring in the subject's own colour. The dot that used to sit
+   beside the name has gone: with the ring carrying the colour, the dot was
+   saying the same thing twice and cluttering a row of a dozen chips. */
 .chip.is-on {
   background: color-mix(in srgb, var(--sc) var(--tint), var(--card));
-  box-shadow: inset 0 0 0 1.6px color-mix(in srgb, var(--sc) 46%, transparent);
+  box-shadow: inset 0 0 0 2px var(--sc);
   color: color-mix(in srgb, var(--sc) 88%, var(--ink));
 }
 
@@ -1936,7 +1983,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
 .tt-btn {
   position: fixed;
   top: calc(var(--safe-t) + 34px);
-  right: max(calc((100% - 540px) / 2 + var(--gutter)), var(--gutter));
+  inset-inline-end: max(calc((100% - 540px) / 2 + var(--gutter)), var(--gutter));
   z-index: 22;
   display: grid;
   place-items: center;
@@ -2044,10 +2091,12 @@ input.hw-title::placeholder { color: var(--ink-3); }
   color: var(--ink-2);
 }
 
+/* Same as the tiles: the colour at full strength, the lesson written on it
+   in ink. A wall of 14% washes was a wall of one colour. */
 .tt-grid tbody td {
   height: 52px;
   border-radius: 11px;
-  background: color-mix(in srgb, var(--sc) var(--tint), var(--card));
+  background: var(--sct, var(--sc));
   vertical-align: middle;
   text-align: center;
   box-shadow: var(--shadow);
@@ -2060,7 +2109,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
   font-weight: 550;
   line-height: 1.25;
   letter-spacing: -.01em;
-  color: color-mix(in srgb, var(--sc) 78%, var(--ink));
+  color: var(--on-sc);
   overflow-wrap: break-word;
 }
 
@@ -2068,6 +2117,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
   background: transparent;
   box-shadow: inset 0 0 0 1.5px var(--line-soft);
 }
+.tt-grid tbody td.tt-free .tt-cell { color: var(--ink-2); }
 
 .tt-grid tbody td.is-today { box-shadow: var(--shadow), inset 0 0 0 1.8px color-mix(in srgb, var(--ink) 26%, transparent); }
 .tt-grid tbody td.tt-free.is-today { box-shadow: inset 0 0 0 1.8px color-mix(in srgb, var(--ink) 16%, transparent); }
@@ -2717,7 +2767,7 @@ button.mon-slot:active { transform: scale(.93); }
 .book .dv-close {
   position: absolute;
   top: calc(var(--safe-t) + 12px);
-  right: 14px;
+  inset-inline-end: 14px;
   z-index: 4;
 }
 

@@ -113,6 +113,10 @@ The weekly schedule is built in. The button in the top-right corner opens the fu
 any screen. Lessons are colour-matched to the subjects you picked at setup, and the Bag page
 reads the day's subjects straight off it.
 
+Every lesson is filled with its subject’s own colour and written on in ink — the same two
+numbers as the subject tiles, so a grid of them reads as one thing rather than a wall of pale
+washes that were nearly all the same colour.
+
 What goes in the bag is worked out from the timetable, and there is nothing to answer:
 
 - pencil bag, bottle and lunch box, every day
@@ -589,12 +593,69 @@ attention.
 slowed-down phone, the shell served with no network request, and the picture
 ending up actually visible.
 
+## Language
+
+English or Hebrew, chosen at the foot of Profile, and **every word the app says for itself**
+follows — headings, buttons, empty states, the days across a week, the dates on a card, the
+text of the two notifications. Nothing you typed is touched, and neither is a subject name: a
+lesson is called what the school calls it in either language, because those are your words
+and not the app’s.
+
+Choosing Hebrew **turns the whole page over** — `dir="rtl"` on the root — rather than leaving
+Hebrew sentences running the wrong way inside a left-handed layout. Most of the stylesheet
+was already using logical properties and needed nothing; what did need changing was every
+corner something was pinned to. The `+` and the timetable button were fixed to the *right* of
+the screen, so in Hebrew they sat on top of a heading that now starts there — `right` became
+`inset-inline-end`, and the punched holes and red margin down a notebook page went the same
+way. A chevron meaning *onwards* is mirrored, because onwards is the other way.
+
+The dictionary is one object with a key per phrase and a table per language. `tr(key, vars)`
+looks one up and fills `{name}` blanks from its second argument, so a sentence can be worded
+differently in each language without the caller knowing where the blank falls. Fixed words in
+the markup carry `data-t` (or `data-t-ph`, `data-t-aria`) and are looked up again when the
+language changes; everything drawn from data is simply drawn again. Nothing reloads — a
+language is not a different app.
+
+It is called `tr` and not `t` for a reason worth writing down: a one-letter name for something
+every screen calls is a name a loop variable will shadow sooner or later, and it did. `dayTabs()`
+keeps a `const t = new Date()` at the top, and every lookup inside that function was calling a
+date. It failed loudly — *t is not a function* — which is the lucky version of that mistake.
+
+**What is not translated:** the creature book. Fifty creatures with an age, a size, where they
+live, what they eat, what they say, two hobbies, a best and a worst and a fact each is 849
+strings of comic writing, and turning that into Hebrew is a piece of work in its own right
+rather than a lookup table. The machinery is ready for it; the words are not written.
+
+
 ## Design rules
 
 Aged parchment, deep ink-blue for text and every primary action, and a red-brown where
 something is being marked. A serif carries the headings; everything you operate stays in the
 sans, where it reads faster. Colour otherwise belongs to the subjects and the creatures, so
 those stay the things you recognise at a glance.
+
+**A subject wears its colour; what is written on it is ink.** A tile used to be a coloured
+mark on a 14% wash of the same colour, which made every tile a rumour of a colour and the
+marks on the palest of them hard to make out. Now the tile is filled and the mark is black by
+day and white by night.
+
+The fill is not the palette colour itself. The palette is tuned for **ink** — deep enough to
+read as text on parchment — and those colours used as a fill are dark enough that a black mark
+on them disappears, worst on the browns. The fill keeps the hue and takes it to **73% lightness
+at 82% saturation**, which is where black sits comfortably; after dark it goes the other way,
+down to 38%, where white does. Both numbers were measured off the drawing rather than guessed:
+`scratchpad/tile2.js` reads the most common colour inside each tile of it. It is derived in
+`tileFill()` rather than listed, so a subject somebody adds themselves gets a tile without
+anyone having to choose a second colour for it — and the same two numbers fill the timetable,
+which is the same idea at grid size.
+
+**The colour is said once.** A homework card used to write its subject in the subject colour
+as well as showing the tile, which is two of the same signal and a weaker one; the name is
+plain ink now. The date it is for lost the pill around it — a date is a line of writing, not a
+badge — and with the pill went the colour, except for *overdue*, which keeps one because it is
+the one you have to see. And the subject chips on the add-homework page lost the dot beside
+each name: the ring round the chosen one carries its colour, and the dot was saying it twice
+down a row of a dozen.
 
 Before adding a button, option, or screen, the test is: *does this make entering or completing
 homework easier?* If not, it doesn't go in.
