@@ -51,7 +51,7 @@
   --spring:     cubic-bezier(.34,1.32,.64,1);
 
   --gutter:     20px;
-  --tabbar-h:   54px;
+  --tabbar-h:   46px;
   /* The notches, read once and named once. Everything that has to clear the
      clock, the island or the home indicator is measured from these two and
      from nothing else — twenty separate env() calls were twenty chances for
@@ -1466,10 +1466,11 @@ button { border: 0; background: none; cursor: pointer; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
   color: var(--ink-3);
   font-size: 10.5px;
   font-weight: 550;
+  line-height: 1.05;   /* the word, not a line box with air round it */
   letter-spacing: .005em;
   transition: color .18s ease;
 }

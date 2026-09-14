@@ -220,8 +220,14 @@ shows under it instead, and it stops where a list of homework stops.
 
 The bar is also the same cream as the pages that stand on it, so on a page made of paper it
 had no edge of its own and read as part of the page, while against the room it read as a band
-of its own. A hairline of light above the rule and the faintest lift under it give it the same
-edge on every screen.
+of its own. A hairline of light above the rule gives it the same edge on every screen.
+
+**It is 46px tall**, down from 62. Neither the icons nor the words got smaller to manage it —
+they are the same 22px and 9.5px they always were, and the five tabs are the same width. What
+went was air: a pixel off the gap between an icon and its word, and the line-height on the
+word itself from 1.45 down to 1.05, which is the difference between a word and a line box with
+empty space above and below it. That left 34px of actual content and 12px of room around it,
+a little tighter than the 49pt iOS uses.
 
 **Every screen starts its heading at the same height.** The room needs a little more air
 under the status bar than a list does, so it set its heading 40px down while every other
