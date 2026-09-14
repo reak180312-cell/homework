@@ -222,12 +222,22 @@ The bar is also the same cream as the pages that stand on it, so on a page made 
 had no edge of its own and read as part of the page, while against the room it read as a band
 of its own. A hairline of light above the rule gives it the same edge on every screen.
 
-**It is 46px tall**, down from 62. Neither the icons nor the words got smaller to manage it —
-they are the same 22px and 9.5px they always were, and the five tabs are the same width. What
-went was air: a pixel off the gap between an icon and its word, and the line-height on the
-word itself from 1.45 down to 1.05, which is the difference between a word and a line box with
-empty space above and below it. That left 34px of actual content and 12px of room around it,
-a little tighter than the 49pt iOS uses.
+**The cream band at the foot of the screen is 58px**, down from 80, and neither the icons nor
+the words got smaller to manage it — they are the same 22px and 9.5px they always were, and
+the five tabs are the same width.
+
+Two numbers make that band and only one of them was ever the bar. The bar proper is **38px**,
+down from 62: a pixel off the gap between an icon and its word, and the line-height on the
+word from 1.45 to 1.05, which is the difference between a word and a line box with empty space
+above and below it. That leaves 34px of content in it.
+
+The other number is the strip kept clear of the home indicator, and it was the bigger of the
+two. Reserving the whole 34pt inset put more empty cream under the labels than the labels and
+icons took between them. `--bar-pad` keeps **60% of it** — about 20px on a phone with an
+indicator, which clears an indicator drawn 8px up and 5px tall with room to spare — and never
+less than 6px, because a phone with no indicator reports no inset and the words would
+otherwise sit on the glass. Everything that measures from the bar — where a page stops, where
+the desk stands, where a toast sits — measures from that, not from the raw inset.
 
 **Every screen starts its heading at the same height.** The room needs a little more air
 under the status bar than a list does, so it set its heading 40px down while every other

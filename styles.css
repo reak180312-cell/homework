@@ -51,7 +51,15 @@
   --spring:     cubic-bezier(.34,1.32,.64,1);
 
   --gutter:     20px;
-  --tabbar-h:   46px;
+  --tabbar-h:   38px;
+  /* How much of the home-indicator strip the bar keeps below its words.
+     The indicator itself is drawn about 8px up and is 5px tall, so a little
+     over half the inset clears it with room to spare — and reserving all of
+     it left more empty cream under the labels than the labels and icons
+     took between them.
+     A phone with no indicator at all reports no inset, and the words would
+     then sit on the very edge of the glass, so there is a floor under it. */
+  --bar-pad:    max(6px, calc(var(--safe-b) * 0.6));
   /* The notches, read once and named once. Everything that has to clear the
      clock, the island or the home indicator is measured from these two and
      from nothing else — twenty separate env() calls were twenty chances for
@@ -63,7 +71,7 @@
   --head-top:   calc(var(--safe-t) + 40px);
   /* And where every screen stops, above the bar. The bar is one fixed thing
      shared by the whole app, so what stands on it has to stop in one place. */
-  --content-bottom: calc(var(--tabbar-h) + var(--safe-b) + 40px);
+  --content-bottom: calc(var(--tabbar-h) + var(--bar-pad) + 40px);
   /* How much of the desk shows at the foot of the homework screen. The
      picture is 1.68 times as wide as it is tall, so at full width it stands
      59.5vw high — measured off the width, because that is what sets how big
@@ -530,7 +538,7 @@ button { border: 0; background: none; cursor: pointer; }
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(var(--tabbar-h) + var(--safe-b) + var(--desk-lift));
+  bottom: calc(var(--tabbar-h) + var(--bar-pad) + var(--desk-lift));
   z-index: 0;
   width: 100%;
   /* A band of the photograph rather than the whole of it, so that what shows
@@ -1448,10 +1456,10 @@ button { border: 0; background: none; cursor: pointer; }
   left: 0; right: 0; bottom: 0;
   z-index: 25;
   display: flex;
-  height: calc(var(--tabbar-h) + var(--safe-b));
+  height: calc(var(--tabbar-h) + var(--bar-pad));
   /* Bar spans the screen; the tabs stay over the content column. */
   padding-inline: max(calc((100% - 540px) / 2), 0px);
-  padding-bottom: var(--safe-b);
+  padding-bottom: var(--bar-pad);
   background: var(--paper);
   border-top: 1px solid var(--line);
   /* The rule above it is the whole of its edge. There was a lift under that
@@ -1467,6 +1475,7 @@ button { border: 0; background: none; cursor: pointer; }
   align-items: center;
   justify-content: center;
   gap: 2px;
+  padding-block: 2px;
   color: var(--ink-3);
   font-size: 10.5px;
   font-weight: 550;
@@ -1802,7 +1811,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(var(--tabbar-h) + var(--safe-b) + 20px);
+  bottom: calc(var(--tabbar-h) + var(--bar-pad) + 20px);
   transform: translateX(-50%);
   z-index: 50;
   display: flex;
