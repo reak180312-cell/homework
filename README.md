@@ -222,7 +222,7 @@ The bar is also the same cream as the pages that stand on it, so on a page made 
 had no edge of its own and read as part of the page, while against the room it read as a band
 of its own. A hairline of light above the rule gives it the same edge on every screen.
 
-**The cream band at the foot of the screen is 58px**, down from 80, and neither the icons nor
+**The cream band at the foot of the screen is 52px**, down from 80, and neither the icons nor
 the words got smaller to manage it — they are the same 22px and 9.5px they always were, and
 the five tabs are the same width.
 
@@ -233,11 +233,20 @@ above and below it. That leaves 34px of content in it.
 
 The other number is the strip kept clear of the home indicator, and it was the bigger of the
 two. Reserving the whole 34pt inset put more empty cream under the labels than the labels and
-icons took between them. `--bar-pad` keeps **60% of it** — about 20px on a phone with an
-indicator, which clears an indicator drawn 8px up and 5px tall with room to spare — and never
-less than 6px, because a phone with no indicator reports no inset and the words would
-otherwise sit on the glass. Everything that measures from the bar — where a page stops, where
-the desk stands, where a toast sits — measures from that, not from the raw inset.
+icons took between them — and nothing is ever drawn in it, which is checkable:
+`scratchpad/below.js` lists everything painted between the labels and the foot of the screen,
+and the answer is nothing at all.
+
+`--bar-pad` keeps **14px** of it, and 14 is not a taste. iOS draws the home indicator 8pt up
+from the bottom and it is 5pt tall, so the bottom **13pt of the screen belong to the**
+**indicator** — anything put there has the indicator drawn straight through it, and the middle
+of the bar is exactly where the indicator sits, so it would be drawn through *Reminders*. 14
+clears 13 by a pixel, and that is the floor: the strip cannot go to nothing, only to the edge
+of what the system already owns. A phone with no indicator reports no inset and gets 4px, so
+its words are not on the glass.
+
+Everything that measures from the bar — where a page stops, where the desk stands, where a
+toast sits — measures from that, not from the raw inset.
 
 **Every screen starts its heading at the same height.** The room needs a little more air
 under the status bar than a list does, so it set its heading 40px down while every other

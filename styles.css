@@ -58,8 +58,14 @@
      it left more empty cream under the labels than the labels and icons
      took between them.
      A phone with no indicator at all reports no inset, and the words would
-     then sit on the very edge of the glass, so there is a floor under it. */
-  --bar-pad:    max(6px, calc(var(--safe-b) * 0.6));
+     then sit on the very edge of the glass, so there is a floor under it.
+
+     14px is as low as this can honestly go. iOS draws the home indicator 8pt
+     up from the bottom and it is 5pt tall, so the bottom 13pt of the screen
+     belong to it; anything in there has the indicator drawn straight through
+     it, and the middle of the bar is where the indicator sits. 14 clears 13
+     by a pixel. The rest of what used to be here was reserved and empty. */
+  --bar-pad:    max(4px, min(14px, var(--safe-b)));
   /* The notches, read once and named once. Everything that has to clear the
      clock, the island or the home indicator is measured from these two and
      from nothing else — twenty separate env() calls were twenty chances for
@@ -1475,7 +1481,7 @@ button { border: 0; background: none; cursor: pointer; }
   align-items: center;
   justify-content: center;
   gap: 2px;
-  padding-block: 2px;
+  padding-block: 1px;
   color: var(--ink-3);
   font-size: 10.5px;
   font-weight: 550;
