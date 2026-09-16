@@ -34,3 +34,9 @@ WhatsApp Image*
 # Design reference screenshots dropped in the folder - never publish these
 Design_Issues_Fixed/
 Design_Issues_Fixed.zip
+
+# Settings reference pictures - never publish these
+pictus to settings/
+
+# ...and the settings screen's own art, which is part of the build
+!art/set/*.webp

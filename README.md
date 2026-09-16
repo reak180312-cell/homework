@@ -657,12 +657,37 @@ The last tab was *Profile* and is now **Settings**, with a line under the headin
 it is for and every section behind the same small capitals: profile and progress, the creature
 book, reminders, language, appearance, about.
 
-Two drawings carry it. A **seedling** stands beside the level, and a **book** leans on the
-creature card with *Collect them all!* written beside it in the same hand the reminders are.
-Both are SVG with their own colours baked in rather than icons painted in `currentColor`, so
-they keep their greens whichever way the ink is going. The book is a *sibling* of the card
-rather than a child of it: the card clips its own overflow, and a book that leans has to lean
-past an edge.
+Nine pictures carry it: a **room** behind the whole screen, a **seedling** beside the level, a
+**book** leaning on the creature card with *Collect them all!* beside it, a **creature** looking
+over the row of **eggs**, another **waving** on the About page, and a small **tile** beside each
+of the three settings — a bell for the daily nudge, a bag for the packing one, a globe for the
+language. They started as SVG stand-ins drawn by hand; the drawings arrived and the stand-ins
+went.
+
+The book is a *sibling* of the card rather than a child of it: the card clips its own overflow,
+and a book that leans has to lean past an edge. The same is true of the creature over the eggs.
+
+**Cutting them out.** Eight arrived as squares on a near-white cream ground, and cutting a
+subject off that ground by colour alone would have punched holes straight through the egg, the
+book's pages and anything else that is itself cream. The ground is not *everything cream*, it is
+*the cream you can reach from the edge of the frame* — so the cut is a flood fill inwards from
+the border, and a cream belly inside a green outline survives it. The edge is then feathered by
+how far each border pixel sits from the ground, so the cut is not a staircase, and the result is
+trimmed to what is left. `scratchpad/set-art.js`.
+
+The three tiles could not be cut at all — they are cream tiles on a cream page, and there is no
+edge to find. They are *found* instead: a tile differs from the very corner of its page by a
+hair and its shadow by more, so the bounding box of everything more than a hair from that corner
+is the tile and nothing else. A first pass cropped them at a fixed fraction of the frame and
+left a different ring of empty page round each one, because the tiles are not all the same size
+in their frames — 83%, 87% and 96%. `scratchpad/set-art2.js`.
+
+All nine come to **83KB** as WebP.
+
+**The room is a wash, not a photograph.** At full strength the desk ran straight through the
+sections further down, which are plain words on paper with no card under them. It sits at 40%
+and is masked out by 88% of its own height, so it is gone before the page gets there — and at
+18% after dark, where it is a memory of itself.
 
 The level card used to say the same thing twice — the line under the bar and the note under
 the row of egg slots were both *finish some homework and an egg turns up*. It says it once now.

@@ -1781,7 +1781,10 @@ function render() {
   if (currentTab === 'bag') renderBag();
   if (currentTab === 'reminders') renderReminders();
   if (currentTab === 'subjects') renderSubjects();
-  if (currentTab === 'profile') { renderProfile(); renderLangPick(); renderDeskPick(); renderAbout(); }
+  if (currentTab === 'profile') {
+    renderProfile(); renderLangPick(); renderDeskPick(); renderAbout();
+    revealRoom('#set-room');
+  }
   if (!$('#subject-page').hidden) renderSubjectPage(openSubjectId);
 }
 
@@ -2064,8 +2067,8 @@ function notesFor(tab) {
 
 /* The room shows only once it has arrived. Half a photograph drawn top-down
    looks like something went wrong; nothing, and then all of it, does not. */
-function revealRoom() {
-  for (const sel of ['#wall', '#shelf']) {
+function revealRoom(...extra) {
+  for (const sel of ['#wall', '#shelf', ...extra]) {
     const img = document.querySelector(sel);
     if (!img) continue;
     if (img.complete && img.naturalWidth) img.classList.add('is-ready');
@@ -2444,7 +2447,7 @@ function renderProfile() {
 
   $('#level-card').innerHTML = `
     <span class="level-pic" aria-hidden="true">
-      <svg class="pic" viewBox="0 0 48 48"><use href="#p-sprout" /></svg>
+      <img src="art/set/sprout.webp" alt="" width="300" height="266" decoding="async" />
     </span>
     <div class="level-main">
     <div class="level-top">
@@ -2533,7 +2536,7 @@ function renderCollection() {
           <span class="mon-rank is-${m.rarity}">${esc(tr('rarity.' + m.rarity))}</span>
         </button>`).join('')
     : ('<span class="mon-slot is-empty" aria-hidden="true">'
-       + '<svg class="slot-egg" viewBox="0 0 32 40"><use href="#p-egg" /></svg>'
+       + '<img class="slot-egg" src="art/set/egg.webp" alt="" width="280" height="270" decoding="async" />'
        + '</span>').repeat(5);
 
   const note = $('#collection-note');
