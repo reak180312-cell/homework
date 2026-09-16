@@ -1432,6 +1432,135 @@ button { border: 0; background: none; cursor: pointer; }
 [dir="rtl"] .page-btn .ico,
 [dir="rtl"] .back-btn .ico { transform: scaleX(-1); }
 
+/* ── Settings ─────────────────────────────────────────────
+   A line under the heading saying what the screen is for, then the sections
+   the app already had, each behind the same small capitals. */
+.set-head { display: block; }
+
+.set-sub {
+  margin-top: 4px;
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+
+/* A drawing rather than an icon: it brings its own colours, so it is not
+   given a stroke and not painted in currentColor. */
+.pic {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: none;
+}
+
+/* The level card grows a seedling on the side the reading starts from. */
+.level-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.level-main { flex: 1; min-width: 0; }
+.level-pic {
+  flex: none;
+  width: 58px; height: 58px;
+}
+
+/* The book leans against the card rather than sitting inside it, which is
+   why it is a sibling: the card's own overflow would cut it in half. */
+.slot-egg {
+  width: 60%;
+  height: auto;
+  fill: currentColor;
+  stroke: none;
+  color: color-mix(in srgb, var(--ink) 9%, transparent);
+}
+
+.bc-pic {
+  position: absolute;
+  inset-inline-end: -4px;
+  bottom: 8px;
+  width: 104px; height: 85px;
+  pointer-events: none;
+}
+.bc-shout {
+  position: absolute;
+  inset-inline-end: 96px;
+  top: -6px;
+  width: 132px;
+  font-family: var(--font-hand);
+  font-style: normal;
+  font-size: 13px;
+  line-height: 1.1;
+  white-space: nowrap;
+  text-align: end;
+  color: var(--ink-2);
+  transform: rotate(-7deg);
+}
+
+/* The cover and the drawing beside it share a corner, so the row they sit in
+   has to be the thing that is positioned. */
+.book-wrap { position: relative; margin-bottom: 10px; }
+.book-wrap .book-cover { margin-bottom: 0; }
+/* The cover stops short of the book so the two do not sit on each other. */
+.book-wrap .bc-go { margin-inline-end: 86px; }
+
+/* Four desks, shown as the four colours themselves. */
+.desk-pick { display: flex; gap: 9px; }
+
+.desk-dot {
+  flex: none;
+  width: 30px; height: 30px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+  border-radius: 50%;
+  background: var(--swatch);
+  transition: transform .16s var(--spring), box-shadow .16s var(--ease);
+}
+.desk-dot:active { transform: scale(.9); }
+.desk-dot.is-on {
+  box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--ink);
+}
+
+/* The About row is a card you can press. */
+.about-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 14px var(--gutter);
+  text-align: start;
+  color: var(--ink);
+  transition: transform .16s var(--spring);
+}
+.about-row:active { transform: scale(.99); }
+.about-row .ico { width: 18px; height: 18px; color: var(--ink-3); }
+
+.about-list { margin: 4px 0 14px; }
+.about-list dt {
+  margin-top: 16px;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.about-list dd {
+  margin: 5px 0 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.sheet-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -.015em;
+}
+#sheet-about .btn-primary { width: 100%; margin-top: 16px; }
+
+
 /* ── Language ─────────────────────────────────────────────
    Each language is written in itself, so you can find your own without
    having to read the one you cannot. */
@@ -1457,6 +1586,24 @@ button { border: 0; background: none; cursor: pointer; }
   box-shadow: none;
 }
 
+/* ── The three daylight desks ─────────────────────────────
+   Sage and Sky are the cream desk with the paper and the cards mixed
+   towards a colour. Nothing else moves: the ink stays ink and every subject
+   keeps its own colour, or choosing a desk would quietly restyle the whole
+   app rather than the surface it stands on. */
+:root[data-desk="sage"] {
+  --paper:     #EDEFE3;
+  --card:      #F6F7EE;
+  --line:      #DCE0CD;
+  --line-soft: #E6E9DA;
+}
+:root[data-desk="sky"] {
+  --paper:     #E9EEF4;
+  --card:      #F4F7FB;
+  --line:      #D5DEE8;
+  --line-soft: #E2E9F1;
+}
+
 /* ── Tab bar ─────────────────────────────────────────────── */
 
 .tabbar {
@@ -1475,6 +1622,14 @@ button { border: 0; background: none; cursor: pointer; }
      hovering over the picture rather than sitting at the foot of it. */
   box-shadow: 0 -1px 0 rgba(255,252,246,.55);
 }
+
+/* That hairline is a catch of daylight on a cream page. On a dark one it is
+   a white wire strung across the foot of the screen, so it is turned down to
+   what it is there for: an edge, not a highlight. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .tabbar { box-shadow: 0 -1px 0 rgba(255,252,246,.09); }
+}
+:root[data-theme="dark"] .tabbar { box-shadow: 0 -1px 0 rgba(255,252,246,.09); }
 
 .tab {
   flex: 1;
@@ -2636,8 +2791,8 @@ body {
 
 .collection {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px 8px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px 7px;
   padding: 16px 14px 14px;
   background: var(--card);
   border-radius: var(--r-card);

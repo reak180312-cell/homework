@@ -5,6 +5,56 @@
 (() => {
 'use strict';
 
+/* ── The look of the place ─────────────────────────────────
+   Four desks. Three of them are daylight with the parchment mixed a
+   different way, and one is the evening. The swatch you tap is the colour
+   the app actually stands on, so there is nothing to describe: the row of
+   four IS the four looks.
+
+   Night is the dark theme that was already here, given a face. Before this
+   it followed the phone and there was no way to ask for it. */
+const DESKS = [
+  { key: 'cream', theme: 'light', swatch: '#F4EEE1' },
+  { key: 'sage',  theme: 'light', swatch: '#9DB48A' },
+  { key: 'night', theme: 'dark',  swatch: '#1E2A38' },
+  { key: 'sky',   theme: 'light', swatch: '#A8C0DA' },
+];
+
+function applyDesk() {
+  const key = state.settings.desk;
+  const desk = DESKS.find(d => d.key === key);
+  const root = document.documentElement;
+  if (!desk) {
+    // Nothing chosen: the phone decides, the way it always did.
+    root.removeAttribute('data-desk');
+    root.removeAttribute('data-theme');
+    return;
+  }
+  root.setAttribute('data-desk', desk.key);
+  root.setAttribute('data-theme', desk.theme);
+}
+
+function renderDeskPick() {
+  const box = $('#desk-pick');
+  if (!box) return;
+  const on = state.settings.desk;
+  box.innerHTML = DESKS.map(d => `
+    <button class="desk-dot ${d.key === on ? 'is-on' : ''}" data-desk="${d.key}"
+            style="--swatch:${d.swatch}"
+            title="${esc(tr('desk.' + d.key))}"
+            aria-label="${esc(tr('desk.' + d.key))}"
+            aria-pressed="${d.key === on}"></button>`).join('');
+}
+
+function setDesk(key) {
+  if (!DESKS.some(d => d.key === key)) return;
+  state.settings.desk = key;
+  save();
+  applyDesk();
+  syncTopColour();
+  renderDeskPick();
+}
+
 /* ── Words ─────────────────────────────────────────────────
    The app speaks one language at a time, chosen in Profile. Every word the
    app says for itself lives here; nothing the user typed and no subject name
@@ -86,6 +136,31 @@ const STRINGS = {
     'pro.pack': 'Pack your bag',
     'pro.packNote': 'Tomorrow’s lessons and reminders, the evening before.',
     'pro.time': 'Time', 'pro.language': 'Language',
+
+    'set.title': 'Settings',
+    'set.sub': 'Personalize your study space and reminders.',
+    'set.progress': 'Profile & progress',
+    'set.book': 'Creature book',
+    'set.collect': 'Collect them all!',
+    'set.reminders': 'Reminders',
+    'set.appearance': 'Appearance',
+    'set.desk': 'Desk theme',
+    'set.deskNote': 'Choose a look for your study space.',
+    'set.about': 'About',
+    'set.help': 'Help & About',
+    'set.version': 'App version {v}',
+    'set.firstCreature': 'Your first creature is on the way.',
+
+    'desk.cream': 'Cream', 'desk.sage': 'Sage',
+    'desk.night': 'Night', 'desk.sky': 'Sky',
+
+    'about.what': 'What this is',
+    'about.whatNote': 'Everything you have to do, in one place. Write homework down as it is set, tick it off when it is done, and the bag packs itself from the timetable.',
+    'about.install': 'On your phone',
+    'about.installNote': 'Share, then Add to Home Screen. Opened from there it fills the screen and can send you reminders; in a browser tab it cannot.',
+    'about.data': 'Your work',
+    'about.dataNote': 'Everything stays on this phone. Nothing is sent anywhere and there is nothing to sign in to.',
+    'about.done': 'Done',
 
     'book.title': 'Creature book', 'book.close': 'Close',
     'book.prev': 'Page back', 'book.next': 'Page on',
@@ -194,6 +269,31 @@ const STRINGS = {
     'pro.pack': 'לארוז את התיק',
     'pro.packNote': 'השיעורים והתזכורות של מחר, בערב שלפני.',
     'pro.time': 'שעה', 'pro.language': 'שפה',
+
+    'set.title': 'הגדרות',
+    'set.sub': 'התאימו את סביבת הלמידה והתזכורות שלכם.',
+    'set.progress': 'פרופיל והתקדמות',
+    'set.book': 'ספר היצורים',
+    'set.collect': 'אספו את כולם!',
+    'set.reminders': 'תזכורות',
+    'set.appearance': 'מראה',
+    'set.desk': 'ערכת שולחן',
+    'set.deskNote': 'בחרו מראה לסביבת הלמידה.',
+    'set.about': 'אודות',
+    'set.help': 'עזרה ואודות',
+    'set.version': 'גרסה {v}',
+    'set.firstCreature': 'היצור הראשון שלך בדרך.',
+
+    'desk.cream': 'קרם', 'desk.sage': 'מרווה',
+    'desk.night': 'לילה', 'desk.sky': 'תכלת',
+
+    'about.what': 'מה זה',
+    'about.whatNote': 'כל מה שצריך לעשות, במקום אחד. רושמים שיעורי בית ברגע שהם ניתנים, מסמנים כשסיימו, והתיק נארז לבד לפי המערכת.',
+    'about.install': 'בטלפון',
+    'about.installNote': 'שיתוף, ואז הוספה למסך הבית. כשפותחים משם האפליקציה ממלאת את המסך ויכולה לשלוח תזכורות; בלשונית של דפדפן היא לא יכולה.',
+    'about.data': 'העבודה שלך',
+    'about.dataNote': 'הכול נשאר בטלפון הזה. שום דבר לא נשלח לשום מקום ואין לאן להתחבר.',
+    'about.done': 'סיום',
 
     'book.title': 'ספר היצורים', 'book.close': 'סגירה',
     'book.prev': 'עמוד אחורה', 'book.next': 'עמוד קדימה',
@@ -1307,6 +1407,8 @@ const blank = () => ({
     bagReminderEnabled: false, bagReminderTime: '20:00',
     // null until somebody chooses; the phone is asked the first time.
     lang: null,
+    // Likewise the look of the place: null means whatever the phone is set to.
+    desk: null,
   },
   lastSubjectId: null,
 });
@@ -1365,6 +1467,7 @@ function hydrate(saved) {
   next.progress = Object.assign({ xp: 0, level: 1, shownUpTo: 1 }, next.progress);
   // Anyone who was here before there was a choice gets the phone asked for them.
   if (!LANGS.some(l => l.key === next.settings.lang)) next.settings.lang = null;
+  if (!DESKS.some(d => d.key === next.settings.desk)) next.settings.desk = null;
   // Anyone already part way through should not be shown a burst of arrivals.
   if (typeof next.progress.shownUpTo !== 'number') next.progress.shownUpTo = levelFor(next.progress.xp || 0);
   return next;
@@ -1654,6 +1757,15 @@ function setLang(next) {
 
 /* Each language names itself, so you can find your own without reading the
    one you cannot. */
+const APP_VERSION = '1.0.0';
+
+function renderAbout() {
+  const v = $('#about-version');
+  if (v) v.textContent = tr('set.version', { v: APP_VERSION });
+  const foot = $('#about-foot');
+  if (foot) foot.textContent = tr('set.version', { v: APP_VERSION });
+}
+
 function renderLangPick() {
   const box = $('#lang-pick');
   if (!box) return;
@@ -1669,7 +1781,7 @@ function render() {
   if (currentTab === 'bag') renderBag();
   if (currentTab === 'reminders') renderReminders();
   if (currentTab === 'subjects') renderSubjects();
-  if (currentTab === 'profile') { renderProfile(); renderLangPick(); }
+  if (currentTab === 'profile') { renderProfile(); renderLangPick(); renderDeskPick(); renderAbout(); }
   if (!$('#subject-page').hidden) renderSubjectPage(openSubjectId);
 }
 
@@ -2331,17 +2443,20 @@ function renderProfile() {
   const allFound = found.length >= MONSTER_COUNT;
 
   $('#level-card').innerHTML = `
+    <span class="level-pic" aria-hidden="true">
+      <svg class="pic" viewBox="0 0 48 48"><use href="#p-sprout" /></svg>
+    </span>
+    <div class="level-main">
     <div class="level-top">
       <span class="level-name">${tr('lvl.level', { n: level })}</span>
       <span class="level-xp">${allFound ? tr('book.allFound') : tr('lvl.xp', { into, of: XP_PER_LEVEL })}</span>
     </div>
     <div class="bar"><div class="bar-fill" style="width:${allFound ? 100 : (into / XP_PER_LEVEL) * 100}%"></div></div>
-    <p class="level-chapter">${here ? tr('book.withYou', { name: esc(here.name) }) : tr('book.firstEgg')}</p>
-    <p class="level-note">${allFound
-      ? tr('book.allFifty')
-      : (xp > 0
-          ? tr('lvl.untilEgg', { n: XP_PER_LEVEL - into })
-          : tr('book.finishSome'))}</p>`;
+    <p class="level-chapter">${here ? tr('book.withYou', { name: esc(here.name) }) : tr('set.firstCreature')}</p>
+    ${allFound || xp > 0
+      ? `<p class="level-note">${allFound ? tr('book.allFifty')
+          : tr('lvl.untilEgg', { n: XP_PER_LEVEL - into })}</p>` : ''}
+    </div>`;
 
   renderCollection();
 
@@ -2417,7 +2532,9 @@ function renderCollection() {
           <span class="mon-name">${esc(m.name)}</span>
           <span class="mon-rank is-${m.rarity}">${esc(tr('rarity.' + m.rarity))}</span>
         </button>`).join('')
-    : '<span class="mon-slot is-empty" aria-hidden="true"></span>'.repeat(4);
+    : ('<span class="mon-slot is-empty" aria-hidden="true">'
+       + '<svg class="slot-egg" viewBox="0 0 32 40"><use href="#p-egg" /></svg>'
+       + '</span>').repeat(5);
 
   const note = $('#collection-note');
   if (note) {
@@ -2666,12 +2783,20 @@ const TOP_PAPER = '#F4EEE1';
 const TOP_WALL  = '#F0E3D6';   // measured off the top of art/wall.jpg
 const TOP_NIGHT = '#13171C';
 
+/* The colour the browser paints around the clock. A desk that has been chosen
+   outranks what the phone is set to — picking Night on a phone in daylight
+   has to darken the top of the screen too, or the app sits in a bright frame. */
+const TOP_DESK = { sage: '#EDEFE3', sky: '#E9EEF4' };
+
 function syncTopColour() {
   const meta = $('#top-colour');
   if (!meta) return;
-  const dark = matchMedia('(prefers-color-scheme: dark)').matches;
-  meta.setAttribute('content',
-    dark ? TOP_NIGHT : (currentTab === 'reminders' ? TOP_WALL : TOP_PAPER));
+  const asked = document.documentElement.getAttribute('data-theme');
+  const dark = asked ? asked === 'dark'
+                     : matchMedia('(prefers-color-scheme: dark)').matches;
+  if (dark) { meta.setAttribute('content', TOP_NIGHT); return; }
+  if (currentTab === 'reminders') { meta.setAttribute('content', TOP_WALL); return; }
+  meta.setAttribute('content', TOP_DESK[state.settings.desk] || TOP_PAPER);
 }
 
 function showTab(tab) {
@@ -3240,6 +3365,14 @@ function wireApp() {
     if (btn) setLang(btn.dataset.lang);
   });
 
+  on('#desk-pick', 'click', (e) => {
+    const btn = e.target.closest('[data-desk]');
+    if (btn) setDesk(btn.dataset.desk);
+  });
+
+  on('#about-open', 'click', () => { renderAbout(); showSheet('#sheet-about'); });
+  on('#about-done', 'click', closeSheet);
+
   on('#rem-scope', 'click', (e) => {
     if (e.target.closest('[data-more]')) {
       remMore = !remMore;
@@ -3327,6 +3460,7 @@ function wireApp() {
 function boot() {
   load();
   saveLocal();      // write the migrated shape back, without bumping the sync clock
+  applyDesk();      // the colour of the place, before it is painted once
   applyLang();      // before anything is drawn, so nothing is drawn twice
   wireApp();
 

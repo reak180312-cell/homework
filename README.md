@@ -651,6 +651,48 @@ strings of comic writing, and turning that into Hebrew is a piece of work in its
 rather than a lookup table. The machinery is ready for it; the words are not written.
 
 
+## Settings
+
+The last tab was *Profile* and is now **Settings**, with a line under the heading saying what
+it is for and every section behind the same small capitals: profile and progress, the creature
+book, reminders, language, appearance, about.
+
+Two drawings carry it. A **seedling** stands beside the level, and a **book** leans on the
+creature card with *Collect them all!* written beside it in the same hand the reminders are.
+Both are SVG with their own colours baked in rather than icons painted in `currentColor`, so
+they keep their greens whichever way the ink is going. The book is a *sibling* of the card
+rather than a child of it: the card clips its own overflow, and a book that leans has to lean
+past an edge.
+
+The level card used to say the same thing twice — the line under the bar and the note under
+the row of egg slots were both *finish some homework and an egg turns up*. It says it once now.
+The row itself is five eggs rather than four empty boxes, which is what is actually waiting.
+
+### Desk theme
+
+**Four desks, shown as the four colours themselves.** There is nothing to read: the row of
+swatches *is* the four looks, and the one you tap is the colour the app then stands on.
+
+Three are daylight — cream, sage, sky — and differ only in `--paper`, `--card`, `--line` and
+`--line-soft`. Nothing else moves. The ink stays ink and every subject keeps its own colour,
+or choosing a desk would quietly restyle the whole app rather than the surface it stands on.
+The fourth is **Night**, which is the dark theme that was already in here given a face: before
+this it only ever followed the phone and there was no way to ask for it.
+
+Asking for it exposed one thing that had been hiding. `syncTopColour()` decided the colour
+behind the clock from `prefers-color-scheme` alone, so choosing Night on a phone set to
+daylight left the app dark inside a bright frame. A desk that has been chosen outranks what
+the phone is set to. The tab bar's hairline needed the same thought: it is a catch of daylight
+on a cream page, and at 55% white on a dark one it is a wire strung across the foot of the
+screen. It dims to 9% after dark.
+
+### Help & About
+
+A row that says which version this is, opening a page with three short answers: what the app
+is, how to get it onto a phone properly, and where the work lives — on the phone, sent nowhere,
+nothing to sign in to.
+
+
 ## The icon on the Home Screen
 
 It went missing and the phone drew a letter **H** in its place, which is what iOS does when it
