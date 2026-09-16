@@ -51,7 +51,23 @@
   --spring:     cubic-bezier(.34,1.32,.64,1);
 
   --gutter:     20px;
+  /* The row the bar actually needs: a 1px rule, a 22px icon, 2px of gap and
+     a 10px word, with a little air. This is the only number here chosen by
+     eye, and it is chosen against what the row holds. */
   --tabbar-h:   46px;
+
+  /* How much of the home-indicator inset the bar keeps. Not all of it: iOS
+     draws the indicator 8pt up from the bottom and it is 5pt tall, so the
+     bottom 13pt are the only part a bar has to stay out of. Reserving the
+     whole 34pt put 34px of empty beige under the labels — more than the
+     icons and words took between them, and 43% of the bar. A phone with no
+     indicator reports no inset and keeps none of it. */
+  --bar-safe:   min(var(--safe-b), 14px);
+
+  /* The bar's real, whole height. Everything that sits on top of the bar
+     measures from this one value rather than adding the raw inset back on
+     for itself — which is how the two got out of step in the first place. */
+  --bar-h:      calc(var(--tabbar-h) + var(--bar-safe));
   /* The notches, read once and named once. Everything that has to clear the
      clock, the island or the home indicator is measured from these two and
      from nothing else — twenty separate env() calls were twenty chances for
@@ -63,7 +79,7 @@
   --head-top:   calc(var(--safe-t) + 40px);
   /* And where every screen stops, above the bar. The bar is one fixed thing
      shared by the whole app, so what stands on it has to stop in one place. */
-  --content-bottom: calc(var(--tabbar-h) + var(--safe-b) + 40px);
+  --content-bottom: calc(var(--bar-h) + 40px);
   /* How much of the desk shows at the foot of the homework screen. The
      picture is 1.68 times as wide as it is tall, so at full width it stands
      59.5vw high — measured off the width, because that is what sets how big
@@ -489,8 +505,8 @@ button { border: 0; background: none; cursor: pointer; }
   /* The desk is behind the whole screen now, so this only has to stand clear
      of it — the same band, off the same figure, so the two cannot drift apart
      on a screen shaped differently from a phone. */
-  min-height: calc(100dvh - var(--safe-t) - var(--safe-b)
-                   - 134px - var(--tabbar-h) - var(--desk-lift) - var(--desk-band));
+  min-height: calc(100dvh - var(--safe-t)
+                   - 134px - var(--bar-h) - var(--desk-lift) - var(--desk-band));
   padding-bottom: 22px;
 }
 
@@ -530,7 +546,7 @@ button { border: 0; background: none; cursor: pointer; }
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(var(--tabbar-h) + var(--safe-b) + var(--desk-lift));
+  bottom: calc(var(--bar-h) + var(--desk-lift));
   z-index: 0;
   width: 100%;
   /* A band of the photograph rather than the whole of it, so that what shows
@@ -1448,10 +1464,10 @@ button { border: 0; background: none; cursor: pointer; }
   left: 0; right: 0; bottom: 0;
   z-index: 25;
   display: flex;
-  height: calc(var(--tabbar-h) + var(--safe-b));
+  height: var(--bar-h);
   /* Bar spans the screen; the tabs stay over the content column. */
   padding-inline: max(calc((100% - 540px) / 2), 0px);
-  padding-bottom: var(--safe-b);
+  padding-bottom: var(--bar-safe);
   background: var(--paper);
   border-top: 1px solid var(--line);
   /* The rule above it is the whole of its edge. There was a lift under that
@@ -1802,7 +1818,7 @@ input.hw-title::placeholder { color: var(--ink-3); }
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(var(--tabbar-h) + var(--safe-b) + 20px);
+  bottom: calc(var(--bar-h) + 20px);
   transform: translateX(-50%);
   z-index: 50;
   display: flex;
