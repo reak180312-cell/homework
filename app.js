@@ -418,6 +418,172 @@ function dayShort(i) {
    school's own name are deliberately left out — this file is published,
    and none of that is needed to pack a bag. */
 
+/* ── Whose app this is ─────────────────────────────────────
+   One app, more than one timetable. Everything that belongs to a particular
+   school week — the periods, the grid, how the subjects look, what goes in
+   the bag — lives in a profile; everything else is shared. A link carries
+   the profile in ?p=, so a change to the app is a change to every link at
+   once and there is nothing to keep in step by hand.
+
+   They live in one file rather than one each because a timetable is a
+   couple of kilobytes and a second request before the first paint costs
+   more than carrying them all. */
+
+const PROFILES = {};
+
+PROFILES.rea = {
+  id: 'rea',
+  appName: 'Homework',
+  periods: [
+    '8:20–9:00', '9:10–9:50', '10:00–10:40', '10:50–11:30',
+    '11:55–12:35', '12:45–13:25', '13:35–14:15', '14:20–15:00',
+  ],
+  schedule: [
+    ['מתמטיקה', 'מתמטיקה', 'אזרחות', 'חינוך', 'שפה', 'שפה', 'מעבדה', 'מעבדה'],
+    ['ביולוגיה', 'ספורט', 'ערבית', 'ערבית', 'אנגלית', 'אנגלית', null, null],
+    ['תנ״ך', 'תנ״ך', 'הנדסה', 'הנדסה', 'פיסיקה', 'הסטוריה', null, null],
+    ['תכנות', 'תכנות', 'אזרחות', 'פיסיקה', 'הסטוריה', 'ערבית', 'מתמטיקה', null],
+    ['חינוך', 'ביולוגיה', 'ספורט', 'ספרות', 'ספרות', 'אנגלית', 'אנגלית', null],
+  ],
+  look: {
+    'מתמטיקה':  { icon: 'i-math',      color: '#3E63DD' },
+    'הנדסה':    { icon: 'i-shapes',    color: '#2F7BC4' },
+    'אזרחות':   { icon: 'i-scales',    color: '#8A6D3B' },
+    'חינוך':    { icon: 'i-people',    color: '#7C7A76' },
+    'שפה':      { icon: null, glyph: 'א', color: '#C0553D' },
+    'מעבדה':    { icon: 'i-flask',     color: '#12A594' },
+    'ביולוגיה': { icon: 'i-leaf',      color: '#4FA83D' },
+    'ספורט':    { icon: 'i-ball',      color: '#D9772E' },
+    'ערבית':    { icon: 'i-globe',     color: '#C97B1E' },
+    'אנגלית':   { icon: 'i-pencil',    color: '#C2456A' },
+    'תנ״ך':     { icon: 'i-bookmark',  color: '#9A7B2E' },
+    'פיסיקה':   { icon: 'i-atom',      color: '#7C5CD6' },
+    'הסטוריה':  { icon: 'i-hourglass', color: '#A0704A' },
+    'תכנות':    { icon: 'i-code',      color: '#5B6B7C' },
+    'ספרות':    { icon: 'i-book',      color: '#B04FA0' },
+  },
+  bagArt: 'art/bag',
+  bagStyle: 'scene',
+  /* Worked out from the timetable, not from anything to keep up to date:
+     every lesson wants a notebook except חינוך, five want a book as well,
+     and two have something of their own. */
+  bag(names, lessonLabel, tr) {
+    const list = (only) => {
+      const out = [];
+      for (const n of names.filter(only)) {
+        const label = lessonLabel(n);
+        if (!out.includes(label)) out.push(label);
+      }
+      return out;
+    };
+    const NO_NOTEBOOK = ['חינוך'];
+    const NEEDS_BOOK = ['מתמטיקה', 'הנדסה', 'ערבית', 'ספרות', 'שפה'];
+    const SPECIAL = {
+      'תכנות': [{ key: 'laptop', label: 'MacBook' }, { key: 'airpods', label: 'AirPods' }],
+      'תנ״ך':  [{ key: 'tanach', label: 'ספר תנ״ך' }],
+    };
+
+    const things = [
+      { key: 'pencil', label: tr('bag.pencil') },
+      { key: 'bottle', label: tr('bag.bottle') },
+      { key: 'lunch',  label: tr('bag.lunch') },
+    ];
+    if (names.includes('ספורט')) things.push({ key: 'shoes', label: tr('bag.shoes') });
+
+    const notebooks = list(n => !NO_NOTEBOOK.includes(n));
+    if (notebooks.length) {
+      things.push({ key: 'notebook', label: tr('bag.notebooks'), detail: notebooks.join(' · ') });
+    }
+    const books = list(n => NEEDS_BOOK.includes(n));
+    if (books.length) {
+      things.push({ key: 'books', label: tr('bag.books'), detail: books.join(' · ') });
+    }
+    // Sport and the special lessons never fall on the same day, so the one
+    // slot beside the bag is enough for whichever of them turns up.
+    for (const name of names) {
+      (SPECIAL[name] || []).forEach((extra, i) => {
+        things.push({ ...extra, detail: i === 0 ? lessonLabel(name) : '' });
+      });
+    }
+    return things;
+  },
+};
+
+/* A twelfth-grade week: ragged, with a seminar, an art major and two
+   evenings. The periods are the union of every slot the week actually uses,
+   so a day that starts at 11:15 simply leaves the morning empty. */
+PROFILES.yb = {
+  id: 'yb',
+  appName: 'Homework · יב',
+  periods: [
+    '8:00–8:45', '8:45–9:30', '9:30–10:10', '10:30–11:15', '11:15–11:55',
+    '12:10–12:50', '12:50–13:30', '14:00–14:40', '17:00–19:00', '20:30',
+  ],
+  schedule: [
+    ['תנך', 'מתמטיקה', 'מתמטיקה', 'סמינר יב', 'סמינר יב', 'מרחב פוליטי', 'מרחב פוליטי', null, null, null],
+    [null, null, null, null, 'ספרות', 'אנגלית', 'אנגלית', 'חינוך גופני', 'דיפלומטיה', 'ליד'],
+    ['תנך', 'אזרחות', 'אזרחות', 'מתמטיקה', 'מתמטיקה', 'ענבר', 'ענבר', null, null, null],
+    [null, 'מתמטיקה', 'מתמטיקה', 'מגדר', 'מגדר', 'חינוך גופני', 'מגמת אומנות', null, 'דיפלומטיה', null],
+    ['אנגלית', 'אנגלית', 'אנגלית', 'ספרות', 'ספרות', null, null, null, null, null],
+  ],
+  look: {
+    'תנך':          { icon: 'i-bookmark',  color: '#9A7B2E' },
+    'מתמטיקה':      { icon: 'i-math',      color: '#3E63DD' },
+    'סמינר יב':     { icon: 'i-book',      color: '#7C5CD6' },
+    'מרחב פוליטי':  { icon: 'i-globe',     color: '#2F7BC4' },
+    'ספרות':        { icon: 'i-book',      color: '#B04FA0' },
+    'אנגלית':       { icon: 'i-pencil',    color: '#C2456A' },
+    'חינוך גופני':  { icon: 'i-ball',      color: '#D9772E' },
+    'דיפלומטיה':    { icon: 'i-globe',     color: '#12A594' },
+    'ליד':          { icon: 'i-people',    color: '#7C7A76' },
+    'אזרחות':       { icon: 'i-scales',    color: '#8A6D3B' },
+    'ענבר':         { icon: 'i-people',    color: '#4FA83D' },
+    'מגדר':         { icon: 'i-people',    color: '#C0553D' },
+    'מגמת אומנות':  { icon: 'i-shapes',    color: '#C97B1E' },
+  },
+  bagArt: 'art/bag2',
+  // Ten things can land on a Monday, which is more than will place around a
+  // backpack without becoming a puzzle. They are listed instead.
+  bagStyle: 'list',
+  bag(names, lessonLabel, tr, dayIndex) {
+    const things = [
+      { key: 'ipad', label: 'אייפד' },
+      { key: 'case', label: 'קלמר' },
+      { key: 'pen',  label: 'עט' },
+    ];
+    // Monday and Wednesday run into the evening.
+    if (dayIndex === 1 || dayIndex === 3) things.push({ key: 'charger', label: 'מטען' });
+
+    const perLesson = {
+      'תנך':         [{ key: 'tanach', label: 'ספר תנ״ך' }],
+      'דיפלומטיה':   [{ key: 'diplomacy', label: 'ספר דיפלומטיה' }],
+      'ספרות':       [{ key: 'lit', label: 'ספר ספרות' }],
+      'אנגלית':      [{ key: 'eng', label: 'ספר אנגלית' }],
+      'חינוך גופני': [{ key: 'sportkit', label: 'בגדים מתאימים' },
+                      { key: 'deo', label: 'דאודורנט' },
+                      { key: 'bottle', label: 'בקבוק מים' }],
+    };
+    for (const name of names) {
+      for (const extra of perLesson[name] || []) {
+        if (!things.some(t => t.key === extra.key)) {
+          things.push({ ...extra, detail: lessonLabel(name) });
+        }
+      }
+    }
+    return things;
+  },
+};
+
+/* Which one this copy is. The name in ?p= is the only thing that differs
+   between the links, and anything it does not recognise is the first. */
+const PROFILE = (() => {
+  try {
+    const want = new URLSearchParams(location.search).get('p');
+    if (want && PROFILES[want]) return PROFILES[want];
+  } catch { /* no URL to read */ }
+  return PROFILES.rea;
+})();
+
 const SCHOOL_DAYS = [
   { js: 0, he: 'ראשון',  en: 'Sunday',    short: 'Sun' },
   { js: 1, he: 'שני',    en: 'Monday',    short: 'Mon' },
@@ -426,19 +592,10 @@ const SCHOOL_DAYS = [
   { js: 4, he: 'חמישי',  en: 'Thursday',  short: 'Thu' },
 ];
 
-const PERIODS = [
-  '8:20–9:00', '9:10–9:50', '10:00–10:40', '10:50–11:30',
-  '11:55–12:35', '12:45–13:25', '13:35–14:15', '14:20–15:00',
-];
+const PERIODS = PROFILE.periods;
 
 // [day index][period index] — null is a free period.
-const SCHEDULE = [
-  ['מתמטיקה', 'מתמטיקה', 'אזרחות', 'חינוך', 'שפה', 'שפה', 'מעבדה', 'מעבדה'],
-  ['ביולוגיה', 'ספורט', 'ערבית', 'ערבית', 'אנגלית', 'אנגלית', null, null],
-  ['תנ״ך', 'תנ״ך', 'הנדסה', 'הנדסה', 'פיסיקה', 'הסטוריה', null, null],
-  ['תכנות', 'תכנות', 'אזרחות', 'פיסיקה', 'הסטוריה', 'ערבית', 'מתמטיקה', null],
-  ['חינוך', 'ביולוגיה', 'ספורט', 'ספרות', 'ספרות', 'אנגלית', 'אנגלית', null],
-];
+const SCHEDULE = PROFILE.schedule;
 
 // Only used to move homework saved before subjects came from the timetable:
 // it matches the name you had picked onto the lesson it clearly meant.
@@ -479,23 +636,7 @@ const shortName = (n) => SHORT_NAME[n] || n;
    in the order the week first meets them. A lesson's name is also its id:
    stable, and readable if you ever look in storage. */
 
-const SUBJECT_LOOK = {
-  'מתמטיקה':  { icon: 'i-math',      color: '#3E63DD' },
-  'הנדסה':    { icon: 'i-shapes',    color: '#2F7BC4' },
-  'אזרחות':   { icon: 'i-scales',    color: '#8A6D3B' },
-  'חינוך':    { icon: 'i-people',    color: '#7C7A76' },
-  'שפה':      { icon: null, glyph: 'א', color: '#C0553D' },
-  'מעבדה':    { icon: 'i-flask',     color: '#12A594' },
-  'ביולוגיה': { icon: 'i-leaf',      color: '#4FA83D' },
-  'ספורט':    { icon: 'i-ball',      color: '#D9772E' },
-  'ערבית':    { icon: 'i-globe',     color: '#C97B1E' },
-  'אנגלית':   { icon: 'i-pencil',    color: '#C2456A' },
-  'תנ״ך':     { icon: 'i-bookmark',  color: '#9A7B2E' },
-  'פיסיקה':   { icon: 'i-atom',      color: '#7C5CD6' },
-  'הסטוריה':  { icon: 'i-hourglass', color: '#A0704A' },
-  'תכנות':    { icon: 'i-code',      color: '#5B6B7C' },
-  'ספרות':    { icon: 'i-book',      color: '#B04FA0' },
-};
+const SUBJECT_LOOK = PROFILE.look;
 
 const SUBJECTS = LESSONS.map((name) => {
   const look = SUBJECT_LOOK[name] || {};
@@ -523,13 +664,7 @@ const subjectForLesson = (name) => subjectById(name);
    date: every lesson wants a notebook except חינוך, five of them want a book
    as well, and three have something of their own. */
 
-const SPORT = 'ספורט';
-const NO_NOTEBOOK = ['חינוך'];
-const NEEDS_BOOK = ['מתמטיקה', 'הנדסה', 'ערבית', 'ספרות', 'שפה'];
-const SPECIAL = {
-  'תכנות': [{ key: 'laptop', label: 'MacBook' }, { key: 'airpods', label: 'AirPods' }],
-  'תנ״ך':  [{ key: 'tanach', label: 'ספר תנ״ך' }],
-};
+
 
 /** A lesson in the words you picked it in, falling back to the timetable's. */
 function lessonLabel(name) {
@@ -538,43 +673,11 @@ function lessonLabel(name) {
 }
 
 /** Everything that goes in the bag on one day, in the order it is drawn. */
+/* What goes in the bag is the profile's business: the lessons of the day go
+   in, a list of things comes back. */
 function bagThings(dayIndex) {
   const names = lessonsFor(dayIndex).map(l => l.name);
-  const list = (only) => {
-    const out = [];
-    for (const n of names.filter(only)) {
-      const label = lessonLabel(n);
-      if (!out.includes(label)) out.push(label);
-    }
-    return out;
-  };
-
-  const things = [
-    { key: 'pencil', label: tr('bag.pencil') },
-    { key: 'bottle', label: tr('bag.bottle') },
-    { key: 'lunch',  label: tr('bag.lunch') },
-  ];
-
-  if (names.includes(SPORT)) things.push({ key: 'shoes', label: tr('bag.shoes') });
-
-  const notebooks = list(n => !NO_NOTEBOOK.includes(n));
-  if (notebooks.length) {
-    things.push({ key: 'notebook', label: tr('bag.notebooks'), detail: notebooks.join(' · ') });
-  }
-  const books = list(n => NEEDS_BOOK.includes(n));
-  if (books.length) {
-    things.push({ key: 'books', label: tr('bag.books'), detail: books.join(' · ') });
-  }
-
-  // Sport and the special lessons never fall on the same day, so the one slot
-  // beside the bag is enough for whichever of them turns up.
-  for (const name of names) {
-    // Two things for one lesson only need to say so once.
-    (SPECIAL[name] || []).forEach((extra, i) => {
-      things.push({ ...extra, detail: i === 0 ? lessonLabel(name) : '' });
-    });
-  }
-  return things;
+  return PROFILE.bag(names, lessonLabel, tr, dayIndex);
 }
 
 
@@ -635,7 +738,7 @@ const BAG_TINT = {
 function bagPic(key, place, extra, H) {
   const art = BAG_PICS[key];
   const w = Math.round(art.w * BAG_SCENE.w);
-  return `<img class="bag-pic ${extra}" src="art/bag/${key}.webp" alt="" aria-hidden="true"
+  return `<img class="bag-pic ${extra}" src="${PROFILE.bagArt}/${key}.webp" alt="" aria-hidden="true"
        width="${w}" height="${Math.round(w / art.ratio)}" decoding="async"
        style="left:${(place.x / BAG_SCENE.w) * 100}%; top:${(place.y / H) * 100}%;
               width:${art.w * 100}%" />`;
@@ -645,7 +748,27 @@ function bagPic(key, place, extra, H) {
  * The scene for one day. Everything on it is worked out from the timetable,
  * so there is never anything to answer.
  */
+/* Ten things will not place around a backpack without becoming a puzzle, so
+   a week that packs that many gets them in a list instead — same pictures,
+   same words, read down rather than hunted for. */
+function bagList(dayIndex) {
+  const things = bagThings(dayIndex);
+  return `
+    <ul class="bag-rows">
+      ${things.map(t => `
+        <li class="bag-row">
+          <img class="bag-row-pic" src="${PROFILE.bagArt}/${t.key}.webp" alt=""
+               aria-hidden="true" decoding="async" />
+          <span class="bag-row-text">
+            <b>${esc(t.label)}</b>
+            ${t.detail ? `<i>${esc(t.detail)}</i>` : ''}
+          </span>
+        </li>`).join('')}
+    </ul>`;
+}
+
 function bagScene(dayIndex) {
+  if (PROFILE.bagStyle === 'list') return bagList(dayIndex);
   const things = bagThings(dayIndex).filter(t => BAG_PLACES[t.key]);
   const H = things.some(t => BAG_LOW.includes(t.key)) ? 560 : BAG_SCENE.h;
 
@@ -1340,7 +1463,10 @@ function eggSvg(m, { split = false } = {}) {
 
 const XP_PER_HOMEWORK = 10;
 const XP_PER_LEVEL = 100;
-const STORAGE_KEY = 'homework.v1';
+/* Two of these can sit on one phone, and they are two different weeks of two
+   different people. The first keeps the plain key so nobody's homework moves
+   when profiles arrive; every other one is kept beside it. */
+const STORAGE_KEY = PROFILE.id === 'rea' ? 'homework.v1' : 'homework.v1.' + PROFILE.id;
 
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
 
@@ -3565,7 +3691,19 @@ function wireApp() {
 
 /* ── Boot ──────────────────────────────────────────────────── */
 
+/* Installing puts the manifest's start_url on the Home Screen, so each link
+   needs a manifest of its own or both would install as the same app and open
+   the same timetable. The tag is pointed at the right one before anybody can
+   ask to install. */
+function pointAtManifest() {
+  const link = document.querySelector('link[rel="manifest"]');
+  if (link) link.setAttribute('href', `m/${PROFILE.id}.webmanifest`);
+  const title = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+  if (title) title.setAttribute('content', PROFILE.appName);
+}
+
 function boot() {
+  pointAtManifest();
   load();
   saveLocal();      // write the migrated shape back, without bumping the sync clock
   applyDesk();      // the colour of the place, before it is painted once
@@ -3595,7 +3733,10 @@ function boot() {
   connectSync();
 
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-    navigator.serviceWorker.register('sw.js').catch(() => { /* offline support is a bonus */ });
+    // The profile goes in the worker's own URL so it keeps its own cache
+    // and its own bag pictures.
+    navigator.serviceWorker.register('sw.js?p=' + PROFILE.id)
+      .catch(() => { /* offline support is a bonus */ });
     navigator.serviceWorker.addEventListener('message', (e) => {
       if (e.data && e.data.type === 'add-homework') openHwSheet();
     });

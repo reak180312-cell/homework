@@ -2,11 +2,29 @@
 
 // Bump this whenever the shell changes shape: it drops every older cache on
 // activate, so a page can never be served new markup with stale script.
-const CACHE = 'homework-v45';
+/* Which app this worker belongs to. It is registered as sw.js?p=<id>, so a
+   second profile on the same phone gets a cache of its own rather than
+   fighting the first one for the same names — and only carries its own
+   bag pictures. */
+const PROFILE = new URL(self.location).searchParams.get('p') || 'rea';
+const CACHE = 'homework-v46-' + PROFILE;
 
 // Only what the app needs to run. The 512px icon is for the installer and the
 // splash screen, which nobody reaches offline, so it is fetched if it is ever
 // actually wanted rather than downloaded by everyone on their first visit.
+/* One bag each. 150KB of somebody else's school things is not worth
+   downloading to never look at. */
+const BAGS = {
+  rea: ['./art/bag/pack.webp', './art/bag/pencil.webp', './art/bag/bottle.webp',
+        './art/bag/lunch.webp', './art/bag/notebook.webp', './art/bag/books.webp',
+        './art/bag/shoes.webp', './art/bag/laptop.webp', './art/bag/airpods.webp',
+        './art/bag/tanach.webp'],
+  yb:  ['./art/bag2/ipad.webp', './art/bag2/case.webp', './art/bag2/pen.webp',
+        './art/bag2/charger.webp', './art/bag2/tanach.webp', './art/bag2/diplomacy.webp',
+        './art/bag2/lit.webp', './art/bag2/eng.webp', './art/bag2/sportkit.webp',
+        './art/bag2/deo.webp', './art/bag2/bottle.webp'],
+};
+
 const SHELL = [
   './index.html',
   './styles.css',
@@ -25,16 +43,7 @@ const SHELL = [
   './art/set/bell.webp',
   './art/set/bag.webp',
   './art/set/globe.webp',
-  './art/bag/pack.webp',
-  './art/bag/pencil.webp',
-  './art/bag/bottle.webp',
-  './art/bag/lunch.webp',
-  './art/bag/notebook.webp',
-  './art/bag/books.webp',
-  './art/bag/shoes.webp',
-  './art/bag/laptop.webp',
-  './art/bag/airpods.webp',
-  './art/bag/tanach.webp',
+  ...BAGS[PROFILE],
   './icons/favicon-64.png',
   './icons/icon-192.png',
   // The one the phone puts on the Home Screen. It is 34KB and it is the

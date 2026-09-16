@@ -651,6 +651,52 @@ strings of comic writing, and turning that into Hebrew is a piece of work in its
 rather than a lookup table. The machinery is ready for it; the words are not written.
 
 
+## One app, more than one timetable
+
+Two people, two school weeks, one app. Each gets a link:
+
+```
+https://reak180312-cell.github.io/homework/            the original week
+https://reak180312-cell.github.io/homework/?p=yb       a twelfth-grade week
+```
+
+Everything that belongs to a particular week — the periods, the grid, how the subjects look,
+what goes in the bag — lives in a **profile**. Everything else is shared. There is one
+`app.js`, one stylesheet and one page, so a change is a change to every link at once and there
+is nothing to keep in step by hand. That was the requirement, and it is the whole reason the
+profiles are data rather than copies.
+
+They sit in one file rather than one each because a timetable is a couple of kilobytes and a
+second request before the first paint costs more than carrying them all. Adding a third person
+is one object in `PROFILES` and one manifest; nothing else moves.
+
+**Each link installs as its own app.** Installing puts the manifest's `start_url` on the Home
+Screen, so one shared manifest would have meant both installs opening the same timetable.
+There is a manifest per profile in `m/`, and the page points its `<link rel="manifest">` at the
+right one before anybody can ask to install.
+
+**And each keeps its own homework.** Two of these can sit on one phone and they are two
+different people; a shared `localStorage` key would have had them writing over each other. The
+first keeps the plain `homework.v1` so nothing moved when profiles arrived, and every other one
+is kept beside it.
+
+**The worker is registered as `sw.js?p=<id>`**, which is how it knows which cache is its own and
+which bag to keep. 150KB of somebody else's school things is not worth downloading to never
+look at.
+
+### The second week
+
+It is ragged in a way the first is not: a seminar, an art major, two evenings, and a Monday
+that does not start until 11:15. The periods are the union of every slot the week actually
+uses — ten of them, ending at 20:30 — so a day that starts late simply leaves the morning
+empty rather than needing a grid of its own.
+
+Its bag is a **list rather than a scene**. A Monday packs ten things, which is more than will
+place around a backpack without becoming a puzzle: an iPad, a pencil case, a pen, a charger,
+two books, sports clothes, deodorant, a water bottle and a diplomacy book. Same pictures, same
+words, read down the page instead of hunted for. `bagStyle` on the profile picks which.
+
+
 ## Five tabs, and what is behind each
 
 **Homework and Subjects share a page.** They are two ways of asking the same question — what

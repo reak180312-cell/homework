@@ -3407,3 +3407,47 @@ button.mon-slot:active { transform: scale(.93); }
   margin-top: 28px;
   animation: rise .5s var(--ease) 3.4s backwards;
 }
+
+/* ── A bag that is a list ─────────────────────────────────
+   Ten things on a Monday will not place around a backpack without becoming a
+   puzzle, so a week that packs that many reads down the page instead. Same
+   pictures, same words. */
+.bag-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bag-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border-radius: var(--r-card);
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  box-shadow: var(--shadow);
+}
+
+.bag-row-pic {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+}
+
+.bag-row-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bag-row-text b {
+  font-size: 16px;
+  font-weight: 550;
+  letter-spacing: -.01em;
+  color: var(--ink);
+}
+.bag-row-text i {
+  font-style: normal;
+  font-size: 13px;
+  color: var(--ink-3);
+}
