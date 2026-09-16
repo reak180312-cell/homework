@@ -2,7 +2,7 @@
 
 // Bump this whenever the shell changes shape: it drops every older cache on
 // activate, so a page can never be served new markup with stale script.
-const CACHE = 'homework-v39';
+const CACHE = 'homework-v40';
 
 // Only what the app needs to run. The 512px icon is for the installer and the
 // splash screen, which nobody reaches offline, so it is fetched if it is ever
@@ -29,6 +29,10 @@ const SHELL = [
   './art/bag/tanach.webp',
   './icons/favicon-64.png',
   './icons/icon-192.png',
+  // The one the phone puts on the Home Screen. It is 34KB and it is the
+  // first thing anybody sees of this app, so it is not left to a network
+  // fetch that might not land.
+  './icons/apple-touch-icon.png',
 ];
 
 // Cache each file on its own: one bad response shouldn't cost us offline support.
@@ -78,7 +82,20 @@ self.addEventListener('fetch', (e) => {
     }).catch(() => null);
 
     if (cached) return cached;                  // instant, every time after the first
-    return (await fresh) || caches.match('./index.html');
+
+    const res = await fresh;
+    if (res) return res;
+
+    // Offline, and nothing cached. A page can stand in for a page — that is
+    // what makes the app open at all without a network. It cannot stand in
+    // for anything else: handing index.html back for a PNG gives whatever
+    // asked for it a document where it wanted a picture, and the phone,
+    // fetching the Home Screen icon, quietly drew a letter instead.
+    if (req.mode === 'navigate' || req.destination === 'document') {
+      return (await caches.match('./index.html'))
+        || new Response('', { status: 504, statusText: 'Offline' });
+    }
+    return new Response('', { status: 504, statusText: 'Offline' });
   })());
 });
 

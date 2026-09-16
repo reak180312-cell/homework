@@ -651,6 +651,37 @@ strings of comic writing, and turning that into Hebrew is a piece of work in its
 rather than a lookup table. The machinery is ready for it; the words are not written.
 
 
+## The icon on the Home Screen
+
+It went missing and the phone drew a letter **H** in its place, which is what iOS does when it
+cannot get an icon at all. The file was fine — 180×180, opaque, served as `image/png` with a
+`<link rel="apple-touch-icon">` in the head. The service worker was the problem, in its very
+last line:
+
+```js
+return (await fresh) || caches.match('./index.html');
+```
+
+`apple-touch-icon.png` was not in the shell, so it was never pre-cached and every request for
+it went to the network. When one of those did not land, **the worker handed back**
+**`index.html`** — a document — as the answer to a request for a picture. The phone asked for
+the icon, got markup, and fell back to the first letter of the app's name.
+
+A page can stand in for a page; that is what makes the app open with no network. It cannot
+stand in for anything else, so the fallback is now behind `req.mode === 'navigate'` and
+everything else gets an honest 504. The icon is in the shell too, because it is 34KB and it is
+the first thing anybody sees of this app.
+
+**Every icon is opaque.** They had cut-away corners, which is right for a favicon and wrong for
+a phone: iOS composites a transparent app icon onto black, so a rounded blue square arrives as
+a blue tile inside a black box — and iOS rounds the corners itself anyway, so cutting them in
+the file only gives it something to fill in. Each one is flattened onto the most common opaque
+colour around its own outer ring, so the fill is the art's own background rather than a colour
+picked by hand. `scratchpad/flatten.js` does it; `scratchpad/test-icon.js` checks that not one
+of them is see-through anywhere, and that the worker cannot answer a picture with a page —
+including for real, with the network cut.
+
+
 ## Design rules
 
 Aged parchment, deep ink-blue for text and every primary action, and a red-brown where
