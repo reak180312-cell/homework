@@ -1487,16 +1487,6 @@ button { border: 0; background: none; cursor: pointer; }
   box-shadow: 0 1px 3px rgba(70,54,30,.16);
 }
 
-/* The creature looking over the row of eggs. */
-.egg-wrap { position: relative; }
-.peek-art {
-  position: absolute;
-  inset-inline-end: -6px;
-  bottom: calc(100% - 16px);
-  width: 92px;
-  height: auto;
-  pointer-events: none;
-}
 
 .about-head {
   display: flex;
@@ -1542,13 +1532,18 @@ button { border: 0; background: none; cursor: pointer; }
   opacity: .42;
 }
 
+/* Leaning on the end of the card rather than printed on the face of it:
+   two thirds of it hangs past the edge, and it casts a shadow onto the card
+   so the drawing and the card are lit by the same light. Laid flat inside
+   the card with no shadow it read as a sticker somebody had put there. */
 .bc-pic {
   position: absolute;
-  inset-inline-end: -2px;
-  bottom: 4px;
-  width: 88px;
+  inset-inline-end: -12px;
+  bottom: -6px;
+  width: 96px;
   line-height: 0;
   pointer-events: none;
+  filter: drop-shadow(-5px 6px 7px rgba(24,32,26,.34));
 }
 .bc-pic img { width: 100%; height: auto; }
 .bc-shout {
@@ -1571,7 +1566,7 @@ button { border: 0; background: none; cursor: pointer; }
 .book-wrap { position: relative; margin-bottom: 10px; }
 .book-wrap .book-cover { margin-bottom: 0; }
 /* The cover stops short of the book so the two do not sit on each other. */
-.book-wrap .bc-go { margin-inline-end: 86px; }
+.book-wrap .bc-go { margin-inline-end: 74px; }
 
 /* Four desks, shown as the four colours themselves. */
 .desk-pick { display: flex; gap: 9px; }

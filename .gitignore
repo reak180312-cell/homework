@@ -40,3 +40,6 @@ pictus to settings/
 
 # ...and the settings screen's own art, which is part of the build
 !art/set/*.webp
+
+# More reference pictures - never publish these
+picturs to new/
