@@ -68,6 +68,12 @@
      measures from this one value rather than adding the raw inset back on
      for itself — which is how the two got out of step in the first place. */
   --bar-h:      calc(var(--tabbar-h) + var(--bar-safe));
+
+  /* The switch between the two halves of the homework page: 53px of control
+     and 16px of margin. The empty homework screen measures itself against
+     what is above it, so the switch has to be a number it can subtract
+     rather than a surprise that pushes the sentence into the desk. */
+  --seg-h:      69px;
   /* The notches, read once and named once. Everything that has to clear the
      clock, the island or the home indicator is measured from these two and
      from nothing else — twenty separate env() calls were twenty chances for
@@ -506,7 +512,7 @@ button { border: 0; background: none; cursor: pointer; }
      of it — the same band, off the same figure, so the two cannot drift apart
      on a screen shaped differently from a phone. */
   min-height: calc(100dvh - var(--safe-t)
-                   - 134px - var(--bar-h) - var(--desk-lift) - var(--desk-band));
+                   - 134px - var(--seg-h) - var(--bar-h) - var(--desk-lift) - var(--desk-band));
   padding-bottom: 22px;
 }
 
@@ -1622,6 +1628,45 @@ button { border: 0; background: none; cursor: pointer; }
 }
 #sheet-about .btn-primary { width: 100%; margin-top: 16px; }
 
+
+/* ── The switch on the homework page ──────────────────────
+   Homework and Subjects are two ways of asking what is set, so they share a
+   page. The switch is the width of the column and splits it in two, which is
+   what says "these are the same thing, seen twice" rather than "here is a
+   filter". */
+.seg {
+  display: flex;
+  gap: 3px;
+  margin: 2px 0 14px;
+  padding: 3px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+.seg-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  font-size: 14.5px;
+  font-weight: 550;
+  letter-spacing: -.01em;
+  color: var(--ink-2);
+  transition: background-color .18s ease, color .18s ease, transform .16s var(--spring);
+}
+.seg-btn:active { transform: scale(.97); }
+.seg-btn.is-on {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(70,54,30,.16);
+}
+
+/* A setting whose control needs the width of the row to itself. */
+.setting.is-stacked {
+  display: block;
+}
+.setting.is-stacked .paper-chips { margin-top: 10px; }
 
 /* ── Language ─────────────────────────────────────────────
    Each language is written in itself, so you can find your own without

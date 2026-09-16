@@ -651,6 +651,25 @@ strings of comic writing, and turning that into Hebrew is a piece of work in its
 rather than a lookup table. The machinery is ready for it; the words are not written.
 
 
+## Five tabs, and what is behind each
+
+**Homework and Subjects share a page.** They are two ways of asking the same question — what
+is set — so they sit behind one switch rather than taking two places in a bar that only has
+five. The switch is the width of the column and splits it in two, which says *these are the
+same thing, seen twice* rather than *here is a filter*. Which half is showing is deliberately
+not remembered between launches: the answer you want on opening the app is almost always the
+list.
+
+That freed a tab for **Creatures**, which had been a section of Settings and is now a page: the
+book, the eggs and the count, with the creature who used to peek over the card still peeking.
+Its icon is an open book with two antennae over it. A first attempt drew a book with a creature
+behind it and read, at 22px, as a second bag.
+
+One thing the move cost: the empty homework screen measures itself against what is above it,
+and the switch is 69px it did not know about, so the sentence landed 13px inside the desk.
+`--seg-h` is that number, and the screen subtracts it.
+
+
 ## Settings
 
 The last tab was *Profile* and is now **Settings**, with a line under the heading saying what
@@ -710,6 +729,17 @@ daylight left the app dark inside a bright frame. A desk that has been chosen ou
 the phone is set to. The tab bar's hairline needed the same thought: it is a catch of daylight
 on a cream page, and at 55% white on a dark one it is a wire strung across the foot of the
 screen. It dims to 9% after dark.
+
+### Two more settings
+
+**Open on** — the page the app launches into, for anyone whose first move is always the bag or
+the board rather than the list. Three chips, because those are the three pages you read; the
+other two you go to on purpose.
+
+**Ask before removing** — the board takes a note down with one tap, which is quick and undoable
+and is the bargain that page makes. For anyone who would rather be asked, this puts the
+question in the way instead. Off by default: the undo is still the better answer for most
+people.
 
 ### Help & About
 

@@ -162,6 +162,21 @@ const STRINGS = {
     'about.dataNote': 'Everything stays on this phone. Nothing is sent anywhere and there is nothing to sign in to.',
     'about.done': 'Done',
 
+    'tab.creatures': 'Creatures',
+    'cre.title': 'Creatures',
+    'cre.sub': 'Fifty of them, one egg at a time.',
+    'cre.book': 'The book',
+    'cre.found': 'Found so far',
+
+    'set.homework': 'Homework',
+    'set.startOn': 'Open on',
+    'set.startOnNote': 'The page the app opens when you launch it.',
+    'set.ask': 'Ask before removing',
+    'set.askNote': 'A note comes off the board with one tap. This puts a question in the way.',
+    'set.remove': 'Remove?',
+    'set.removeCancel': 'Keep it',
+    'set.removeOk': 'Remove',
+
     'book.title': 'Creature book', 'book.close': 'Close',
     'book.prev': 'Page back', 'book.next': 'Page on',
     'book.size': 'Size', 'book.hobbies': 'Hobbies', 'book.found': 'Found',
@@ -294,6 +309,21 @@ const STRINGS = {
     'about.data': 'העבודה שלך',
     'about.dataNote': 'הכול נשאר בטלפון הזה. שום דבר לא נשלח לשום מקום ואין לאן להתחבר.',
     'about.done': 'סיום',
+
+    'tab.creatures': 'יצורים',
+    'cre.title': 'יצורים',
+    'cre.sub': 'חמישים, ביצה אחת בכל פעם.',
+    'cre.book': 'הספר',
+    'cre.found': 'נמצאו עד כה',
+
+    'set.homework': 'שיעורי בית',
+    'set.startOn': 'פתיחה בעמוד',
+    'set.startOnNote': 'העמוד שייפתח כשמפעילים את האפליקציה.',
+    'set.ask': 'לשאול לפני הסרה',
+    'set.askNote': 'פתק יורד מהלוח בהקשה אחת. זה שם שאלה בדרך.',
+    'set.remove': 'להסיר?',
+    'set.removeCancel': 'להשאיר',
+    'set.removeOk': 'להסיר',
 
     'book.title': 'ספר היצורים', 'book.close': 'סגירה',
     'book.prev': 'עמוד אחורה', 'book.next': 'עמוד קדימה',
@@ -1409,6 +1439,9 @@ const blank = () => ({
     lang: null,
     // Likewise the look of the place: null means whatever the phone is set to.
     desk: null,
+    // Which page the app opens on, and whether taking a note down asks first.
+    startOn: 'home',
+    askBeforeRemove: false,
   },
   lastSubjectId: null,
 });
@@ -1468,6 +1501,8 @@ function hydrate(saved) {
   // Anyone who was here before there was a choice gets the phone asked for them.
   if (!LANGS.some(l => l.key === next.settings.lang)) next.settings.lang = null;
   if (!DESKS.some(d => d.key === next.settings.desk)) next.settings.desk = null;
+  if (!START_PAGES.some(p => p.key === next.settings.startOn)) next.settings.startOn = 'home';
+  next.settings.askBeforeRemove = !!next.settings.askBeforeRemove;
   // Anyone already part way through should not be shown a burst of arrivals.
   if (typeof next.progress.shownUpTo !== 'number') next.progress.shownUpTo = levelFor(next.progress.xp || 0);
   return next;
@@ -1766,6 +1801,23 @@ function renderAbout() {
   if (foot) foot.textContent = tr('set.version', { v: APP_VERSION });
 }
 
+/* The pages it makes sense to open on: the three you read rather than the
+   two you go to on purpose. */
+const START_PAGES = [
+  { key: 'home', t: 'tab.home' },
+  { key: 'bag', t: 'tab.bag' },
+  { key: 'reminders', t: 'tab.reminders' },
+];
+
+function renderStartPick() {
+  const box = $('#start-pick');
+  if (!box) return;
+  const on = state.settings.startOn;
+  box.innerHTML = START_PAGES.map(p => `
+    <button class="p-chip ${p.key === on ? 'is-on' : ''}" data-start="${p.key}"
+            aria-pressed="${p.key === on}">${esc(tr(p.t))}</button>`).join('');
+}
+
 function renderLangPick() {
   const box = $('#lang-pick');
   if (!box) return;
@@ -1774,15 +1826,40 @@ function renderLangPick() {
             lang="${l.key}" dir="${l.dir}" aria-pressed="${l.key === lang}">${esc(l.name)}</button>`).join('');
 }
 
+/* Homework and Subjects are two ways of asking the same question — what is
+   set — so they share a page and a switch rather than two places in the bar.
+   Which half is showing is not worth remembering between launches: the answer
+   you want on opening the app is almost always the list. */
+let homePane = 'work';
+
+function showPane(pane) {
+  homePane = pane === 'subjects' ? 'subjects' : 'work';
+  const work = homePane === 'work';
+  $('#home-list').hidden = !work;
+  $('#subject-list').hidden = work;
+  const desk = $('#desk');
+  // The desk is the foot of the homework list, not of a list of subjects.
+  if (desk) desk.hidden = !work;
+  for (const b of $$('#home-switch [data-pane]')) {
+    const on = b.dataset.pane === homePane;
+    b.classList.toggle('is-on', on);
+    b.setAttribute('aria-selected', String(on));
+  }
+  render();
+}
+
 function render() {
   renderTtButton();
   syncFab();
-  if (currentTab === 'home') renderHome();
+  if (currentTab === 'home') {
+    if (homePane === 'subjects') renderSubjects(); else renderHome();
+  }
+  if (currentTab === 'creatures') renderCreatures();
   if (currentTab === 'bag') renderBag();
   if (currentTab === 'reminders') renderReminders();
-  if (currentTab === 'subjects') renderSubjects();
   if (currentTab === 'profile') {
-    renderProfile(); renderLangPick(); renderDeskPick(); renderAbout();
+    renderProfile(); renderLangPick(); renderDeskPick(); renderAbout(); renderStartPick();
+    $('#ask-toggle').checked = !!state.settings.askBeforeRemove;
     revealRoom('#set-room');
   }
   if (!$('#subject-page').hidden) renderSubjectPage(openSubjectId);
@@ -2280,6 +2357,12 @@ function wireBoard() {
 function takeDown(id) {
   const i = state.notes.findIndex(n => n.id === id);
   if (i < 0) return;
+  // One tap is quick and undoable, which is the bargain the board makes. For
+  // anyone who would rather be asked, the question goes in the way instead.
+  if (state.settings.askBeforeRemove) {
+    const note = state.notes[i];
+    if (!confirm(tr('set.remove') + '\n\n' + note.text)) return;
+  }
   const [gone] = state.notes.splice(i, 1);
   save();
   renderReminders();
@@ -2435,6 +2518,12 @@ function doneRow(hw, sub, showSubject = true) {
     </div>`;
 }
 
+/* The book, the eggs and the count, which used to be a section of Settings
+   and are now the whole of their own page. */
+function renderCreatures() {
+  renderCollection();
+}
+
 function renderProfile() {
   const { xp } = state.progress;
   const level = levelFor(xp);
@@ -2460,8 +2549,6 @@ function renderProfile() {
       ? `<p class="level-note">${allFound ? tr('book.allFifty')
           : tr('lvl.untilEgg', { n: XP_PER_LEVEL - into })}</p>` : ''}
     </div>`;
-
-  renderCollection();
 
   // History, newest first, grouped by the day it was finished.
   const done = state.homework
@@ -3363,6 +3450,24 @@ function wireApp() {
 
   on('#rem-flip', 'click', flipRemPaper);
 
+  on('#home-switch', 'click', (e) => {
+    const btn = e.target.closest('[data-pane]');
+    if (btn) showPane(btn.dataset.pane);
+  });
+
+  on('#start-pick', 'click', (e) => {
+    const btn = e.target.closest('[data-start]');
+    if (!btn) return;
+    state.settings.startOn = btn.dataset.start;
+    save();
+    renderStartPick();
+  });
+
+  on('#ask-toggle', 'change', (e) => {
+    state.settings.askBeforeRemove = e.target.checked;
+    save();
+  });
+
   on('#lang-pick', 'click', (e) => {
     const btn = e.target.closest('[data-lang]');
     if (btn) setLang(btn.dataset.lang);
@@ -3468,7 +3573,9 @@ function boot() {
   wireApp();
 
   $('#main').hidden = false;
-  showTab('home');
+  // The page asked for, unless something else is being opened on purpose.
+  showTab(START_PAGES.some(p => p.key === state.settings.startOn)
+    ? state.settings.startOn : 'home');
 
   scheduleReminder();
 
