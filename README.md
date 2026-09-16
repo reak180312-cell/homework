@@ -691,10 +691,20 @@ that does not start until 11:15. The periods are the union of every slot the wee
 uses — ten of them, ending at 20:30 — so a day that starts late simply leaves the morning
 empty rather than needing a grid of its own.
 
-Its bag is a **list rather than a scene**. A Monday packs ten things, which is more than will
-place around a backpack without becoming a puzzle: an iPad, a pencil case, a pen, a charger,
-two books, sports clothes, deodorant, a water bottle and a diplomacy book. Same pictures, same
-words, read down the page instead of hunted for. `bagStyle` on the profile picks which.
+Its bag is **laid out rather than placed**. Both weeks draw the same picture — a bag in the
+middle, the day’s things around it — but the first gives each thing a fixed place, which works
+because it has nine possible things and shows five or six. This one has eleven and a Monday
+shows ten: an iPad, a pencil case, a pen, a charger, two books, sports clothes, deodorant, a
+water bottle and a diplomacy book. A place each would leave a different hole in the ring every
+day, so the day’s things are dealt out alternately down either side instead, and each side is
+stacked by the heights things actually have.
+
+That last part matters more than it sounds. Only the **shape** each picture came out of the
+cutter as is written down; how big to draw it follows from that. Picking widths by eye gave a
+pen 150px tall, because a pen is eight times taller than it is wide. Now every thing is drawn
+to fit a 92px square keeping its own proportions, and the labels get their room reserved before
+anything is positioned — so no label ever lands on the thing below it, on any day.
+`bagStyle` on the profile picks which layout a week gets.
 
 
 ## Five tabs, and what is behind each

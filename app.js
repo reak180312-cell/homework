@@ -544,7 +544,27 @@ PROFILES.yb = {
   bagArt: 'art/bag2',
   // Ten things can land on a Monday, which is more than will place around a
   // backpack without becoming a puzzle. They are listed instead.
-  bagStyle: 'list',
+  // Ten things on a Monday, so they are laid out around the bag rather than
+  // each having a place of its own: a place each leaves a different hole in
+  // the ring every day of the week.
+  bagStyle: 'ring',
+  // The shape each thing came out of the cutter as, width over height. How
+  // big to draw it follows from that and nothing else: a pen picked by eye
+  // came out 150px tall, because a pen is eight times taller than it is wide
+  // and a width chosen to look right made a height that did not.
+  pics: {
+    ipad:      { ratio: 0.822 },
+    case:      { ratio: 1.908 },
+    pen:       { ratio: 0.127 },
+    charger:   { ratio: 1.016 },
+    tanach:    { ratio: 0.796 },
+    diplomacy: { ratio: 0.735 },
+    lit:       { ratio: 0.754 },
+    eng:       { ratio: 0.767 },
+    sportkit:  { ratio: 1.092 },
+    deo:       { ratio: 0.592 },
+    bottle:    { ratio: 0.370 },
+  },
   bag(names, lessonLabel, tr, dayIndex) {
     const things = [
       { key: 'ipad', label: 'אייפד' },
@@ -748,27 +768,73 @@ function bagPic(key, place, extra, H) {
  * The scene for one day. Everything on it is worked out from the timetable,
  * so there is never anything to answer.
  */
-/* Ten things will not place around a backpack without becoming a puzzle, so
-   a week that packs that many gets them in a list instead — same pictures,
-   same words, read down rather than hunted for. */
-function bagList(dayIndex) {
-  const things = bagThings(dayIndex);
+/* A bag in the middle and the day's things down either side of it.
+
+   The first week gives every thing a place of its own, which works because
+   it has nine possible things and shows five or six of them. This one has
+   eleven and a Monday shows ten, so a place each would leave a different
+   hole in the ring every day. Here the day's things are dealt out instead —
+   alternately left and right, top to bottom — so four things and ten things
+   both come out even. */
+/* Every thing is drawn no taller than CELL and no wider than CELL, keeping
+   its own shape — which is what stops a pen being a lamp post and a pencil
+   case being a plank. Then each side is stacked by the heights that come
+   out of that, so a label always has the room it needs and never lands on
+   the thing below it. */
+const BAG_CELL = 92;
+
+function bagRing(dayIndex) {
+  const things = bagThings(dayIndex).filter(t => PROFILE.pics[t.key]);
+
+  // Deal them out, alternately, so both sides come out even.
+  const columns = [[], []];
+  things.forEach((t, i) => columns[i % 2].push(t));
+
+  const TOP = 26, GAP = 20, LABEL = 22, DETAIL = 17;
+  const placed = [];
+  const bottoms = columns.map((column, side) => {
+    let y = TOP;
+    for (const t of column) {
+      const ratio = PROFILE.pics[t.key].ratio;
+      const h = Math.min(BAG_CELL, BAG_CELL / ratio);
+      const w = h * ratio;
+      placed.push({ ...t, side, w, h, top: y, labelTop: y + h + 4 });
+      y += h + 4 + LABEL + (t.detail ? DETAIL : 0) + GAP;
+    }
+    return y;
+  });
+  // The scene is as tall as the day needs and no taller — a Sunday of four
+  // things held open to a Monday's height is a screen of nothing. The floor is
+  // the bag's own height (32% of the width, and it is 422x502) with air round it,
+  // since it hangs from the middle and would otherwise poke out of a short day.
+  const H = Math.max(260, ...bottoms);
+
+  const pics = placed.map(t => `
+    <img class="bag-pic bag-thing" src="${PROFILE.bagArt}/${t.key}.webp" alt=""
+         aria-hidden="true" decoding="async"
+         style="left:${t.side ? 82 : 18}%; top:${(t.top / H) * 100}%;
+                width:${(t.w / BAG_SCENE.w) * 100}%;
+                transform:translateX(-50%)" />`).join('');
+
+  const labels = placed.map(t => `
+    <span class="bag-label is-ring ${t.detail ? 'is-wide' : ''}"
+          style="left:${t.side ? 82 : 18}%; top:${(t.labelTop / H) * 100}%">
+      <b>${esc(t.label)}</b>
+      ${t.detail ? `<i>${esc(t.detail)}</i>` : ''}
+    </span>`).join('');
+
   return `
-    <ul class="bag-rows">
-      ${things.map(t => `
-        <li class="bag-row">
-          <img class="bag-row-pic" src="${PROFILE.bagArt}/${t.key}.webp" alt=""
-               aria-hidden="true" decoding="async" />
-          <span class="bag-row-text">
-            <b>${esc(t.label)}</b>
-            ${t.detail ? `<i>${esc(t.detail)}</i>` : ''}
-          </span>
-        </li>`).join('')}
-    </ul>`;
+    <div class="bag-scene is-ring" style="aspect-ratio:${BAG_SCENE.w}/${H}">
+      <img class="bag-pic bag-pack" src="art/bag/pack.webp" alt="" aria-hidden="true"
+           decoding="async" style="left:50%; top:50%; width:32%;
+                                   transform:translate(-50%,-50%)" />
+      ${pics}
+      ${labels}
+    </div>`;
 }
 
 function bagScene(dayIndex) {
-  if (PROFILE.bagStyle === 'list') return bagList(dayIndex);
+  if (PROFILE.bagStyle === 'ring') return bagRing(dayIndex);
   const things = bagThings(dayIndex).filter(t => BAG_PLACES[t.key]);
   const H = things.some(t => BAG_LOW.includes(t.key)) ? 560 : BAG_SCENE.h;
 
