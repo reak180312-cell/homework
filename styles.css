@@ -4035,3 +4035,49 @@ body {
   border-color: color-mix(in srgb, #D9A94A 52%, var(--line-soft));
   background: linear-gradient(160deg, color-mix(in srgb, #D9A94A 8%, var(--card)), var(--card));
 }
+
+/* ══ Painted creatures ═════════════════════════════════════
+   Thirty-nine of the fifty are paintings now. They go wherever the flat
+   drawing went and take the same box, so nothing that shows a creature had
+   to learn a second set of sizes. */
+.mon-art {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  /* A painting has its own edges; the flat drawing's slow breath would show
+     as the whole picture sliding, so it keeps still. */
+  animation: none !important;
+}
+
+/* A locked painting is the same file with its colour taken out — a truer
+   outline than anything that could be drawn to stand in for it, and free,
+   since the browser already has the picture. */
+.mon-lock {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.mon-lock .mon-hidden {
+  position: absolute;
+  inset: 0;
+  filter: grayscale(1) brightness(0);
+  opacity: .3;
+}
+.mon-lock .mon-q {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--card);
+  /* The outline underneath is not solid everywhere — a moth's wings are
+     thinner than its body — so the mark carries its own shadow to stay
+     readable wherever it lands. */
+  text-shadow: 0 1px 3px rgba(60, 54, 44, .45);
+}
+
+/* The book's portrait and the hatching are the two places a creature is the
+   whole point of the screen, so a painting is given the room it deserves. */
+.portrait .mon-art { width: 100%; height: 100%; }
+.hatch-mon .mon-art { width: 100%; height: 100%; }

@@ -1001,43 +1001,43 @@ const RARITY = [
 const rarityOf = (key) => RARITY.find(r => r.key === key) || RARITY[0];
 
 const MONSTERS = [
-  { id: 'blip', name: 'Blip', rarity: 'common', colour: '#5FB89C', shape: 'round', eyes: 1, top: 'antennae', mark: 'none',
+  { id: 'blip', art: true, name: 'Blip', rarity: 'common', colour: '#6f7daf', shape: 'round', eyes: 1, top: 'antennae', mark: 'none',
     age: 'Three weeks old', size: 'Fits in a cupped hand', lives: 'In the pencil case, under the rulers',
     eats: 'Pencil shavings, apparently', says: 'A soft blip, about once an hour',
     hobbies: ['Blinking slowly', 'Rolling downhill'], best: 'Finding things you dropped', worst: 'Staying awake past nine',
     fact: 'Blip has one eye and has never once complained about it.' },
 
-  { id: 'pom', name: 'Pom', rarity: 'common', colour: '#E08BA6', shape: 'cloud', eyes: 2, top: 'none', mark: 'none',
+  { id: 'pom', art: true, name: 'Pom', rarity: 'common', colour: '#ae6f87', shape: 'cloud', eyes: 2, top: 'none', mark: 'none',
     age: 'Half a year', size: 'About the size of a plum', lives: 'In the hood of your coat',
     eats: 'Anything warm', says: 'Nothing at all, ever',
     hobbies: ['Napping in socks', 'Being carried'], best: 'Being comfortable anywhere', worst: 'Walking',
     fact: 'Pom has never walked anywhere by itself and does not intend to start.' },
 
-  { id: 'nib', name: 'Nib', rarity: 'uncommon', colour: '#9186D4', shape: 'tall', eyes: 3, top: 'none', mark: 'none',
+  { id: 'nib', art: true, name: 'Nib', rarity: 'uncommon', colour: '#6f78ae', shape: 'tall', eyes: 3, top: 'none', mark: 'none',
     age: 'Four months', size: 'As tall as a glue stick', lives: 'Behind the books on the shelf',
     eats: 'Crumbs, in a very tidy way', says: 'Mm.',
     hobbies: ['Watching everything at once', 'Tidying'], best: 'Noticing what moved', worst: 'Surprises',
     fact: 'With three eyes Nib can watch the door, the window and you at the same time.' },
 
-  { id: 'tuft', name: 'Tuft', rarity: 'common', colour: '#EC9A72', shape: 'round', eyes: 2, top: 'ears', mark: 'none',
+  { id: 'tuft', art: true, name: 'Tuft', rarity: 'common', colour: '#aea26f', shape: 'round', eyes: 2, top: 'ears', mark: 'none',
     age: 'One year', size: 'A grapefruit with ears', lives: 'At the bottom of your school bag',
     eats: 'Half a biscuit, saved for later', says: 'A small hum when it rains',
     hobbies: ['Listening to rain', 'Hiding in bags'], best: 'Hearing things a room away', worst: 'Loud rooms',
     fact: 'Tuft can hear a packet being opened from the next room.' },
 
-  { id: 'glim', name: 'Glim', rarity: 'rare', colour: '#E3B655', shape: 'drop', eyes: 2, top: 'none', mark: 'glow',
+  { id: 'glim', art: true, name: 'Glim', rarity: 'rare', colour: '#d49449', shape: 'drop', eyes: 2, top: 'none', mark: 'glow',
     age: 'Nobody knows', size: 'Roughly a lamp', lives: 'On the desk, after dark',
     eats: 'Does not. Just glows.', says: 'A faint buzz, like a bulb',
     hobbies: ['Glowing gently', 'Reading past bedtime'], best: 'Being the last light on', worst: 'Mornings',
     fact: 'Glim has finished more books than anyone else here.' },
 
-  { id: 'moss', name: 'Moss', rarity: 'common', colour: '#6BA155', shape: 'round', eyes: 2, top: 'sprout', mark: 'none',
+  { id: 'moss', art: true, name: 'Moss', rarity: 'common', colour: '#bd8161', shape: 'round', eyes: 2, top: 'sprout', mark: 'none',
     age: 'Two springs', size: 'A flowerpot', lives: 'On the windowsill',
     eats: 'Sunlight and a little water', says: 'A creak, like a growing branch',
     hobbies: ['Growing things', 'Sitting in the sun'], best: 'Keeping plants alive', worst: 'Being indoors too long',
     fact: 'The sprout on Moss’s head is a different plant every spring.' },
 
-  { id: 'wisp', name: 'Wisp', rarity: 'rare', colour: '#7BAED6', shape: 'wisp', eyes: 2, top: 'none', mark: 'none',
+  { id: 'wisp', art: true, name: 'Wisp', rarity: 'rare', colour: '#8c6fae', shape: 'wisp', eyes: 2, top: 'none', mark: 'none',
     age: 'Older than it looks', size: 'Hard to say — it keeps changing', lives: 'Wherever the draught is',
     eats: 'Nothing anyone has seen', says: 'A long sigh',
     hobbies: ['Drifting', 'Turning up quietly'], best: 'Appearing behind you', worst: 'Staying in one place',
@@ -1049,13 +1049,13 @@ const MONSTERS = [
     hobbies: ['Warming cold hands', 'Small mischief'], best: 'Warming cold hands', worst: 'Keeping a secret',
     fact: 'Cinder is exactly as warm as a fresh cup of tea.' },
 
-  { id: 'pebble', name: 'Pebble', rarity: 'common', colour: '#7F92A6', shape: 'square', eyes: 2, top: 'none', mark: 'spots',
+  { id: 'pebble', art: true, name: 'Pebble', rarity: 'common', colour: '#8eae6f', shape: 'square', eyes: 2, top: 'none', mark: 'spots',
     age: 'Very old', size: 'A paperweight', lives: 'Exactly where you left it',
     eats: 'Once a month, quietly', says: 'Nothing you would notice',
     hobbies: ['Staying put', 'Collecting smaller pebbles'], best: 'Not moving', worst: 'Hurrying',
     fact: 'Pebble has been in the same spot since Tuesday and is very pleased about it.' },
 
-  { id: 'fizz', name: 'Fizz', rarity: 'uncommon', colour: '#49A9A8', shape: 'round', eyes: 2, top: 'antennae', mark: 'bubbles',
+  { id: 'fizz', art: true, name: 'Fizz', rarity: 'uncommon', colour: '#6fadae', shape: 'round', eyes: 2, top: 'antennae', mark: 'bubbles',
     age: 'Two months', size: 'A fizzy drink can', lives: 'In the water bottle pocket',
     eats: 'Bubbles, mostly', says: 'A steady stream of questions',
     hobbies: ['Fizzing', 'Asking questions'], best: 'Asking but why', worst: 'Sitting still',
@@ -1067,13 +1067,13 @@ const MONSTERS = [
     hobbies: ['Blanket forts', 'Long breakfasts'], best: 'Building a fort out of anything', worst: 'Getting up',
     fact: 'Snug once stayed in bed for a Sunday and most of a Monday.' },
 
-  { id: 'luna', name: 'Luna', rarity: 'epic', colour: '#6A78C0', shape: 'tall', eyes: 2, top: 'none', mark: 'stars',
+  { id: 'luna', art: true, name: 'Luna', rarity: 'epic', colour: '#6c78b1', shape: 'tall', eyes: 2, top: 'none', mark: 'stars',
     age: 'One whole moon', size: 'As tall as a bedside lamp', lives: 'On the windowsill at night',
     eats: 'Nothing. Watches instead.', says: 'The names of stars, quietly',
     hobbies: ['Staying up late', 'Naming the stars'], best: 'Knowing which star is which', worst: 'Being awake before noon',
     fact: 'Luna has named every star it can see, and a few it cannot.' },
 
-  { id: 'bud', name: 'Bud', rarity: 'common', colour: '#8FBF6A', shape: 'bean', eyes: 2, top: 'leaf', mark: 'none',
+  { id: 'bud', art: true, name: 'Bud', rarity: 'common', colour: '#ae896f', shape: 'bean', eyes: 2, top: 'leaf', mark: 'none',
     age: 'One spring', size: 'A small apple', lives: 'In the plant pot, pretending',
     eats: 'Rainwater', says: 'A tiny rustle',
     hobbies: ['Pretending to be a plant', 'Turning to face the sun'], best: 'Standing very still', worst: 'Being watered',
@@ -1085,7 +1085,7 @@ const MONSTERS = [
     hobbies: ['Squeezing into gaps', 'Saying its own name'], best: 'Fitting anywhere', worst: 'Being found',
     fact: 'Mip says only one word and that word is Mip.' },
 
-  { id: 'dot', name: 'Dot', rarity: 'common', colour: '#E8C35C', shape: 'pebble', eyes: 2, top: 'none', mark: 'spots',
+  { id: 'dot', art: true, name: 'Dot', rarity: 'common', colour: '#c59058', shape: 'pebble', eyes: 2, top: 'none', mark: 'spots',
     age: 'Two months', size: 'A large coin', lives: 'In your coat pocket',
     eats: 'Half a raisin', says: 'A click, twice',
     hobbies: ['Counting things', 'Lining things up'], best: 'Counting past a hundred', worst: 'Odd numbers',
@@ -1115,7 +1115,7 @@ const MONSTERS = [
     hobbies: ['Watching from high up', 'Singing at dawn'], best: 'Spotting things first', worst: 'Being indoors',
     fact: 'Wren wakes before everyone and has opinions about it.' },
 
-  { id: 'tilly', name: 'Tilly', rarity: 'common', colour: '#E5A0B4', shape: 'bean', eyes: 2, top: 'bow', mark: 'heart',
+  { id: 'tilly', art: true, name: 'Tilly', rarity: 'common', colour: '#d46449', shape: 'bean', eyes: 2, top: 'bow', mark: 'heart',
     age: 'Seven months', size: 'A rolled-up sock', lives: 'In the sock drawer',
     eats: 'Crumbs from the biscuit tin', says: 'A pleased little hum',
     hobbies: ['Matching socks', 'Being tidy'], best: 'Finding the other sock', worst: 'Odd socks',
@@ -1127,31 +1127,31 @@ const MONSTERS = [
     hobbies: ['Bouncing', 'Landing on things'], best: 'Bouncing', worst: 'Standing still',
     fact: 'Bop has not stopped bouncing since the day it hatched.' },
 
-  { id: 'sprig', name: 'Sprig', rarity: 'common', colour: '#7CB884', shape: 'tall', eyes: 2, top: 'sprout', mark: 'none',
+  { id: 'sprig', art: true, name: 'Sprig', rarity: 'common', colour: '#c0bf5e', shape: 'tall', eyes: 2, top: 'sprout', mark: 'none',
     age: 'Two summers', size: 'A ruler, standing up', lives: 'Among the herbs',
     eats: 'Sunlight, mostly', says: 'A leafy whisper',
     hobbies: ['Growing taller', 'Smelling of mint'], best: 'Smelling wonderful', worst: 'Being trimmed',
     fact: 'Sprig grows a little every week and measures itself against the window.' },
 
-  { id: 'mo', name: 'Mo', rarity: 'common', colour: '#8E8FA8', shape: 'blob', eyes: 2, top: 'none', mark: 'none',
+  { id: 'mo', art: true, name: 'Mo', rarity: 'common', colour: '#6f78ae', shape: 'blob', eyes: 2, top: 'none', mark: 'none',
     age: 'Unclear', size: 'A bowl of porridge', lives: 'Anywhere soft',
     eats: 'Slowly', says: 'Mmmmm',
     hobbies: ['Settling', 'Thinking it over'], best: 'Not rushing', worst: 'Being asked to decide',
     fact: 'Mo has been thinking about something since March.' },
 
-  { id: 'gus', name: 'Gus', rarity: 'common', colour: '#D98F5C', shape: 'square', eyes: 2, top: 'horns', mark: 'none',
+  { id: 'gus', art: true, name: 'Gus', rarity: 'common', colour: '#b1ac6d', shape: 'square', eyes: 2, top: 'horns', mark: 'none',
     age: 'Two years', size: 'A lunchbox', lives: 'By the front door',
     eats: 'Whatever is left', says: 'A short, gruff note',
     hobbies: ['Guarding the door', 'Watching the street'], best: 'Noticing arrivals', worst: 'Goodbyes',
     fact: 'Gus is at the door before the key is in the lock.' },
 
-  { id: 'pip', name: 'Pip', rarity: 'common', colour: '#EFC04F', shape: 'pebble', eyes: 1, top: 'sprout', mark: 'none',
+  { id: 'pip', art: true, name: 'Pip', rarity: 'common', colour: '#d46a49', shape: 'pebble', eyes: 1, top: 'sprout', mark: 'none',
     age: 'A fortnight', size: 'An acorn', lives: 'In a jam jar on the shelf',
     eats: 'A drop of water a day', says: 'A very small squeak',
     hobbies: ['Waiting to grow', 'Being encouraged'], best: 'Patience', worst: 'Being rushed',
     fact: 'Pip intends to be enormous one day and is taking its time.' },
 
-  { id: 'fen', name: 'Fen', rarity: 'common', colour: '#6E9E8E', shape: 'wisp', eyes: 2, top: 'none', mark: 'none',
+  { id: 'fen', art: true, name: 'Fen', rarity: 'common', colour: '#b69a67', shape: 'wisp', eyes: 2, top: 'none', mark: 'none',
     age: 'A misty week', size: 'Knee-high, at a guess', lives: 'Low to the ground, early',
     eats: 'Dew', says: 'Almost nothing',
     hobbies: ['Sitting in fog', 'Muffling sounds'], best: 'Making mornings quiet', worst: 'Bright noon',
@@ -1169,13 +1169,13 @@ const MONSTERS = [
     hobbies: ['Keeping what falls', 'Sorting by colour'], best: 'Knowing where it went', worst: 'Giving things back',
     fact: 'Everything you have ever dropped is under the desk with Kip.' },
 
-  { id: 'marl', name: 'Marl', rarity: 'uncommon', colour: '#A8896B', shape: 'square', eyes: 2, top: 'none', mark: 'swirl',
+  { id: 'marl', art: true, name: 'Marl', rarity: 'uncommon', colour: '#746fae', shape: 'square', eyes: 2, top: 'none', mark: 'swirl',
     age: 'Nine years', size: 'A brick', lives: 'Holding a door open',
     eats: 'Twice a year', says: 'A low rumble',
     hobbies: ['Being useful', 'Holding things up'], best: 'Not budging', worst: 'Being moved',
     fact: 'Marl has held the same door open since the summer before last.' },
 
-  { id: 'vex', name: 'Vex', rarity: 'uncommon', colour: '#D4606A', shape: 'spike', eyes: 2, top: 'horns', mark: 'none',
+  { id: 'vex', art: true, name: 'Vex', rarity: 'uncommon', colour: '#bba263', shape: 'spike', eyes: 2, top: 'horns', mark: 'none',
     age: 'Six months', size: 'A closed fist', lives: 'Somewhere it was told not to',
     eats: 'The last biscuit', says: 'A sharp tut',
     hobbies: ['Disagreeing', 'Being right later'], best: 'Spotting the flaw', worst: 'Being told what to do',
@@ -1187,115 +1187,115 @@ const MONSTERS = [
     hobbies: ['Following the sun', 'Warming cold feet'], best: 'Finding the sunny spot', worst: 'Curtains',
     fact: 'Ora is always in the sunniest square of the room, whatever the hour.' },
 
-  { id: 'thistle', name: 'Thistle', rarity: 'uncommon', colour: '#8A76C4', shape: 'spike', eyes: 2, top: 'tuft', mark: 'none',
+  { id: 'thistle', art: true, name: 'Thistle', rarity: 'uncommon', colour: '#ae816f', shape: 'spike', eyes: 2, top: 'tuft', mark: 'none',
     age: 'Two summers', size: 'A teapot', lives: 'At the edge of the garden',
     eats: 'Whatever the wind brings', says: 'A prickly rustle',
     hobbies: ['Standing its ground', 'Being admired from a distance'], best: 'Looking fierce', worst: 'Hugs',
     fact: 'Thistle is far softer than it looks and would rather you did not know.' },
 
-  { id: 'bram', name: 'Bram', rarity: 'uncommon', colour: '#6B7F4A', shape: 'round', eyes: 3, top: 'leaf', mark: 'spots',
+  { id: 'bram', art: true, name: 'Bram', rarity: 'uncommon', colour: '#b99564', shape: 'round', eyes: 3, top: 'leaf', mark: 'spots',
     age: 'Four autumns', size: 'A football', lives: 'In the hedge',
     eats: 'Berries, all of them', says: 'A contented munch',
     hobbies: ['Finding berries', 'Getting stuck in hedges'], best: 'Reaching the high ones', worst: 'Thorns',
     fact: 'Bram knows where every berry on the street is and when it will be ready.' },
 
-  { id: 'juno', name: 'Juno', rarity: 'uncommon', colour: '#3F8FA8', shape: 'tall', eyes: 2, top: 'crown', mark: 'none',
+  { id: 'juno', art: true, name: 'Juno', rarity: 'uncommon', colour: '#bc9662', shape: 'tall', eyes: 2, top: 'crown', mark: 'none',
     age: 'Three years', size: 'A tall glass', lives: 'At the head of the table',
     eats: 'Politely, and first', says: 'A clear, carrying voice',
     hobbies: ['Organising everyone', 'Making plans'], best: 'Getting things started', worst: 'Being interrupted',
     fact: 'Juno has a plan for the week and everybody is in it.' },
 
-  { id: 'ash', name: 'Ash', rarity: 'uncommon', colour: '#7A7F86', shape: 'wisp', eyes: 2, top: 'none', mark: 'freckles',
+  { id: 'ash', art: true, name: 'Ash', rarity: 'uncommon', colour: '#6c7db2', shape: 'wisp', eyes: 2, top: 'none', mark: 'freckles',
     age: 'After the fire', size: 'A drifting handful', lives: 'Above the fireplace',
     eats: 'Warmth', says: 'A dry whisper',
     hobbies: ['Drifting upward', 'Settling on things'], best: 'Going unnoticed', worst: 'Being dusted',
     fact: 'Ash settles on everything and apologises for none of it.' },
 
-  { id: 'wick', name: 'Wick', rarity: 'uncommon', colour: '#E0803C', shape: 'tall', eyes: 1, top: 'none', mark: 'glow',
+  { id: 'wick', art: true, name: 'Wick', rarity: 'uncommon', colour: '#6f8aae', shape: 'tall', eyes: 1, top: 'none', mark: 'glow',
     age: 'Burning a while', size: 'A candle', lives: 'On the shelf, alight',
     eats: 'Slowly, itself', says: 'A quiet flicker',
     hobbies: ['Burning steadily', 'Keeping watch at night'], best: 'Lasting longer than expected', worst: 'Draughts',
     fact: 'Wick has been alight since the start of term and shows no sign of stopping.' },
 
-  { id: 'noor', name: 'Noor', rarity: 'uncommon', colour: '#D9C05A', shape: 'round', eyes: 2, top: 'halo', mark: 'stars',
+  { id: 'noor', art: true, name: 'Noor', rarity: 'uncommon', colour: '#68b0b6', shape: 'round', eyes: 2, top: 'halo', mark: 'stars',
     age: 'One bright year', size: 'A lantern', lives: 'Wherever it is darkest',
     eats: 'Nothing it will admit to', says: 'A soft chime',
     hobbies: ['Lighting corners', 'Leading the way'], best: 'Being found in the dark', worst: 'Full daylight',
     fact: 'Noor goes to the darkest corner of a room and simply stays there.' },
 
-  { id: 'ember', name: 'Ember', rarity: 'rare', colour: '#E05A3C', shape: 'drop', eyes: 2, top: 'horns', mark: 'glow',
+  { id: 'ember', art: true, name: 'Ember', rarity: 'rare', colour: '#bb7a62', shape: 'drop', eyes: 2, top: 'horns', mark: 'glow',
     age: 'Since the last fire went out', size: 'A closed hand', lives: 'In the last warm ash',
     eats: 'A breath of air', says: 'A low crackle',
     hobbies: ['Staying warm', 'Waiting to catch'], best: 'Outlasting the fire', worst: 'Rain',
     fact: 'Ember is the part of the fire that refused to go out.' },
 
-  { id: 'frost', name: 'Frost', rarity: 'rare', colour: '#9FD0E0', shape: 'spike', eyes: 2, top: 'crown', mark: 'swirl',
+  { id: 'frost', art: true, name: 'Frost', rarity: 'rare', colour: '#ae876f', shape: 'spike', eyes: 2, top: 'crown', mark: 'swirl',
     age: 'One cold night', size: 'A windowpane’s worth', lives: 'On the inside of the glass',
     eats: 'Nothing. It only spreads.', says: 'A thin crackle',
     hobbies: ['Drawing on windows', 'Arriving overnight'], best: 'Making patterns nobody taught it', worst: 'Ten o’clock sun',
     fact: 'Frost draws a different window every night and never repeats one.' },
 
-  { id: 'echo', name: 'Echo', rarity: 'rare', colour: '#8C9BB5', shape: 'wisp', eyes: 3, top: 'none', mark: 'swirl',
+  { id: 'echo', art: true, name: 'Echo', rarity: 'rare', colour: '#ae756f', shape: 'wisp', eyes: 3, top: 'none', mark: 'swirl',
     age: 'As old as the last thing said', size: 'The size of the room', lives: 'In empty halls',
     eats: 'Silence', says: 'Whatever you said, a moment later',
     hobbies: ['Repeating things', 'Waiting in stairwells'], best: 'Remembering exactly', worst: 'Carpet',
     fact: 'Echo has never had an idea of its own and is perfectly happy about it.' },
 
-  { id: 'sable', name: 'Sable', rarity: 'rare', colour: '#4C4A5C', shape: 'bean', eyes: 2, top: 'ears', mark: 'moon',
+  { id: 'sable', art: true, name: 'Sable', rarity: 'rare', colour: '#646fb9', shape: 'bean', eyes: 2, top: 'ears', mark: 'moon',
     age: 'Nine lives in', size: 'A cat, curled', lives: 'On the warmest chair, always',
     eats: 'Only what it chose', says: 'Nothing, pointedly',
     hobbies: ['Sitting where you were sitting', 'Ignoring you'], best: 'Choosing the best seat', worst: 'Being called',
     fact: 'Sable was in your chair before you stood up. Nobody saw it move.' },
 
-  { id: 'cirrus', name: 'Cirrus', rarity: 'rare', colour: '#CFE0EE', shape: 'cloud', eyes: 2, top: 'none', mark: 'stripes',
+  { id: 'cirrus', art: true, name: 'Cirrus', rarity: 'rare', colour: '#b99b65', shape: 'cloud', eyes: 2, top: 'none', mark: 'stripes',
     age: 'High and thin', size: 'Wider than it looks', lives: 'The very top of the sky',
     eats: 'Cold air', says: 'A far-off whistle',
     hobbies: ['Being first to see weather', 'Streaking the sky'], best: 'Knowing what tomorrow brings', worst: 'Coming down',
     fact: 'When Cirrus turns up, it rains within the day. It has never been wrong.' },
 
-  { id: 'onyx', name: 'Onyx', rarity: 'rare', colour: '#3A3F52', shape: 'square', eyes: 2, top: 'none', mark: 'stars',
+  { id: 'onyx', art: true, name: 'Onyx', rarity: 'rare', colour: '#ae6f85', shape: 'square', eyes: 2, top: 'none', mark: 'stars',
     age: 'Older than the building', size: 'A paving stone', lives: 'Under everything',
     eats: 'Never, as far as anyone knows', says: 'A deep, slow note',
     hobbies: ['Holding the floor up', 'Remembering'], best: 'Bearing weight', worst: 'Being asked to move',
     fact: 'Onyx remembers what was here before the school was, and will not say.' },
 
-  { id: 'vela', name: 'Vela', rarity: 'rare', colour: '#5F7FD4', shape: 'drop', eyes: 2, top: 'fin', mark: 'bubbles',
+  { id: 'vela', art: true, name: 'Vela', rarity: 'rare', colour: '#5496ca', shape: 'drop', eyes: 2, top: 'fin', mark: 'bubbles',
     age: 'One long voyage', size: 'A jug', lives: 'In the deep end',
     eats: 'Whatever drifts past', says: 'A low bubble',
     hobbies: ['Swimming in circles', 'Going deeper'], best: 'Holding its breath', worst: 'Dry land',
     fact: 'Vela has never been to the bottom and thinks about it constantly.' },
 
-  { id: 'aurora', name: 'Aurora', rarity: 'epic', colour: '#3FBFA0', shape: 'wisp', eyes: 2, top: 'crown', mark: 'glow',
+  { id: 'aurora', art: true, name: 'Aurora', rarity: 'epic', colour: '#d49949', shape: 'wisp', eyes: 2, top: 'crown', mark: 'glow',
     age: 'Nine hundred winters', size: 'The whole northern sky', lives: 'Above the cold places',
     eats: 'Starlight', says: 'A sound you feel rather than hear',
     hobbies: ['Rippling', 'Being photographed badly'], best: 'Stopping people in their tracks', worst: 'Cloud',
     fact: 'Everyone who has seen Aurora describes a different colour, and all of them are right.' },
 
-  { id: 'solis', name: 'Solis', rarity: 'epic', colour: '#F0A32E', shape: 'round', eyes: 1, top: 'halo', mark: 'glow',
+  { id: 'solis', art: true, name: 'Solis', rarity: 'epic', colour: '#d49749', shape: 'round', eyes: 1, top: 'halo', mark: 'glow',
     age: 'Every morning', size: 'Too bright to measure', lives: 'Just over the horizon',
     eats: 'Nothing, and gives everything', says: 'The first bird of the day',
     hobbies: ['Rising', 'Waking the whole street'], best: 'Turning up on time, always', worst: 'December',
     fact: 'Solis has never once been late, in the whole history of mornings.' },
 
-  { id: 'tempest', name: 'Tempest', rarity: 'epic', colour: '#4A5A7A', shape: 'spike', eyes: 3, top: 'horns', mark: 'stripes',
+  { id: 'tempest', art: true, name: 'Tempest', rarity: 'epic', colour: '#6f85ae', shape: 'spike', eyes: 3, top: 'horns', mark: 'stripes',
     age: 'Gathering since Tuesday', size: 'Fills the window', lives: 'Out at sea, mostly',
     eats: 'Warm air', says: 'Thunder, eventually',
     hobbies: ['Building slowly', 'Arriving all at once'], best: 'Making everyone look up', worst: 'Calm weather',
     fact: 'Tempest takes three days to arrive and eleven minutes to pass.' },
 
-  { id: 'nimbus', name: 'Nimbus', rarity: 'epic', colour: '#7E8FA8', shape: 'cloud', eyes: 2, top: 'crown', mark: 'swirl',
+  { id: 'nimbus', art: true, name: 'Nimbus', rarity: 'epic', colour: '#aaae6f', shape: 'cloud', eyes: 2, top: 'crown', mark: 'swirl',
     age: 'A long grey season', size: 'Ceiling to floor', lives: 'Directly overhead',
     eats: 'The sea, a little at a time', says: 'A patient, steady drumming',
     hobbies: ['Raining', 'Turning up on sports day'], best: 'Timing', worst: 'Being wanted',
     fact: 'Nimbus has never once rained on a day nobody minded.' },
 
-  { id: 'zenith', name: 'Zenith', rarity: 'legendary', colour: '#E8C24A', shape: 'tall', eyes: 3, top: 'crown', mark: 'stars',
+  { id: 'zenith', art: true, name: 'Zenith', rarity: 'legendary', colour: '#d49e49', shape: 'tall', eyes: 3, top: 'crown', mark: 'stars',
     age: 'As old as counting', size: 'As tall as the room lets it be', lives: 'At the very top of things',
     eats: 'Nothing anyone may offer', says: 'One word, once, and it is always the right one',
     hobbies: ['Being highest', 'Keeping perfect time'], best: 'Being exactly where it should be', worst: 'Second place',
     fact: 'Zenith turns up only when someone has done everything they set out to do.' },
 
-  { id: 'eclipse', name: 'Eclipse', rarity: 'legendary', colour: '#2E2A44', shape: 'round', eyes: 1, top: 'halo', mark: 'glow',
+  { id: 'eclipse', art: true, name: 'Eclipse', rarity: 'legendary', colour: '#af916e', shape: 'round', eyes: 1, top: 'halo', mark: 'glow',
     age: 'Counted in centuries', size: 'Exactly the size of the sun, from here', lives: 'Between the light and you',
     eats: 'Daylight, briefly', says: 'Absolute silence, for four minutes',
     hobbies: ['Lining things up', 'Making birds go quiet'], best: 'Stopping everything at once', worst: 'Being predicted',
@@ -1538,8 +1538,68 @@ function markOf(mark, colour) {
 }
 
 /**
- * One creature, drawn. `locked` gives back only its silhouette, so what is
- * still to come stays a surprise.
+ * One creature, however it is drawn.
+ *
+ * Thirty-nine of the fifty are paintings and the rest are still the flat
+ * drawing the app made itself. Everywhere that shows a creature calls this,
+ * so neither kind needs a second code path — and a creature whose picture
+ * fails to load falls back to nothing rather than to a broken image, because
+ * the flat drawing is still under it.
+ */
+function monsterPic(m, { locked = false } = {}) {
+  if (!m.art) return monsterSvg(m, { locked });
+
+  const src = `art/mon/${m.id}.webp`;
+  if (!locked) {
+    return `<img class="mon mon-art" src="${src}" data-mon="${m.id}" alt=""
+                 aria-hidden="true" width="448" height="448"
+                 loading="lazy" decoding="async" />`;
+  }
+  // The silhouette is the painting with its colour taken out, which is a
+  // truer outline than anything that could be drawn to stand in for it — and
+  // it costs nothing, since the file is the same file.
+  return `<span class="mon mon-lock" aria-hidden="true">
+            <img class="mon-art mon-hidden" src="${src}" data-mon="${m.id}" alt=""
+                 width="448" height="448" loading="lazy" decoding="async" />
+            <b class="mon-q">?</b>
+          </span>`;
+}
+
+/* The paintings are 1.5MB between them, which is twice the rest of the app,
+   so they are not downloaded with it — each is kept the first time it is
+   actually looked at. Two things follow from that.
+ *
+ * One: a painting that has not been looked at yet, on a phone with no signal,
+ * would leave a hole where a creature should be. It falls back to the flat
+ * drawing instead, which is still in the code and costs nothing to draw. The
+ * listener is on the window with capture on, because an image that fails to
+ * load fires an error that does not bubble.
+ */
+function wireArtFallback() {
+  window.addEventListener('error', (e) => {
+    const img = e.target;
+    if (!img || img.tagName !== 'IMG' || !img.classList.contains('mon-art')) return;
+    const m = monsterById(img.dataset.mon);
+    if (!m) return;
+    const locked = img.classList.contains('mon-hidden');
+    const holder = locked ? img.closest('.mon-lock') : img;
+    if (holder) holder.outerHTML = monsterSvg(m, { locked });
+  }, true);
+}
+
+/* Two: the creatures you already have are the ones you will actually look at,
+ * and there are rarely more than a handful, so those are fetched quietly once
+ * the app is up. After that the book, the profile and the hatching all work
+ * with no signal at all. */
+function warmOwnArt() {
+  for (const m of collectedMonsters()) {
+    if (m.art) new Image().src = `art/mon/${m.id}.webp`;
+  }
+}
+
+/**
+ * One creature, drawn by hand. `locked` gives back only its silhouette, so
+ * what is still to come stays a surprise.
  */
 function monsterSvg(m, { locked = false } = {}) {
   if (locked) {
@@ -1986,6 +2046,7 @@ function adoptRemoteState() {
   $('#main').hidden = false;
   render();
   scheduleReminder();
+  warmOwnArt();     // the ones you already have, so the book works with no signal
 }
 
 const activeHw = () => state.homework.filter(h => !h.completed);
@@ -2941,7 +3002,7 @@ function renderProfileTop() {
     you.innerHTML = `
       <span class="pro-avatar ${m ? '' : 'is-empty'}" ${m ? `style="--mc:${m.colour}"` : ''}
             aria-hidden="true">
-        ${m ? monsterSvg(m)
+        ${m ? monsterPic(m)
             : '<img src="art/set/sprout.webp" alt="" width="300" height="266" decoding="async" />'}
         ${m ? '<span class="pro-badge"><svg class="ico" aria-hidden="true"><use href="#i-leaf" /></svg></span>' : ''}
       </span>
@@ -2977,7 +3038,7 @@ function renderProfileTop() {
       const { n } = togetherFor(m.id);
       card.innerHTML = `
         <div class="card pro-cmp" style="--mc:${m.colour}">
-          <span class="pro-cmp-art" aria-hidden="true">${monsterSvg(m)}</span>
+          <span class="pro-cmp-art" aria-hidden="true">${monsterPic(m)}</span>
           <span class="pro-cmp-words">
             <span class="cmp-kicker">${esc(tr('cmp.mine'))}</span>
             <strong>${esc(m.name)}</strong>
@@ -3001,7 +3062,7 @@ function renderProfileTop() {
   const peek = $('#book-peek');
   if (peek) {
     peek.innerHTML = found.slice(-3).map(x =>
-      `<span class="bc-peek" style="--mc:${x.colour}">${monsterSvg(x)}</span>`).join('');
+      `<span class="bc-peek" style="--mc:${x.colour}">${monsterPic(x)}</span>`).join('');
   }
 }
 
@@ -3131,14 +3192,14 @@ function renderCollection() {
       return `
         <button class="mon-slot is-locked is-${m.rarity}" data-locked="${m.id}"
                 aria-label="${esc(tr('cre.creature', { n: no }))} — ${esc(tr('cre.locked'))}">
-          ${monsterSvg(m, { locked: true })}
+          ${monsterPic(m, { locked: true })}
           <span class="mon-no">${esc(tr('cre.number', { n: no }))}</span>
         </button>`;
     }
     return `
       <button class="mon-slot is-${m.rarity}" data-monster="${m.id}" style="--mc:${m.colour}"
               aria-label="${esc(m.name)} — ${esc(tr(`rarity.${m.rarity}`))}">
-        ${monsterSvg(m)}
+        ${monsterPic(m)}
         <span class="mon-name">${esc(m.name)}</span>
         <span class="mon-no">${esc(tr('cre.number', { n: no }))}</span>
       </button>`;
@@ -3203,7 +3264,7 @@ function renderCompanionBanner() {
         ${esc(tr('cmp.view'))}<svg class="ico" aria-hidden="true"><use href="#i-chevron" /></svg>
       </button>
     </div>
-    <span class="cmp-art" style="--mc:${m.colour}" aria-hidden="true">${monsterSvg(m)}</span>
+    <span class="cmp-art" style="--mc:${m.colour}" aria-hidden="true">${monsterPic(m)}</span>
     ${bar}`;
 }
 
@@ -3253,7 +3314,7 @@ function renderCreaturePage() {
 
   body.innerHTML = `
     <div class="cre-hero" style="--mc:${m.colour}">
-      <span class="cre-hero-art">${monsterSvg(m)}</span>
+      <span class="cre-hero-art">${monsterPic(m)}</span>
     </div>
 
     <h1 class="cre-name">${esc(m.name)}</h1>
@@ -3348,7 +3409,7 @@ function renderCompanionPage() {
     <p class="cmp-sub">${esc(tr('cmp.sub'))}</p>
 
     <div class="cmp-preview">
-      <span class="cmp-preview-art" style="--mc:${pick.colour}">${monsterSvg(pick)}</span>
+      <span class="cmp-preview-art" style="--mc:${pick.colour}">${monsterPic(pick)}</span>
       <span class="cmp-preview-tag">${esc(pick.name)}</span>
     </div>
 
@@ -3357,7 +3418,7 @@ function renderCompanionPage() {
       ${have.map(m => `
         <button class="cmp-card ${m.id === pick.id ? 'is-on' : ''}" data-pick="${m.id}"
                 style="--mc:${m.colour}" aria-pressed="${m.id === pick.id}">
-          ${monsterSvg(m)}
+          ${monsterPic(m)}
           <span class="cmp-card-name">${esc(m.name)}</span>
           <span class="cmp-tick" aria-hidden="true">
             <svg class="ico" aria-hidden="true"><use href="#i-check" /></svg>
@@ -3414,7 +3475,7 @@ function foundSpread(m) {
   const rank = rarityOf(m.rarity);
   return `
     <div class="page page-l" style="--mc:${m.colour}">
-      <div class="portrait">${monsterSvg(m)}</div>
+      <div class="portrait">${monsterPic(m)}</div>
       <h2 class="page-name">${esc(m.name)}</h2>
       <p class="page-rank is-${m.rarity}">${esc(tr('rarity.' + m.rarity))}</p>
       <dl class="page-facts">
@@ -3549,7 +3610,7 @@ function showArrival(m, fromLevel) {
       <p class="ar-kicker is-${m.rarity}">${esc(tr('rarity.' + m.rarity))}</p>
       <div class="hatch" style="--mc:${m.colour}; --shell:${m.shell}">
         <span class="hatch-glow"></span>
-        <div class="hatch-mon">${monsterSvg(m)}</div>
+        <div class="hatch-mon">${monsterPic(m)}</div>
         <div class="hatch-egg">${eggSvg(m, { split: true })}</div>
         <span class="hatch-shards">${'<i></i>'.repeat(8)}</span>
       </div>
@@ -3596,7 +3657,12 @@ function maybeArrival(level, fromLevel) {
   state.progress.metAt = state.progress.metAt || {};
 
   const m = rollMonster();
-  if (m) state.progress.metAt[m.id] = Date.now();
+  if (m) {
+    state.progress.metAt[m.id] = Date.now();
+    // The egg takes three seconds to open. Whoever is inside is fetched now,
+    // so the moment it does there is a creature there and not a gap.
+    if (m.art) new Image().src = `art/mon/${m.id}.webp`;
+  }
   save();
 
   if (!m) return false;                 // everyone has already turned up
@@ -4407,6 +4473,7 @@ function pointAtManifest() {
 
 function boot() {
   pointAtManifest();
+  wireArtFallback();
   load();
   saveLocal();      // write the migrated shape back, without bumping the sync clock
   applyDesk();      // the colour of the place, before it is painted once

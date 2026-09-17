@@ -50,3 +50,9 @@ picturs to new/
 # Redesign reference pictures - never publish these
 cahnge for it/
 *.zip
+
+# Creature source drawings - never publish these
+new monsters/
+
+# ...and the fifty creatures
+!art/mon/*.webp

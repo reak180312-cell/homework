@@ -723,12 +723,42 @@ book with a creature behind it and read, at 22px, as a second bag.
 ### The collection
 
 All fifty at once, three across, in the order they were written — so a creature keeps the same
-number for ever and the gaps are the ones left to find. The ones you have are drawn. The ones
-you have not are **their own silhouette** with a question mark: body, whatever is on the head,
-feet, flattened to one colour. Fifty identical blobs would say nothing about how different they
-are; a silhouette says that much and nothing else. The few tops drawn in their own colours — a
-sprout, a crown, a halo — are flattened with the rest, or a green shoot would name the creature
-under it.
+number for ever and the gaps are the ones left to find.
+
+**Thirty-nine of the fifty are paintings.** They arrived as 1254px squares, twenty-four already
+cut out and fifteen painted onto solid black. Keying out “everything dark” would have eaten the
+dark creatures — a smoke horse, an ink blob, a lava dragon — so the black is taken by flood
+filling **inwards from the edge of the frame**: only black you can reach from outside is
+background, and the dark inside a creature is kept because it is fenced in by the creature’s own
+lighter edge. Then two passes of erosion, because JPEG blurs its edges and the ring just inside
+the cut is half black — which on a cream page reads as an outline drawn round the drawing.
+
+Each one went to the creature whose page it fits rather than to the next free slot. A grey owl
+with a halo and a single gold eye is Eclipse, who has one eye, a halo, and makes the birds stop
+singing. A clockwork crab is Juno, who has a plan for the week and everybody is in it. The
+other eleven keep the flat drawing the app makes itself; none of them is rarer than uncommon,
+because the rare ones are the prize and a prize should not be the plainest thing on the shelf.
+
+Every creature had a colour picked by hand, which tints its card, washes its page and patterns
+the egg it hatches from. A gold phoenix on a pink wash would look wrong, so a painted creature’s
+colour is now measured off its own picture — the average of its **vivid** pixels weighted by
+saturation, not of all of them, or every creature would come out the same beige. A mostly-white
+deer with blue markings comes out blue; a grey owl comes out grey, because it has nothing more
+colourful to offer.
+
+The ones you have not found are **their own silhouette** with a question mark — for a painted
+creature, the painting itself with its colour taken out, which is a truer outline than anything
+that could be drawn to stand in for it and costs nothing, since it is the same file. Fifty
+identical blobs would say nothing about how different they are; a moth, a centipede and a koi
+say that much and no more.
+
+The paintings are 1.5MB between them, twice the rest of the app, so **they are not downloaded
+with it** — each is kept the first time it is looked at. Two things follow. A painting nobody
+has looked at yet, on a phone with no signal, would leave a hole where a creature should be:
+it falls back to the flat drawing instead, which is still in the code and costs nothing to draw.
+And the creatures you already own are fetched quietly once the app is up, along with whoever is
+inside an egg that is about to open — so the book, the profile and the hatching all work with no
+signal at all.
 
 Rarity used to be a word under every name. At three cards across that was a lot of small print,
 so it is the card's border now, and the word moved to the creature's own page and to the card's
