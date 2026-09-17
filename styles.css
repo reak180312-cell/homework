@@ -3255,7 +3255,7 @@ body {
   border-radius: 50%;
   background: radial-gradient(circle, color-mix(in srgb, var(--mc) 30%, transparent) 0%,
                               color-mix(in srgb, var(--mc) 16%, transparent) 52%, transparent 72%);
-  animation: h-glow 1s var(--ease) 2.35s both;
+  animation: h-glow 1s var(--ease) 2.7s both;
 }
 @keyframes h-glow {
   0%   { opacity: 0; transform: scale(.45); }
@@ -3294,23 +3294,26 @@ body {
 .egg-crack {
   stroke-dasharray: 130;
   stroke-dashoffset: 130;
-  animation: h-crack .68s ease-out 1.5s both, h-vanish .2s linear 2.3s both;
+  animation: h-crack .68s ease-out 1.5s both, h-vanish .18s linear 2.16s both;
 }
 @keyframes h-crack  { to { stroke-dashoffset: 0; } }
 @keyframes h-vanish { to { opacity: 0; } }
 
 .egg-top, .egg-bot { transform-box: fill-box; transform-origin: center; }
-.egg-top { animation: h-top .8s var(--ease) 2.3s both; }
-.egg-bot { animation: h-bot .8s var(--ease) 2.3s both; }
+/* Quicker than they were, and gone sooner: there has to be a moment with
+   nothing in it before the light, or the flash only looks like part of the
+   shell coming off. */
+.egg-top { animation: h-top .32s var(--ease) 2.14s both; }
+.egg-bot { animation: h-bot .32s var(--ease) 2.14s both; }
 @keyframes h-top {
   0%   { transform: none; opacity: 1; }
-  62%  { opacity: 1; }
-  100% { transform: translate(-26px, -46px) rotate(-38deg); opacity: 0; }
+  55%  { opacity: 1; }
+  100% { transform: translate(-30px, -52px) rotate(-44deg); opacity: 0; }
 }
 @keyframes h-bot {
   0%   { transform: none; opacity: 1; }
-  62%  { opacity: 1; }
-  100% { transform: translate(7px, 30px) rotate(18deg); opacity: 0; }
+  55%  { opacity: 1; }
+  100% { transform: translate(9px, 36px) rotate(22deg); opacity: 0; }
 }
 
 /* Bits of shell, thrown outwards. */
@@ -3323,7 +3326,7 @@ body {
   border-radius: 3px 3px 2px 2px;
   background: var(--shell);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mc) 45%, transparent);
-  animation: h-shard .85s var(--ease) 2.32s both;
+  animation: h-shard .8s var(--ease) 2.18s both;
 }
 @keyframes h-shard {
   0%   { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(.7); }
@@ -3339,13 +3342,103 @@ body {
 .hatch-shards i:nth-child(7) { --dx:   4px; --dy:  74px; --r:  -20deg; }
 .hatch-shards i:nth-child(8) { --dx: -70px; --dy:  44px; --r: -150deg; }
 
-/* And out they come. */
-.hatch-mon { z-index: 3; animation: h-out .95s var(--spring) 2.45s both; }
-.hatch-mon .mon { animation: mon-bob 3.6s ease-in-out 3.5s infinite; }
+/* ── The light ──────────────────────────────────────────────
+   The shell is gone at 2.46s and the light does not start until 2.56s, so for
+   a tenth of a second there is nothing on the stage at all. That gap is the
+   whole trick: the flash has to arrive into an empty space, or it reads as
+   part of the shell coming off rather than as something happening.
+
+   One flash, half a second, and no bigger than the egg was. Short and single
+   on purpose — this fires every time anybody levels up. */
+.hatch-flash {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 48%; height: 48%;
+  margin: -24% 0 0 -24%;
+  z-index: 5;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, #fff 0%, #fff 34%,
+    color-mix(in srgb, var(--mc) 65%, #fff) 54%, transparent 72%);
+  animation: h-flash .52s var(--ease) 2.56s both;
+}
+@keyframes h-flash {
+  0%   { opacity: 0; transform: scale(.2); }
+  18%  { opacity: 1; transform: scale(1.45); }   /* the flash itself: 90ms */
+  100% { opacity: 0; transform: scale(2.7); }
+}
+
+/* Spokes of light thrown out with it. Each hangs from the middle of the stage
+   and swings to its own angle, so they grow outwards from one point. */
+.hatch-rays { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+.hatch-rays i {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 3px; height: 42%;
+  margin-left: -1.5px;
+  transform-origin: 50% 0;
+  background: linear-gradient(to bottom,
+    #fff 0%, color-mix(in srgb, var(--mc) 40%, #fff) 45%, transparent 100%);
+  animation: h-ray .46s var(--ease) 2.56s both;
+}
+@keyframes h-ray {
+  0%   { opacity: 0; transform: rotate(var(--a)) scaleY(.05); }
+  22%  { opacity: 1; }
+  100% { opacity: 0; transform: rotate(var(--a)) scaleY(1.2); }
+}
+.hatch-rays i:nth-child(1)  { --a:   0deg; }
+.hatch-rays i:nth-child(2)  { --a:  36deg; }
+.hatch-rays i:nth-child(3)  { --a:  72deg; }
+.hatch-rays i:nth-child(4)  { --a: 108deg; }
+.hatch-rays i:nth-child(5)  { --a: 144deg; }
+.hatch-rays i:nth-child(6)  { --a: 180deg; }
+.hatch-rays i:nth-child(7)  { --a: 216deg; }
+.hatch-rays i:nth-child(8)  { --a: 252deg; }
+.hatch-rays i:nth-child(9)  { --a: 288deg; }
+.hatch-rays i:nth-child(10) { --a: 324deg; }
+
+/* And one ring going out after it, which is what gives the flash a size. */
+.hatch-ring {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 30%; height: 30%;
+  margin: -15% 0 0 -15%;
+  z-index: 5;
+  border-radius: 50%;
+  border: 2.5px solid color-mix(in srgb, var(--mc) 55%, #fff);
+  pointer-events: none;
+  animation: h-ring .6s var(--ease) 2.6s both;
+}
+@keyframes h-ring {
+  0%   { opacity: 0; transform: scale(.35); }
+  20%  { opacity: .85; }
+  100% { opacity: 0; transform: scale(2.5); }
+}
+
+/* And out they come — white to begin with, because they are still standing in
+   the light, and their own colour by the time it has gone. */
+.hatch-mon { z-index: 3; animation: h-out .92s var(--spring) 2.8s both; }
+.hatch-mon .mon { animation: mon-bob 3.6s ease-in-out 3.95s infinite; }
 @keyframes h-out {
-  0%   { opacity: 0; transform: translateY(16px) scale(.2); }
-  50%  { opacity: 1; transform: translateY(-12px) scale(1.14); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+  0%   { opacity: 0; transform: translateY(10px) scale(.5); filter: brightness(3.4); }
+  26%  { opacity: 1; filter: brightness(2); }
+  58%  { transform: translateY(-10px) scale(1.12); filter: brightness(1.12); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: brightness(1); }
+}
+
+/* For anyone who would rather it did not flash: the shell still comes off and
+   the creature still arrives, without the burst of light or the spokes. */
+@media (prefers-reduced-motion: reduce) {
+  .hatch-flash, .hatch-rays, .hatch-ring { display: none; }
+  .hatch-egg { animation: none; }
+  .hatch-mon {
+    animation: h-out-calm .5s var(--ease) 2.3s both;
+  }
+  .hatch-mon .mon { animation: none; }
+  @keyframes h-out-calm {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
 }
 
 .ar-name {
@@ -3742,10 +3835,13 @@ body {
   color: var(--done);
 }
 .cre-stat-ico .ico { width: 17px; height: 17px; }
-.cre-stat-label { flex: 1; font-size: 14.5px; color: var(--ink-2); }
+/* Where a creature lives is a real place now, and some of them are a whole
+   phrase. The label keeps its one line and the answer takes what is left,
+   rather than both of them wrapping to meet in the middle. */
+.cre-stat-label { flex: none; font-size: 14.5px; color: var(--ink-2); }
 .cre-stat b {
-  flex: none;
-  max-width: 52%;
+  flex: 1;
+  min-width: 0;
   font-size: 14.5px;
   font-weight: 600;
   text-align: end;
@@ -4081,3 +4177,28 @@ body {
    whole point of the screen, so a painting is given the room it deserves. */
 .portrait .mon-art { width: 100%; height: 100%; }
 .hatch-mon .mon-art { width: 100%; height: 100%; }
+
+/* Where a creature came from. Set in the book's own italic so it reads as a
+   story rather than another field with a label on it. */
+.cre-story {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.page-head {
+  margin: 18px 0 6px;
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.page-story {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}

@@ -733,11 +733,23 @@ background, and the dark inside a creature is kept because it is fenced in by th
 lighter edge. Then two passes of erosion, because JPEG blurs its edges and the ring just inside
 the cut is half black — which on a cream page reads as an outline drawn round the drawing.
 
-Each one went to the creature whose page it fits rather than to the next free slot. A grey owl
-with a halo and a single gold eye is Eclipse, who has one eye, a halo, and makes the birds stop
-singing. A clockwork crab is Juno, who has a plan for the week and everybody is in it. The
-other eleven keep the flat drawing the app makes itself; none of them is rarer than uncommon,
-because the rare ones are the prize and a prize should not be the plainest thing on the shelf.
+Each one went to the creature whose page it fits rather than to the next free slot, and then
+**every name and every line was rewritten to belong to the drawing**. The grey owl with a halo
+and a single gold eye is Totality, and its page is about the four minutes when the birds stop
+singing. The clockwork crab is Tickspring, wound in 1911, with a plan for the week that you are
+in on Thursday at four. The eleven that kept the flat drawing were rewritten too; none of them
+is rarer than uncommon, because the rare ones are the prize and a prize should not be the
+plainest thing on the shelf.
+
+Each also has a **story of where it came from** — a few sentences, on its own page and on the
+right-hand page of the book. A rainbow came in through an open window and grew legs so it could
+leave the way everyone else does. Four theatre masks listened to rehearsals through a cupboard
+door for thirty years and came out one night to try the parts. A candle was put in a window to
+guide somebody home on a bad night, and it worked, and it has been lit there every night since.
+
+The ids did not change. They are what a saved collection points at and what the art files are
+named after, so a collection made before any of this still counts — which is why the creature
+called Totality is still `eclipse` in the code.
 
 Every creature had a colour picked by hand, which tints its card, washes its page and patterns
 the egg it hatches from. A gold phoenix on a pink wash would look wrong, so a painted creature’s
@@ -790,6 +802,21 @@ paint above a sibling of the shell no matter what z-index it is given.
 One thing the move cost: the empty homework screen measures itself against what is above it,
 and the switch is 69px it did not know about, so the sentence landed 13px inside the desk.
 `--seg-h` is that number, and the screen subtracts it.
+
+### The egg
+
+The egg drops in, wobbles, cracks along its middle and the two halves go their separate ways —
+and then, for a tenth of a second, **there is nothing on the stage at all**. That gap is the
+whole trick. One hard flash of white arrives into it, with ten spokes and a ring going out
+after it, and the creature comes up inside the light at `brightness(3.4)` and resolves into its
+own colour as the flash fades. Without the gap the flash reads as part of the shell coming off
+rather than as something happening.
+
+The shell’s animation ends at the moment the shell actually disappears rather than running on
+invisibly for another fifth of a second, so “gone before the light” is true of the timeline and
+not only of what you can see — which is what lets a test check the order instead of a person
+checking the screenshots. It is one flash, half a second, no bigger than the egg was, and
+`prefers-reduced-motion` drops the burst entirely and simply fades the creature in.
 
 
 ## Settings
