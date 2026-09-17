@@ -3526,29 +3526,16 @@ body {
 .cmp-count b { font-size: 17px; color: var(--ink); }
 .cmp-count .bar { margin-top: 7px; }
 
-/* ── Title, count and chips, which stick together ────────── */
+/* ── The title and the chips ─────────────────────────────
+   These used to follow the scroll, pinned below the two round buttons. On a
+   phone that put a slab across the middle of the grid with cards showing
+   above and below it — the chips came down the page with you instead of
+   staying where they were put. They are part of the page again. */
 .cre-bar {
-  position: sticky;
-  top: 0;
-  z-index: 4;
   margin-top: 22px;
-  padding-top: 10px;
   padding-bottom: 8px;
-  background: var(--paper);
-}
-.cre-bar-top {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
 }
 .cre-bar .section-title { margin: 0; }
-.cre-count {
-  flex: none;
-  font-size: 12px;
-  color: var(--ink-3);
-}
-.cre-count b { font-size: 14px; color: var(--ink); }
 
 .cre-chips { margin-top: 10px; }
 .cre-chip { flex: none; }
@@ -4003,41 +3990,12 @@ body {
   font-weight: 600;
 }
 
-/* The count only appears once the banner it was already on has gone past. */
-.cre-count {
-  opacity: 0;
-  transition: opacity .18s var(--ease);
-}
-.cre-bar.is-stuck .cre-count { opacity: 1; }
-.cre-bar.is-stuck {
-  box-shadow: 0 10px 14px -12px rgba(56, 44, 28, .5);
-  border-bottom: 1px solid var(--line-soft);
-}
-@media (prefers-reduced-motion: reduce) { .cre-count { transition: none; } }
-
-/* Zero-height, so it changes nothing about where anything sits. */
-.stick-mark { display: block; height: 0; }
-
 /* A locked card is a solid shape with a hole punched in it for the question
    mark, rather than a faint smudge — it has to read across a three-wide grid
    at arm's length. */
 .mon-slot.is-locked { color: color-mix(in srgb, var(--ink-3) 46%, var(--line-soft)); }
 .mon-hidden { opacity: 1; }
 .mon-q { fill: var(--card); opacity: 1; font-family: var(--font-display); }
-
-/* The bar stops below the two round buttons rather than sliding under them,
-   and paints the strip they sit on so nothing scrolls through it. */
-.cre-bar { top: calc(var(--safe-t) + 78px); }
-.cre-bar.is-stuck::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: calc(var(--safe-t) + 78px);
-  background: var(--paper);
-  z-index: -1;
-}
 
 /* Both of these open over a screen but under the bar: the five tabs stay put
    the whole way through, which is what the references show and what stops a

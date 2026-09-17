@@ -737,9 +737,9 @@ the two rarest is a tease, but ranking all fifty strangers would spoil the egg.
 
 A **search** filters by name or number — by number for anyone, by name only for creatures you
 have met, since finding a stranger by name would confirm the name exists. Three chips filter
-all / discovered / locked. The title, the count and the chips travel together and stick below
-the two round buttons once the banner above them has scrolled away; a zero-height marker where
-the bar starts says when that has happened, which is steadier than watching every scroll event.
+all / discovered / locked, and they stay where they are written rather than following the
+scroll. Pinned, they put a slab across the middle of the grid with cards showing above and
+below it — the chips came down the page with you instead of staying up where they were put.
 
 ### Your companion
 

@@ -2921,20 +2921,6 @@ function doneRow(hw, sub, showSubject = true) {
 
 /* The book, the eggs and the count, which used to be a section of Settings
    and are now the whole of their own page. */
-/* Reference 02 shows the title and chips pinned to the top with the count
-   beside them, once the banner has scrolled away. A marker sitting where the
-   bar starts says when that has happened: while it is on screen the bar is
-   where it was written, and when it leaves the bar is stuck. Cheaper and
-   steadier than watching every scroll event. */
-function watchStickyBar() {
-  const mark = $("#cre-stick-mark");
-  const bar = mark && mark.nextElementSibling;
-  if (!mark || !bar || typeof IntersectionObserver !== "function") return;
-  new IntersectionObserver(([e]) => {
-    bar.classList.toggle("is-stuck", !e.isIntersecting);
-  }, { root: $("#view-creatures"), threshold: 0 }).observe(mark);
-}
-
 function renderCreatures() {
   renderCompanionBanner();
   renderCollection();
@@ -3126,12 +3112,6 @@ function renderCollection() {
               aria-pressed="${creFilter === k}">
         ${esc(tr('cre.f' + (k === 'all' ? 'All' : k === 'found' ? 'Found' : 'Locked')))}
       </button>`).join('');
-  }
-
-  const count = $('#cre-count');
-  if (count) {
-    count.innerHTML = `<b>${tr('cre.progress', { have: have.length, all: MONSTER_COUNT })}</b>`
-      + ` <span>${esc(tr('cre.discovered'))}</span>`;
   }
 
   const box = $('#collection');
@@ -4408,7 +4388,6 @@ function wireApp() {
   on('#book-prev', 'click', () => turnPage(-1));
   on('#book-next', 'click', () => turnPage(1));
   wireBookSwipe();
-  watchStickyBar();
 
   wireLists();
 }
