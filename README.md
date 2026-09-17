@@ -716,10 +716,46 @@ same thing, seen twice* rather than *here is a filter*. Which half is showing is
 not remembered between launches: the answer you want on opening the app is almost always the
 list.
 
-That freed a tab for **Creatures**, which had been a section of Settings and is now a page: the
-book, the eggs and the count, with the creature who used to peek over the card still peeking.
-Its icon is an open book with two antennae over it. A first attempt drew a book with a creature
-behind it and read, at 22px, as a second bag.
+That freed a tab for **Creatures**, which had been a section of Settings and is now the
+collection itself. Its icon is an open book with two antennae over it. A first attempt drew a
+book with a creature behind it and read, at 22px, as a second bag.
+
+### The collection
+
+All fifty at once, three across, in the order they were written — so a creature keeps the same
+number for ever and the gaps are the ones left to find. The ones you have are drawn. The ones
+you have not are **their own silhouette** with a question mark: body, whatever is on the head,
+feet, flattened to one colour. Fifty identical blobs would say nothing about how different they
+are; a silhouette says that much and nothing else. The few tops drawn in their own colours — a
+sprout, a crown, a halo — are flattened with the rest, or a green shoot would name the creature
+under it.
+
+Rarity used to be a word under every name. At three cards across that was a lot of small print,
+so it is the card's border now, and the word moved to the creature's own page and to the card's
+label for a screen reader. Locked cards get no border at all below epic: gold and lavender on
+the two rarest is a tease, but ranking all fifty strangers would spoil the egg.
+
+A **search** filters by name or number — by number for anyone, by name only for creatures you
+have met, since finding a stranger by name would confirm the name exists. Three chips filter
+all / discovered / locked. The title, the count and the chips travel together and stick below
+the two round buttons once the banner above them has scrolled away; a zero-height marker where
+the bar starts says when that has happened, which is steadier than watching every scroll event.
+
+### Your companion
+
+One of the creatures you have found comes out of the book and sits on the profile. The point of
+it is the counting: **homework finished while they are your companion is finished with them**,
+and their page says how much and shows the last three. The companion is written onto the task
+itself, not just counted — a task finished three companions ago still knows whose it was, which
+is the only way undo can take the credit back off the right one.
+
+Tapping a creature in the picker only moves the preview. Nothing is saved until the button at
+the bottom, so a wrong tap costs nothing.
+
+Both new screens open over the page but **under the tab bar**, so the five tabs stay put the
+whole way through. That needed them to live inside the app shell: the shell is
+`position: fixed`, which makes it a stacking context of its own, so a bar inside it can never
+paint above a sibling of the shell no matter what z-index it is given.
 
 One thing the move cost: the empty homework screen measures itself against what is above it,
 and the switch is 69px it did not know about, so the sentence landed 13px inside the desk.
@@ -728,9 +764,17 @@ and the switch is 69px it did not know about, so the sentence landed 13px inside
 
 ## Settings
 
-The last tab was *Profile* and is now **Settings**, with a line under the heading saying what
-it is for and every section behind the same small capitals: profile and progress, the creature
-book, reminders, language, appearance, about.
+The last tab is **Profile**, and it leads with who you are: the companion as the picture, the
+level as the heading, a stats row of tasks, creatures and day streak, and a card for the
+companion with a Change button. Everything underneath is the settings, behind the same small
+capitals: the book, profile and progress, reminders, language, appearance, about.
+
+There is no name on it because the app has never asked for one, and a text field for a name
+would be a field that does not help anybody write down or finish homework. The level is what
+the app actually knows about you, and it is the thing that goes up.
+
+The **book** moved here when the creatures page became the collection — cover, lean, peeking
+faces and all.
 
 Nine pictures carry it: a **room** behind the whole screen, a **seedling** beside the level, a
 **book** leaning on the creature card with *Collect them all!* beside it, a **creature** looking

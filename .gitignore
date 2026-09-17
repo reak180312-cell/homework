@@ -46,3 +46,7 @@ picturs to new/
 
 # ...and the second timetable's bag
 !art/bag2/*.webp
+
+# Redesign reference pictures - never publish these
+cahnge for it/
+*.zip

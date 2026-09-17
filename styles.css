@@ -2889,50 +2889,10 @@ body {
 
 /* ── The collection ──────────────────────────────────────────
    A shelf of little creatures. Each one drawn, not photographed, so they
-   all belong to the same family. */
-
-.collection {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px 7px;
-  padding: 16px 14px 14px;
-  background: var(--card);
-  border-radius: var(--r-card);
-  box-shadow: var(--shadow);
-}
-
-.mon-slot {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 8px 2px 6px;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--mc, var(--ink-3)) 9%, transparent);
-  transition: transform .22s var(--spring), background-color .2s ease;
-}
-button.mon-slot:active { transform: scale(.93); }
-
-.mon-slot.is-empty {
-  background: none;
-  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--line) 80%, transparent);
-  min-height: 76px;
-  border-radius: 14px;
-}
-
-.mon-slot.is-locked { background: color-mix(in srgb, var(--ink-3) 8%, transparent); color: var(--ink-3); }
+   all belong to the same family. The grid itself is further down, with the
+   rest of the collection page. */
 
 .mon { width: 46px; height: 46px; display: block; overflow: visible; }
-.mon-q { font-size: 30px; font-weight: 700; fill: currentColor; opacity: .35; font-family: var(--font-display); }
-
-.mon-name {
-  font-size: 10.5px;
-  font-weight: 650;
-  letter-spacing: .04em;
-  color: var(--ink-2);
-  text-align: center;
-}
-.mon-slot.is-locked .mon-name { color: var(--ink-3); font-weight: 550; }
 
 /* A slow breath, so the shelf is alive without being busy. */
 .mon-slot .mon { animation: mon-bob 4.2s ease-in-out infinite; }
@@ -2942,7 +2902,9 @@ button.mon-slot:active { transform: scale(.93); }
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50%      { transform: translateY(-3px) rotate(-2deg); }
 }
+/* Whoever is still in an egg holds still. */
 .mon-slot.is-locked .mon, .mon-slot.is-empty .mon { animation: none; }
+@media (prefers-reduced-motion: reduce) { .mon-slot .mon { animation: none; } }
 
 
 /* ── Eggs ────────────────────────────────────────────────── */
@@ -3420,4 +3382,698 @@ button.mon-slot:active { transform: scale(.93); }
   text-align: center;
   width: 36%;
   max-width: 36%;
+}
+
+
+/* ══ The creature collection ═══════════════════════════════
+   A grid of fifty, a banner for whoever is keeping you company, and a page
+   each. The whole thing is built out of the tokens the rest of the app uses,
+   so it is the same room — only the furniture is new. */
+
+/* A heading with a round button sitting out at the end of it. */
+.head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.head-words { min-width: 0; }
+
+.round-btn {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform .18s var(--spring), box-shadow .18s var(--ease);
+}
+.round-btn:active { transform: scale(.94); }
+.round-btn .ico { width: 21px; height: 21px; }
+
+.cre-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 0 16px;
+  height: 46px;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--ink-3);
+  animation: fade-in .2s var(--ease);
+}
+.cre-search .ico { width: 18px; height: 18px; flex: none; }
+.cre-search-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 16px;            /* anything smaller and iOS zooms the page in */
+  color: var(--ink);
+  outline: none;
+}
+.cre-search-input::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+/* ── Your companion ──────────────────────────────────────── */
+.cmp-banner {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 22px;
+  background: linear-gradient(150deg,
+    color-mix(in srgb, var(--done) 12%, var(--card)), var(--card) 62%);
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.cmp-words { min-width: 0; }
+.cmp-kicker {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.cmp-name {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--font-display);
+  font-size: 27px;
+  line-height: 1.1;
+  color: var(--ink);
+}
+.cmp-line {
+  margin: 5px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  /* However long a creature's one fact is, the banner stays one shape. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.btn-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 9px 14px 9px 18px;
+  min-height: 38px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--done);
+  color: var(--on-ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .18s var(--spring);
+}
+.btn-pill:active { transform: scale(.96); }
+.btn-pill .ico { width: 15px; height: 15px; }
+[dir="rtl"] .btn-pill .ico { transform: scaleX(-1); }
+
+.cmp-art {
+  width: 108px;
+  height: 108px;
+  align-self: center;
+  color: var(--mc, var(--done));
+}
+.cmp-art .mon { width: 100%; height: 100%; }
+.cmp-art.is-egg img { width: 100%; height: auto; opacity: .85; }
+
+.cmp-count {
+  grid-column: 1 / -1;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.cmp-count b { font-size: 17px; color: var(--ink); }
+.cmp-count .bar { margin-top: 7px; }
+
+/* ── Title, count and chips, which stick together ────────── */
+.cre-bar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  margin-top: 22px;
+  padding-top: 10px;
+  padding-bottom: 8px;
+  background: var(--paper);
+}
+.cre-bar-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cre-bar .section-title { margin: 0; }
+.cre-count {
+  flex: none;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.cre-count b { font-size: 14px; color: var(--ink); }
+
+.cre-chips { margin-top: 10px; }
+.cre-chip { flex: none; }
+
+/* ── The grid ────────────────────────────────────────────── */
+.collection {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.mon-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 6px 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  color: var(--mc, var(--ink-3));
+  cursor: pointer;
+  transition: transform .18s var(--spring), box-shadow .18s var(--ease);
+}
+.mon-slot:active { transform: scale(.96); }
+.mon-slot .mon { width: 64px; height: 64px; }
+
+.mon-name {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--ink);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mon-no {
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+}
+
+/* Nobody is given away early: the shape is the creature's own, everything
+   else about it is not. The rarer ones get a hint of a border, which is the
+   only thing a locked card tells you. */
+.mon-slot.is-locked { color: var(--ink-3); cursor: pointer; }
+.mon-slot.is-locked .mon-no { color: var(--ink-3); }
+.mon-slot.is-locked.is-epic { border-color: color-mix(in srgb, #9B51C9 34%, var(--line-soft)); }
+.mon-slot.is-locked.is-legendary {
+  border-color: color-mix(in srgb, #D9A94A 46%, var(--line-soft));
+  background: linear-gradient(160deg, color-mix(in srgb, #D9A94A 7%, var(--card)), var(--card));
+}
+.mon-q { font-size: 30px; font-weight: 700; fill: var(--card); }
+
+/* ── One creature's page ─────────────────────────────────── */
+.cre-top {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: calc(var(--safe-t) + 10px) var(--gutter) 10px;
+  background: var(--paper);
+}
+.back-btn.is-inline { position: static; flex: none; margin: 0; background: none; }
+.cre-top-gap { width: 44px; flex: none; }
+.cre-num {
+  flex: 1;
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.cre-fav { color: var(--ink-3); }
+.cre-fav.is-on { color: var(--stamp); }
+.cre-fav.is-on .ico { fill: currentColor; }
+
+#creature-body, #companion-body {
+  padding: 0 var(--gutter) calc(var(--content-bottom) + 20px);
+}
+
+.cre-hero {
+  display: grid;
+  place-items: center;
+  height: 210px;
+  border-radius: 22px;
+  color: var(--mc, var(--done));
+  background:
+    radial-gradient(120% 90% at 50% 100%,
+      color-mix(in srgb, var(--mc) 20%, transparent), transparent 70%),
+    linear-gradient(160deg, color-mix(in srgb, var(--mc) 12%, var(--card)), var(--card));
+  border: 1px solid var(--line-soft);
+}
+.cre-hero-art { width: 158px; height: 158px; }
+.cre-hero-art .mon { width: 100%; height: 100%; }
+
+.cre-name {
+  margin: 16px 0 0;
+  font-family: var(--font-display);
+  font-size: 38px;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.cre-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.cre-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+  background: var(--line-soft);
+  font-size: 13.5px;
+  color: var(--ink-2);
+}
+.cre-pill .ico { width: 15px; height: 15px; }
+.cre-pill.is-rarity { color: var(--on-ink); background: var(--rc, var(--ink-3)); }
+.cre-pill.is-common    { --rc: #8A94A2; }
+.cre-pill.is-uncommon  { --rc: #4FA83D; }
+.cre-pill.is-rare      { --rc: #3E63DD; }
+.cre-pill.is-epic      { --rc: #9B51C9; }
+.cre-pill.is-legendary { --rc: #C79A3C; }
+
+.cre-actions { display: flex; gap: 10px; margin-top: 16px; }
+.btn-primary {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--done);
+  color: var(--on-ink);
+  font: inherit;
+  font-family: var(--font-display);
+  font-size: 17px;
+  cursor: pointer;
+  transition: transform .18s var(--spring);
+}
+.btn-primary:active { transform: scale(.98); }
+.btn-primary .ico { width: 18px; height: 18px; }
+/* Already the companion: it says so and stops being a button, rather than
+   looking like one thing you can press twice. */
+.btn-primary.is-current {
+  background: color-mix(in srgb, var(--done) 15%, var(--card));
+  color: var(--done);
+  cursor: default;
+}
+.btn-primary.is-current:active { transform: none; }
+.btn-primary.is-wide { width: 100%; }
+
+.btn-second {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 0 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-family: var(--font-display);
+  font-size: 17px;
+  cursor: pointer;
+}
+.btn-second:active { transform: scale(.98); }
+.btn-second .ico { width: 18px; height: 18px; }
+
+.cre-about {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+.cre-stats { margin-top: 16px; padding: 4px 16px; }
+.cre-stat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.cre-stat:last-child { border-bottom: 0; }
+.cre-stat-ico {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--done) 12%, transparent);
+  color: var(--done);
+}
+.cre-stat-ico .ico { width: 17px; height: 17px; }
+.cre-stat-label { flex: 1; font-size: 14.5px; color: var(--ink-2); }
+.cre-stat b {
+  flex: none;
+  max-width: 52%;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-align: end;
+  color: var(--ink);
+}
+
+.mem-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.mem-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 92px;
+  padding: 11px;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--line-soft);
+  color: var(--sc, var(--ink-3));
+}
+.mem-slot .ico { width: 15px; height: 15px; }
+.mem-slot b {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.mem-slot i { margin-top: auto; font-style: normal; font-size: 11px; color: var(--ink-3); }
+.mem-slot.is-empty {
+  border-style: dashed;
+  border-color: var(--line);
+  background: none;
+}
+
+/* ── Choosing a companion ────────────────────────────────── */
+.cmp-sub {
+  margin: 0 0 18px;
+  text-align: center;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.cmp-preview { display: grid; justify-items: center; }
+.cmp-preview-art {
+  width: 150px;
+  height: 150px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-pill);
+  color: var(--mc, var(--done));
+  background: color-mix(in srgb, var(--mc) 15%, var(--card));
+  border: 3px solid var(--card);
+  box-shadow: var(--shadow-lift);
+}
+.cmp-preview-art .mon { width: 76%; height: 76%; }
+.cmp-preview-tag {
+  margin-top: -12px;
+  padding: 6px 18px;
+  border-radius: var(--r-pill);
+  background: var(--done);
+  color: var(--on-ink);
+  font-family: var(--font-display);
+  font-size: 15px;
+}
+
+.cmp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.cmp-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 8px 12px;
+  border: 2px solid transparent;
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  color: var(--mc, var(--ink-3));
+  cursor: pointer;
+  transition: transform .18s var(--spring), border-color .18s var(--ease);
+}
+.cmp-card:active { transform: scale(.97); }
+.cmp-card .mon { width: 78px; height: 78px; }
+.cmp-card-name {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--ink);
+}
+.cmp-card.is-on { border-color: var(--done); }
+.cmp-tick {
+  position: absolute;
+  inset-block-start: 8px;
+  inset-inline-end: 8px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-pill);
+  background: var(--done);
+  color: var(--on-ink);
+  opacity: 0;
+  transform: scale(.7);
+  transition: opacity .18s var(--ease), transform .18s var(--spring);
+}
+.cmp-tick .ico { width: 14px; height: 14px; }
+.cmp-card.is-on .cmp-tick { opacity: 1; transform: scale(1); }
+
+/* The button that actually saves it stays where the thumb is. */
+.cmp-confirm {
+  position: sticky;
+  bottom: 0;
+  margin-top: 18px;
+  padding: 12px 0 calc(var(--content-bottom) - 24px);
+  background: linear-gradient(to top, var(--paper) 72%, transparent);
+}
+
+/* ── The profile leads with the companion ────────────────── */
+.pro-you { display: grid; justify-items: center; margin-top: 6px; }
+.pro-avatar {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-pill);
+  color: var(--mc, var(--done));
+  background: color-mix(in srgb, var(--mc, var(--done)) 16%, var(--card));
+  border: 3px solid var(--card);
+  box-shadow: var(--shadow-lift);
+}
+.pro-avatar .mon { width: 78%; height: 78%; }
+.pro-avatar.is-empty img { width: 74%; height: auto; }
+.pro-badge {
+  position: absolute;
+  inset-block-end: 2px;
+  inset-inline-end: 2px;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  color: var(--done);
+  box-shadow: var(--shadow);
+}
+.pro-badge .ico { width: 19px; height: 19px; }
+
+.pro-name {
+  margin: 14px 0 0;
+  font-family: var(--font-display);
+  font-size: 32px;
+  line-height: 1;
+  color: var(--ink);
+}
+.pro-role { margin: 6px 0 0; font-size: 15px; color: var(--ink-2); text-align: center; }
+.pro-pill {
+  margin-top: 10px;
+  padding: 7px 16px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--done) 14%, transparent);
+  color: var(--done);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.pro-stats { margin-top: 18px; }
+.pro-stat-row { display: flex; padding: 16px 8px; }
+.pro-stat {
+  flex: 1;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  border-inline-end: 1px solid var(--line-soft);
+}
+.pro-stat:last-child { border-inline-end: 0; }
+.pro-stat b {
+  font-family: var(--font-display);
+  font-size: 27px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.pro-stat span { font-size: 12.5px; color: var(--ink-2); }
+
+.pro-companion { margin-top: 14px; }
+.pro-cmp {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  text-align: start;
+  border: 1px solid var(--line-soft);
+  background: linear-gradient(150deg,
+    color-mix(in srgb, var(--mc, var(--done)) 11%, var(--card)), var(--card) 64%);
+}
+.pro-cmp-art { flex: none; width: 88px; height: 88px; color: var(--mc, var(--done)); }
+.pro-cmp-art .mon { width: 100%; height: 100%; }
+.pro-cmp-words { display: grid; gap: 2px; min-width: 0; flex: 1; }
+.pro-cmp-words strong {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.pro-cmp-words em { font-style: normal; font-size: 13.5px; color: var(--ink-2); }
+.pro-cmp-words .btn-pill { justify-self: start; margin-top: 10px; }
+.pro-cmp.is-empty { cursor: pointer; }
+
+
+.foot-note.is-big { padding: 40px 0; text-align: center; font-size: 15px; }
+
+/* Nothing here jumps about for anyone who would rather it did not. */
+@media (prefers-reduced-motion: reduce) {
+  .cre-search { animation: none; }
+  .round-btn, .btn-pill, .btn-primary, .btn-second, .mon-slot, .cmp-card, .cmp-tick {
+    transition: none;
+  }
+}
+
+/* The search button shares the top-right corner with the timetable button,
+   which is fixed there on every screen. Rather than land underneath it, this
+   one is fixed to the same line and sits one button inside it — which is how
+   the two round buttons in the reference end up being real. */
+#cre-search-btn {
+  position: fixed;
+  top: calc(var(--safe-t) + 34px);
+  inset-inline-end: max(calc((100% - 540px) / 2 + var(--gutter)), var(--gutter));
+  margin-inline-end: 50px;
+  z-index: 22;
+  width: 42px;
+  height: 42px;
+}
+.head-row { padding-inline-end: 96px; }
+
+/* The filter chips are not a subject, so they have no subject colour to be
+   picked out in. They take the app's green instead. */
+.cre-chip.is-on {
+  background: var(--done);
+  box-shadow: none;
+  color: var(--on-ink);
+  font-weight: 600;
+}
+
+/* The count only appears once the banner it was already on has gone past. */
+.cre-count {
+  opacity: 0;
+  transition: opacity .18s var(--ease);
+}
+.cre-bar.is-stuck .cre-count { opacity: 1; }
+.cre-bar.is-stuck {
+  box-shadow: 0 10px 14px -12px rgba(56, 44, 28, .5);
+  border-bottom: 1px solid var(--line-soft);
+}
+@media (prefers-reduced-motion: reduce) { .cre-count { transition: none; } }
+
+/* Zero-height, so it changes nothing about where anything sits. */
+.stick-mark { display: block; height: 0; }
+
+/* A locked card is a solid shape with a hole punched in it for the question
+   mark, rather than a faint smudge — it has to read across a three-wide grid
+   at arm's length. */
+.mon-slot.is-locked { color: color-mix(in srgb, var(--ink-3) 46%, var(--line-soft)); }
+.mon-hidden { opacity: 1; }
+.mon-q { fill: var(--card); opacity: 1; font-family: var(--font-display); }
+
+/* The bar stops below the two round buttons rather than sliding under them,
+   and paints the strip they sit on so nothing scrolls through it. */
+.cre-bar { top: calc(var(--safe-t) + 78px); }
+.cre-bar.is-stuck::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--safe-t) + 78px);
+  background: var(--paper);
+  z-index: -1;
+}
+
+/* Both of these open over a screen but under the bar: the five tabs stay put
+   the whole way through, which is what the references show and what stops a
+   creature's page feeling like somewhere else in the app. They still sit over
+   the two round buttons, which belong to the screen underneath. */
+.creature-page, .companion-page { z-index: 23; }
+
+/* The button that saves the choice clears the tab bar rather than hiding
+   behind it. */
+.cmp-confirm {
+  bottom: var(--bar-h);
+  padding: 22px 0 14px;
+  background: linear-gradient(to top, var(--paper) 58%, transparent);
+}
+
+/* Disabled means "this is already true", not "this is greyed out" — the
+   browser's own dimming would make it unreadable. */
+.btn-primary.is-current {
+  opacity: 1;
+  border: 1px solid color-mix(in srgb, var(--done) 30%, transparent);
+  color: var(--done);
+}
+
+/* Rarity used to be a word under every name, which at three cards across was
+   a lot of small print. It is a border now — the same device the reference
+   uses on its locked rare cards — so a shelf of fifty still shows at a glance
+   which ones were lucky, and the name has the room back. The word itself is
+   on the creature's own page and in the card's label for a screen reader. */
+/* Only cards of creatures you have actually met, though: a locked card that
+   told you its rarity would rank fifty strangers for you, and the whole
+   point of the egg is that you do not know. The two rarest keep a hint,
+   which is the tease the reference draws and all it gives away. */
+[data-monster].is-uncommon  { border-color: color-mix(in srgb, #4FA83D 30%, var(--line-soft)); }
+[data-monster].is-rare      { border-color: color-mix(in srgb, #3E63DD 32%, var(--line-soft)); }
+[data-monster].is-epic      { border-color: color-mix(in srgb, #9B51C9 36%, var(--line-soft)); }
+[data-monster].is-legendary {
+  border-color: color-mix(in srgb, #D9A94A 52%, var(--line-soft));
+  background: linear-gradient(160deg, color-mix(in srgb, #D9A94A 8%, var(--card)), var(--card));
 }

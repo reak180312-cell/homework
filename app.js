@@ -164,9 +164,60 @@ const STRINGS = {
 
     'tab.creatures': 'Creatures',
     'cre.title': 'Creatures',
-    'cre.sub': 'Fifty of them, one egg at a time.',
+    'cre.sub': 'Meet every creature you discover.',
     'cre.book': 'The book',
     'cre.found': 'Found so far',
+    'cre.all': 'All creatures',
+    'cre.search': 'Search creatures',
+    'cre.searchPh': 'Name or number',
+    'cre.fAll': 'All', 'cre.fFound': 'Discovered', 'cre.fLocked': 'Locked',
+    'cre.progress': '{have} / {all}',
+    'cre.discovered': 'discovered',
+    'cre.noMatch': 'Nobody by that name yet.',
+    'cre.noneFound': 'Nobody found yet. Finish some homework and the first egg will turn up.',
+    'cre.noneLocked': 'Nobody left to find. You have all fifty.',
+    'cre.number': '#{n}',
+    'cre.creature': 'Creature #{n}',
+    'cre.locked': 'Not found yet',
+    'cre.lockedNote': 'Finish homework to hatch eggs. Whoever is inside is whoever the roll gives you.',
+
+    'cmp.yours': 'Your companion',
+    'cmp.mine': 'My companion',
+    'cmp.none': 'No companion yet',
+    'cmp.noneSub': 'Find a creature and one of them can keep you company.',
+    'cmp.noneCta': 'Find your first',
+    'cmp.pick': 'Choose one',
+    'cmp.view': 'View',
+    'cmp.change': 'Change',
+    'cmp.make': 'Make companion',
+    'cmp.current': 'Your companion',
+    'cmp.title': 'Choose a companion',
+    'cmp.sub': 'Your companion sits on your profile, and gets the credit for what you finish.',
+    'cmp.preview': 'Preview',
+    'cmp.discovered': 'Discovered creatures',
+    'cmp.set': 'Set {name} as companion',
+    'cmp.pillTag': '{name} • Companion',
+    'cmp.tasks': '{n} tasks together',
+    'cmp.tasks1': '1 task together',
+    'cmp.tasks0': 'Nothing together yet',
+    'cmp.swapped': '{name} is with you now',
+
+    'cre.about': 'About',
+    'cre.share': 'Share',
+    'cre.shareText': '{name} turned up in my homework book.',
+    'cre.fav': 'Favourite',
+    'cre.unfav': 'Remove from favourites',
+    'cre.statFound': 'Found',
+    'cre.statTasks': 'Tasks together',
+    'cre.statLives': 'Favourite place',
+    'cre.today': 'Today',
+    'cre.memories': 'Memories',
+    'cre.memoriesNote': 'Finish homework with {name} to make memories.',
+    'cre.memoriesSome': 'The last thing you finished together.',
+
+    'pro.you': 'Profile',
+    'pro.yourStory': 'Your journey, your creatures, your story.',
+    'pro.sTasks': 'Tasks', 'pro.sCreatures': 'Creatures', 'pro.sStreak': 'Day streak',
 
     'set.homework': 'Homework',
     'set.startOn': 'Open on',
@@ -312,9 +363,60 @@ const STRINGS = {
 
     'tab.creatures': 'יצורים',
     'cre.title': 'יצורים',
-    'cre.sub': 'חמישים, ביצה אחת בכל פעם.',
+    'cre.sub': 'הכירו כל יצור שתגלו.',
     'cre.book': 'הספר',
     'cre.found': 'נמצאו עד כה',
+    'cre.all': 'כל היצורים',
+    'cre.search': 'חיפוש יצורים',
+    'cre.searchPh': 'שם או מספר',
+    'cre.fAll': 'הכול', 'cre.fFound': 'נמצאו', 'cre.fLocked': 'נעולים',
+    'cre.progress': '{have} / {all}',
+    'cre.discovered': 'התגלו',
+    'cre.noMatch': 'אף אחד בשם הזה עדיין.',
+    'cre.noneFound': 'עוד לא נמצא אף אחד. סיימו שיעורי בית והביצה הראשונה תגיע.',
+    'cre.noneLocked': 'לא נשאר אף אחד למצוא. כל החמישים אצלכם.',
+    'cre.number': '#{n}',
+    'cre.creature': 'יצור #{n}',
+    'cre.locked': 'עוד לא נמצא',
+    'cre.lockedNote': 'סיימו שיעורי בית כדי לבקוע ביצים. מי שבפנים הוא מי שההגרלה נתנה.',
+
+    'cmp.yours': 'החבר שלך',
+    'cmp.mine': 'החבר שלי',
+    'cmp.none': 'עוד אין חבר',
+    'cmp.noneSub': 'מצאו יצור ואחד מהם יוכל ללוות אתכם.',
+    'cmp.noneCta': 'מצאו את הראשון',
+    'cmp.pick': 'בחרו אחד',
+    'cmp.view': 'צפייה',
+    'cmp.change': 'החלפה',
+    'cmp.make': 'הפכו לחבר',
+    'cmp.current': 'החבר שלך',
+    'cmp.title': 'בחירת חבר',
+    'cmp.sub': 'החבר שלכם יושב בפרופיל, ומקבל את הקרדיט על מה שתסיימו.',
+    'cmp.preview': 'תצוגה',
+    'cmp.discovered': 'יצורים שנמצאו',
+    'cmp.set': 'הפכו את {name} לחבר',
+    'cmp.pillTag': '{name} • חבר',
+    'cmp.tasks': '{n} מטלות יחד',
+    'cmp.tasks1': 'מטלה אחת יחד',
+    'cmp.tasks0': 'עוד כלום יחד',
+    'cmp.swapped': '{name} איתך עכשיו',
+
+    'cre.about': 'עליו',
+    'cre.share': 'שיתוף',
+    'cre.shareText': '{name} הופיע לי בספר היצורים.',
+    'cre.fav': 'מועדף',
+    'cre.unfav': 'הסרה מהמועדפים',
+    'cre.statFound': 'נמצא',
+    'cre.statTasks': 'מטלות יחד',
+    'cre.statLives': 'המקום האהוב',
+    'cre.today': 'היום',
+    'cre.memories': 'זיכרונות',
+    'cre.memoriesNote': 'סיימו שיעורי בית עם {name} כדי ליצור זיכרונות.',
+    'cre.memoriesSome': 'הדבר האחרון שסיימתם יחד.',
+
+    'pro.you': 'פרופיל',
+    'pro.yourStory': 'המסע שלכם, היצורים שלכם, הסיפור שלכם.',
+    'pro.sTasks': 'מטלות', 'pro.sCreatures': 'יצורים', 'pro.sStreak': 'ימים ברצף',
 
     'set.homework': 'שיעורי בית',
     'set.startOn': 'פתיחה בעמוד',
@@ -1209,6 +1311,87 @@ function collectedMonsters() {
   return MONSTERS.filter(m => met[m.id]).sort((a, b) => met[a.id] - met[b.id]);
 }
 
+/* ── The companion ─────────────────────────────────────────
+   One of the creatures you have found comes out of the book and sits on your
+   profile. The point of it is the counting: homework finished while they are
+   your companion is finished *with* them, and their page says so. Nothing
+   here changes what homework is or how it is written down — it only gives
+   what you already do to somebody. */
+
+/** The creature on the profile, or null while none has been chosen. */
+function companionMonster() {
+  return monsterById(state.progress.companion);
+}
+
+/** Only somebody you have actually met can take the job. */
+function setCompanion(id) {
+  const met = state.progress.metAt || {};
+  state.progress.companion = (id && met[id]) ? id : null;
+  save();
+}
+
+const isFavourite = (id) => (state.progress.favourites || []).includes(id);
+
+function toggleFavourite(id) {
+  const list = state.progress.favourites || (state.progress.favourites = []);
+  const at = list.indexOf(id);
+  if (at < 0) list.push(id); else list.splice(at, 1);
+  save();
+  return at < 0;
+}
+
+/** How much has been finished with somebody, and the last few of them. */
+function togetherFor(id) {
+  const t = (state.progress.together || {})[id];
+  return { n: (t && t.n) || 0, recent: (t && Array.isArray(t.recent)) ? t.recent : [] };
+}
+
+/* Only the last few are kept. The number is the whole count; the list is the
+   three the page has room to show, and there is no screen that wants more. */
+const MEMORY_SLOTS = 3;
+
+/* The companion is written onto the task, not just counted. A task finished
+   three companions ago still knows whose it was, which is the only way undo
+   can take the credit back off the right one. */
+function recordTogether(hw) {
+  const id = state.progress.companion;
+  if (!id) return;
+  const all = state.progress.together || (state.progress.together = {});
+  const t = all[id] || (all[id] = { n: 0, recent: [] });
+  hw.withId = id;
+  t.n += 1;
+  t.recent.unshift({ id: hw.id, t: hw.title, s: hw.subjectId, at: hw.completedAt });
+  t.recent = t.recent.slice(0, MEMORY_SLOTS);
+}
+
+function forgetTogether(hw) {
+  const t = (state.progress.together || {})[hw.withId];
+  delete hw.withId;
+  if (!t) return;
+  t.n = Math.max(0, t.n - 1);
+  const at = t.recent.findIndex(r => r.id === hw.id);
+  if (at >= 0) t.recent.splice(at, 1);
+}
+
+/** Days in a row ending today or yesterday with something finished on them. */
+function dayStreak() {
+  const days = new Set(state.homework
+    .filter(h => h.completed && h.completedAt)
+    .map(h => dayKey(new Date(h.completedAt))));
+  if (!days.size) return 0;
+
+  // Yesterday still counts: a streak should not break because it is 9am and
+  // today has not been started yet.
+  const day = new Date();
+  if (!days.has(dayKey(day))) {
+    day.setDate(day.getDate() - 1);
+    if (!days.has(dayKey(day))) return 0;
+  }
+  let n = 0;
+  while (days.has(dayKey(day))) { n++; day.setDate(day.getDate() - 1); }
+  return n;
+}
+
 /**
  * Who comes out of the egg. A rarity is rolled first, then someone of that
  * rarity you have not met — so the odds are the odds, but you are never given
@@ -1360,8 +1543,18 @@ function markOf(mark, colour) {
  */
 function monsterSvg(m, { locked = false } = {}) {
   if (locked) {
+    /* The outline is the creature’s own — its body, whatever is on its head,
+       its feet — flattened to one colour. Fifty identical blobs would say
+       nothing about how different they are; this says that much and no more.
+       The few tops that are drawn in their own colours (a sprout, a crown)
+       are flattened with the rest, or they would give the game away. */
+    const flat = (svg) => svg.replace(/(fill|stroke)="#[0-9A-Fa-f]{3,8}"/g, `$1="currentColor"`);
     return `<svg class="mon" viewBox="0 0 100 100" aria-hidden="true">
-              <g fill="currentColor" opacity=".2">${bodyPath(m.shape)}</g>
+              <g class="mon-hidden" fill="currentColor">
+                <ellipse cx="38" cy="86" rx="8" ry="5" /><ellipse cx="62" cy="86" rx="8" ry="5" />
+                ${flat(topOf(m.top, `currentColor`))}
+                ${bodyPath(m.shape)}
+              </g>
               <text x="50" y="63" text-anchor="middle" class="mon-q">?</text>
             </svg>`;
   }
@@ -1623,7 +1816,13 @@ const blank = () => ({
   notes: [],
   extraSubjects: [],     // anything older data filed under a subject not on the timetable
 
-  progress: { xp: 0, level: 1, shownUpTo: 1 },
+  /* companion:  whose face is on the profile, and who gets the credit for
+                what you finish. null until one is chosen.
+     favourites: ids hearted on a creature page.
+     together:   per creature, how many tasks were finished while they were
+                the companion, and the last few of them. */
+  progress: { xp: 0, level: 1, shownUpTo: 1, metAt: {},
+              companion: null, favourites: [], together: {} },
   settings: {
     dailyReminderEnabled: false, dailyReminderTime: '15:00',
     bagReminderEnabled: false, bagReminderTime: '20:00',
@@ -1689,7 +1888,17 @@ function hydrate(saved) {
   adoptOldSubjects(next, saved);
   delete next.subjects;
   delete next.onboarded;
-  next.progress = Object.assign({ xp: 0, level: 1, shownUpTo: 1 }, next.progress);
+  next.progress = Object.assign({ xp: 0, level: 1, shownUpTo: 1, metAt: {},
+                                  companion: null, favourites: [], together: {} },
+                                next.progress);
+  if (!next.progress.metAt || typeof next.progress.metAt !== "object") next.progress.metAt = {};
+  if (!Array.isArray(next.progress.favourites)) next.progress.favourites = [];
+  if (!next.progress.together || typeof next.progress.together !== "object") next.progress.together = {};
+  // A companion you have not met cannot be your companion — which is what a
+  // half-written save, or a creature removed from the fifty, would leave behind.
+  if (!monsterById(next.progress.companion) || !next.progress.metAt[next.progress.companion]) {
+    next.progress.companion = null;
+  }
   // Anyone who was here before there was a choice gets the phone asked for them.
   if (!LANGS.some(l => l.key === next.settings.lang)) next.settings.lang = null;
   if (!DESKS.some(d => d.key === next.settings.desk)) next.settings.desk = null;
@@ -2712,11 +2921,107 @@ function doneRow(hw, sub, showSubject = true) {
 
 /* The book, the eggs and the count, which used to be a section of Settings
    and are now the whole of their own page. */
+/* Reference 02 shows the title and chips pinned to the top with the count
+   beside them, once the banner has scrolled away. A marker sitting where the
+   bar starts says when that has happened: while it is on screen the bar is
+   where it was written, and when it leaves the bar is stuck. Cheaper and
+   steadier than watching every scroll event. */
+function watchStickyBar() {
+  const mark = $("#cre-stick-mark");
+  const bar = mark && mark.nextElementSibling;
+  if (!mark || !bar || typeof IntersectionObserver !== "function") return;
+  new IntersectionObserver(([e]) => {
+    bar.classList.toggle("is-stuck", !e.isIntersecting);
+  }, { root: $("#view-creatures"), threshold: 0 }).observe(mark);
+}
+
 function renderCreatures() {
+  renderCompanionBanner();
   renderCollection();
 }
 
+/* ── Who you are, at the top of the profile ────────────────
+   The companion is the face of it. There is no name to show — the app never
+   asked for one — so the heading is the level, which is the thing the app
+   does actually know about you and the thing that goes up. */
+
+function renderProfileTop() {
+  const m = companionMonster();
+  const found = collectedMonsters();
+  const done = state.homework.filter(h => h.completed).length;
+
+  const you = $('#pro-you');
+  if (you) {
+    you.innerHTML = `
+      <span class="pro-avatar ${m ? '' : 'is-empty'}" ${m ? `style="--mc:${m.colour}"` : ''}
+            aria-hidden="true">
+        ${m ? monsterSvg(m)
+            : '<img src="art/set/sprout.webp" alt="" width="300" height="266" decoding="async" />'}
+        ${m ? '<span class="pro-badge"><svg class="ico" aria-hidden="true"><use href="#i-leaf" /></svg></span>' : ''}
+      </span>
+      <h2 class="pro-name">${esc(tr('lvl.level', { n: levelFor(state.progress.xp) }))}</h2>
+      <p class="pro-role">${esc(m ? tr('book.withYou', { name: m.name }) : tr('set.firstCreature'))}</p>
+      ${m ? `<span class="pro-pill">${esc(tr('cmp.pillTag', { name: m.name }))}</span>` : ''}`;
+  }
+
+  const stats = $('#pro-stats');
+  if (stats) {
+    const row = [
+      [done, tr('pro.sTasks')],
+      [found.length, tr('pro.sCreatures')],
+      [dayStreak(), tr('pro.sStreak')],
+    ];
+    stats.innerHTML = `<div class="card pro-stat-row">${row.map(([n, label]) => `
+      <span class="pro-stat"><b>${n}</b><span>${esc(label)}</span></span>`).join('')}</div>`;
+  }
+
+  const card = $('#pro-companion');
+  if (card) {
+    if (!m) {
+      card.innerHTML = found.length ? `
+        <button id="pro-pick" class="card pro-cmp is-empty">
+          <span class="pro-cmp-words">
+            <span class="cmp-kicker">${esc(tr('cmp.mine'))}</span>
+            <strong>${esc(tr('cmp.none'))}</strong>
+            <em>${esc(tr('cmp.noneSub'))}</em>
+          </span>
+          <svg class="ico ico-go" aria-hidden="true"><use href="#i-chevron" /></svg>
+        </button>` : '';
+    } else {
+      const { n } = togetherFor(m.id);
+      card.innerHTML = `
+        <div class="card pro-cmp" style="--mc:${m.colour}">
+          <span class="pro-cmp-art" aria-hidden="true">${monsterSvg(m)}</span>
+          <span class="pro-cmp-words">
+            <span class="cmp-kicker">${esc(tr('cmp.mine'))}</span>
+            <strong>${esc(m.name)}</strong>
+            <em>${esc(n === 0 ? tr('cmp.tasks0') : n === 1 ? tr('cmp.tasks1') : tr('cmp.tasks', { n }))}</em>
+            <button id="pro-change" class="btn-pill">
+              ${esc(tr('cmp.change'))}<svg class="ico" aria-hidden="true"><use href="#i-chevron" /></svg>
+            </button>
+          </span>
+        </div>`;
+    }
+  }
+
+  /* The book itself moved here from the creatures page, which is now the
+     collection. Its cover carries the count and the last three faces. */
+  const cover = $('#book-count');
+  if (cover) {
+    cover.textContent = found.length >= MONSTER_COUNT
+      ? tr('book.allFoundOf', { n: MONSTER_COUNT })
+      : tr('book.countFound', { have: found.length, all: MONSTER_COUNT });
+  }
+  const peek = $('#book-peek');
+  if (peek) {
+    peek.innerHTML = found.slice(-3).map(x =>
+      `<span class="bc-peek" style="--mc:${x.colour}">${monsterSvg(x)}</span>`).join('');
+  }
+}
+
 function renderProfile() {
+  renderProfileTop();
+
   const { xp } = state.progress;
   const level = levelFor(xp);
   const into = xp % XP_PER_LEVEL;
@@ -2786,47 +3091,322 @@ function renderProfile() {
 }
 
 
-/** The shelf of everyone who has turned up. Nobody is teased with what is
- *  coming: which creature hatches next is a roll, so there is no next one
- *  to point at. */
-function renderCollection() {
-  const have = collectedMonsters();
+/* ── The collection page ───────────────────────────────────
+   All fifty at once, in the order they were written, so a creature keeps the
+   same number for ever and the gaps are the ones you have left to find. The
+   ones you have are drawn; the ones you have not are their own silhouette
+   with a question mark, which says how many are coming and how different
+   they are without giving any of them away. */
 
-  const cover = $('#book-count');
-  if (cover) {
-    cover.textContent = have.length >= MONSTER_COUNT
-      ? tr('book.allFoundOf', { n: MONSTER_COUNT })
-      : tr('book.countFound', { have: have.length, all: MONSTER_COUNT });
+const CRE_FILTERS = ['all', 'found', 'locked'];
+let creFilter = 'all';
+let creQuery = '';
+
+/** The number a creature wears, padded, from its place in the fifty. */
+const monsterNo = (m) => String(MONSTERS.indexOf(m) + 1).padStart(3, '0');
+
+/** Name or number, whichever the search box looks like. */
+function matchesQuery(m, q, found) {
+  if (!q) return true;
+  const number = monsterNo(m);
+  if (number.includes(q.replace(/^#/, ''))) return true;
+  // A name nobody has met yet would give the surprise away.
+  return found && m.name.toLowerCase().includes(q);
+}
+
+function renderCollection() {
+  const met = state.progress.metAt || {};
+  const have = collectedMonsters();
+  const q = creQuery.trim().toLowerCase();
+
+  const chips = $('#cre-filters');
+  if (chips) {
+    chips.innerHTML = CRE_FILTERS.map(k => `
+      <button class="chip cre-chip ${creFilter === k ? 'is-on' : ''}" data-cre-filter="${k}"
+              aria-pressed="${creFilter === k}">
+        ${esc(tr('cre.f' + (k === 'all' ? 'All' : k === 'found' ? 'Found' : 'Locked')))}
+      </button>`).join('');
   }
-  const peek = $('#book-peek');
-  if (peek) {
-    peek.innerHTML = have.slice(-3).map(m =>
-      `<span class="bc-peek" style="--mc:${m.colour}">${monsterSvg(m)}</span>`).join('');
+
+  const count = $('#cre-count');
+  if (count) {
+    count.innerHTML = `<b>${tr('cre.progress', { have: have.length, all: MONSTER_COUNT })}</b>`
+      + ` <span>${esc(tr('cre.discovered'))}</span>`;
   }
 
   const box = $('#collection');
   if (!box) return;
 
-  box.innerHTML = have.length
-    ? have.map(m => `
-        <button class="mon-slot" data-monster="${m.id}" style="--mc:${m.colour}">
-          ${monsterSvg(m)}
-          <span class="mon-name">${esc(m.name)}</span>
-          <span class="mon-rank is-${m.rarity}">${esc(tr('rarity.' + m.rarity))}</span>
-        </button>`).join('')
-    : ('<span class="mon-slot is-empty" aria-hidden="true">'
-       + '<img class="slot-egg" src="art/set/egg.webp" alt="" width="280" height="270" decoding="async" />'
-       + '</span>').repeat(5);
+  const shown = MONSTERS.filter((m) => {
+    const found = !!met[m.id];
+    if (creFilter === 'found' && !found) return false;
+    if (creFilter === 'locked' && found) return false;
+    return matchesQuery(m, q, found);
+  });
+
+  box.innerHTML = shown.map((m) => {
+    const found = !!met[m.id];
+    const no = monsterNo(m);
+    if (!found) {
+      return `
+        <button class="mon-slot is-locked is-${m.rarity}" data-locked="${m.id}"
+                aria-label="${esc(tr('cre.creature', { n: no }))} — ${esc(tr('cre.locked'))}">
+          ${monsterSvg(m, { locked: true })}
+          <span class="mon-no">${esc(tr('cre.number', { n: no }))}</span>
+        </button>`;
+    }
+    return `
+      <button class="mon-slot is-${m.rarity}" data-monster="${m.id}" style="--mc:${m.colour}"
+              aria-label="${esc(m.name)} — ${esc(tr(`rarity.${m.rarity}`))}">
+        ${monsterSvg(m)}
+        <span class="mon-name">${esc(m.name)}</span>
+        <span class="mon-no">${esc(tr('cre.number', { n: no }))}</span>
+      </button>`;
+  }).join('');
 
   const note = $('#collection-note');
   if (note) {
     const left = MONSTER_COUNT - have.length;
-    note.textContent = !have.length
-      ? tr('book.allOut', { n: MONSTER_COUNT })
-      : left
-        ? tr('book.stillOut', { n: left })
-        : tr('book.everyone');
+    note.textContent = !shown.length
+      ? (q ? tr('cre.noMatch')
+           : creFilter === 'found' ? tr('cre.noneFound') : tr('cre.noneLocked'))
+      : !have.length ? tr('book.allOut', { n: MONSTER_COUNT })
+        : left ? tr('book.stillOut', { n: left })
+          : tr('book.everyone');
   }
+}
+
+
+/* ── Your companion ────────────────────────────────────────
+   The banner at the top of the collection. With nobody chosen it is an
+   invitation rather than an empty box, and with nobody found it says what to
+   do about that: finish some homework. */
+
+function renderCompanionBanner() {
+  const box = $('#cmp-banner');
+  if (!box) return;
+
+  const m = companionMonster();
+  const have = collectedMonsters();
+  const bar = `
+    <div class="cmp-count">
+      <b>${tr('cre.progress', { have: have.length, all: MONSTER_COUNT })}</b>
+      <span>${esc(tr('cre.discovered'))}</span>
+      <div class="bar"><div class="bar-fill" style="width:${(have.length / MONSTER_COUNT) * 100}%"></div></div>
+    </div>`;
+
+  if (!m) {
+    box.className = 'cmp-banner is-empty';
+    box.innerHTML = `
+      <div class="cmp-words">
+        <span class="cmp-kicker">${esc(tr('cmp.yours'))}</span>
+        <strong class="cmp-name">${esc(tr('cmp.none'))}</strong>
+        <p class="cmp-line">${esc(have.length ? tr('cmp.noneSub') : tr('set.firstCreature'))}</p>
+        ${have.length ? `<button id="cmp-pick" class="btn-pill">
+          ${esc(tr('cmp.pick'))}<svg class="ico" aria-hidden="true"><use href="#i-chevron" /></svg>
+        </button>` : ''}
+      </div>
+      <span class="cmp-art is-egg" aria-hidden="true">
+        <img src="art/set/egg.webp" alt="" width="280" height="270" decoding="async" />
+      </span>
+      ${bar}`;
+    return;
+  }
+
+  box.className = 'cmp-banner';
+  box.innerHTML = `
+    <div class="cmp-words">
+      <span class="cmp-kicker">${esc(tr('cmp.yours'))}</span>
+      <strong class="cmp-name">${esc(m.name)}</strong>
+      <p class="cmp-line">${esc(m.fact)}</p>
+      <button id="cmp-view" class="btn-pill" data-monster="${m.id}">
+        ${esc(tr('cmp.view'))}<svg class="ico" aria-hidden="true"><use href="#i-chevron" /></svg>
+      </button>
+    </div>
+    <span class="cmp-art" style="--mc:${m.colour}" aria-hidden="true">${monsterSvg(m)}</span>
+    ${bar}`;
+}
+
+
+/* ── One creature's own page ───────────────────────────────
+   What the book says about them, plus the two things the book cannot: make
+   them your companion, and what the pair of you have finished. */
+
+let creatureAt = null;
+
+/* Sharing is the phone's own sheet or nothing. There is no fallback worth
+   building — a homework app has nowhere else to send a creature to. */
+const canShare = () => typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+
+function memorySlots(m) {
+  const { recent } = togetherFor(m.id);
+  const slots = [];
+  for (let i = 0; i < MEMORY_SLOTS; i++) {
+    const r = recent[i];
+    if (!r) { slots.push('<span class="mem-slot is-empty" aria-hidden="true"></span>'); continue; }
+    const sub = subjectById(r.s);
+    slots.push(`
+      <span class="mem-slot" style="--sc:${sub ? sub.color : 'var(--ink-3)'}">
+        <svg class="ico" aria-hidden="true"><use href="#i-check" /></svg>
+        <b>${esc(r.t)}</b>
+        <i>${esc(timeLabel(r.at))}</i>
+      </span>`);
+  }
+  return slots.join('');
+}
+
+function renderCreaturePage() {
+  const m = monsterById(creatureAt);
+  const body = $('#creature-body');
+  if (!m || !body) return;
+
+  const no = monsterNo(m);
+  const isCompanion = state.progress.companion === m.id;
+  const { n } = togetherFor(m.id);
+  const met = (state.progress.metAt || {})[m.id];
+
+  $('#creature-num').textContent = tr('cre.creature', { n: no });
+  const fav = $('#creature-fav');
+  fav.classList.toggle('is-on', isFavourite(m.id));
+  fav.setAttribute('aria-pressed', String(isFavourite(m.id)));
+  fav.setAttribute('aria-label', tr(isFavourite(m.id) ? 'cre.unfav' : 'cre.fav'));
+
+  body.innerHTML = `
+    <div class="cre-hero" style="--mc:${m.colour}">
+      <span class="cre-hero-art">${monsterSvg(m)}</span>
+    </div>
+
+    <h1 class="cre-name">${esc(m.name)}</h1>
+    <div class="cre-pills">
+      <span class="cre-pill is-rarity is-${m.rarity}">
+        <svg class="ico" aria-hidden="true"><use href="#i-leaf" /></svg>
+        ${esc(tr('rarity.' + m.rarity))}
+      </span>
+      <span class="cre-pill">${esc(m.age)}</span>
+    </div>
+
+    <div class="cre-actions">
+      <button id="cre-make" class="btn-primary ${isCompanion ? 'is-current' : ''}"
+              ${isCompanion ? 'disabled' : ''} data-monster="${m.id}">
+        <svg class="ico" aria-hidden="true"><use href="#i-${isCompanion ? 'check' : 'leaf'}" /></svg>
+        ${esc(tr(isCompanion ? 'cmp.current' : 'cmp.make'))}
+      </button>
+      ${canShare() ? `<button id="cre-share" class="btn-second">
+        <svg class="ico" aria-hidden="true"><use href="#i-share" /></svg>
+        ${esc(tr('cre.share'))}
+      </button>` : ''}
+    </div>
+
+    <h2 class="section-title" data-t="cre.about">${esc(tr('cre.about'))}</h2>
+    <p class="cre-about">${esc(m.fact)}</p>
+
+    <div class="card cre-stats">
+      <div class="cre-stat">
+        <span class="cre-stat-ico"><svg class="ico" aria-hidden="true"><use href="#i-calendar" /></svg></span>
+        <span class="cre-stat-label">${esc(tr('cre.statFound'))}</span>
+        <b>${esc(met ? dayHeading(met) : tr('cre.today'))}</b>
+      </div>
+      <div class="cre-stat">
+        <span class="cre-stat-ico"><svg class="ico" aria-hidden="true"><use href="#i-check" /></svg></span>
+        <span class="cre-stat-label">${esc(tr('cre.statTasks'))}</span>
+        <b>${n}</b>
+      </div>
+      <div class="cre-stat">
+        <span class="cre-stat-ico"><svg class="ico" aria-hidden="true"><use href="#i-pin" /></svg></span>
+        <span class="cre-stat-label">${esc(tr('cre.statLives'))}</span>
+        <b>${esc(m.lives)}</b>
+      </div>
+    </div>
+
+    <h2 class="section-title">${esc(tr('cre.memories'))}</h2>
+    <div class="mem-row">${memorySlots(m)}</div>
+    <p class="foot-note">${esc(n ? tr('cre.memoriesSome') : tr('cre.memoriesNote', { name: m.name }))}</p>`;
+}
+
+function openCreaturePage(id) {
+  if (!monsterById(id)) return;
+  creatureAt = id;
+  const page = $('#creature-page');
+  page.hidden = false;
+  page.classList.remove('is-leaving');
+  renderCreaturePage();
+  page.scrollTop = 0;
+}
+
+function closeCreaturePage() {
+  const page = $('#creature-page');
+  if (!page || page.hidden) return;
+  page.classList.add('is-leaving');
+  setTimeout(() => {
+    page.hidden = true;
+    page.classList.remove('is-leaving');
+    creatureAt = null;
+  }, 240);
+}
+
+
+/* ── Choosing a companion ──────────────────────────────────
+   Tapping a creature only moves the preview. Nothing is saved until the
+   button at the bottom is pressed, so a wrong tap costs nothing. */
+
+let companionPick = null;
+
+function renderCompanionPage() {
+  const body = $('#companion-body');
+  if (!body) return;
+
+  const have = collectedMonsters();
+  if (!have.length) {
+    body.innerHTML = `<p class="foot-note is-big">${esc(tr('cre.noneFound'))}</p>`;
+    return;
+  }
+
+  const pick = monsterById(companionPick) || have[have.length - 1];
+  companionPick = pick.id;
+
+  body.innerHTML = `
+    <p class="cmp-sub">${esc(tr('cmp.sub'))}</p>
+
+    <div class="cmp-preview">
+      <span class="cmp-preview-art" style="--mc:${pick.colour}">${monsterSvg(pick)}</span>
+      <span class="cmp-preview-tag">${esc(pick.name)}</span>
+    </div>
+
+    <h2 class="section-title">${esc(tr('cmp.discovered'))}</h2>
+    <div class="cmp-grid">
+      ${have.map(m => `
+        <button class="cmp-card ${m.id === pick.id ? 'is-on' : ''}" data-pick="${m.id}"
+                style="--mc:${m.colour}" aria-pressed="${m.id === pick.id}">
+          ${monsterSvg(m)}
+          <span class="cmp-card-name">${esc(m.name)}</span>
+          <span class="cmp-tick" aria-hidden="true">
+            <svg class="ico" aria-hidden="true"><use href="#i-check" /></svg>
+          </span>
+        </button>`).join('')}
+    </div>
+
+    <div class="cmp-confirm">
+      <button id="cmp-set" class="btn-primary is-wide">${esc(tr('cmp.set', { name: pick.name }))}</button>
+    </div>`;
+}
+
+function openCompanionPage() {
+  companionPick = state.progress.companion;
+  const page = $('#companion-page');
+  page.hidden = false;
+  page.classList.remove('is-leaving');
+  renderCompanionPage();
+  page.scrollTop = 0;
+}
+
+function closeCompanionPage() {
+  const page = $('#companion-page');
+  if (!page || page.hidden) return;
+  page.classList.add('is-leaving');
+  setTimeout(() => {
+    page.hidden = true;
+    page.classList.remove('is-leaving');
+  }, 240);
 }
 
 
@@ -3264,6 +3844,7 @@ function completeHw(id, node) {
   const before = levelFor(state.progress.xp);
   hw.completed = true;
   hw.completedAt = Date.now();
+  recordTogether(hw);
   state.progress.xp += XP_PER_HOMEWORK;
   state.progress.level = levelFor(state.progress.xp);
   save();
@@ -3316,6 +3897,7 @@ function undoComplete(id) {
   if (!hw) return;
   hw.completed = false;
   hw.completedAt = null;
+  forgetTogether(hw);
   state.progress.xp = Math.max(0, state.progress.xp - XP_PER_HOMEWORK);
   state.progress.level = levelFor(state.progress.xp);
   save();
@@ -3327,7 +3909,11 @@ function showToast(text, onUndo) {
   const toast = $('#toast');
   clearTimeout(undoTimer);
   $('#toast-text').textContent = text;
-  $('#toast-undo').onclick = onUndo;
+  // Some things said in a toast cannot be undone — a locked card explaining
+  // itself, a companion swapped. Those get no button rather than a dead one.
+  const undo = $('#toast-undo');
+  undo.onclick = onUndo || null;
+  undo.hidden = !onUndo;
   toast.hidden = false;
   toast.classList.remove('is-leaving');
   undoTimer = setTimeout(hideToast, 4200);
@@ -3742,15 +4328,87 @@ function wireApp() {
   });
 
 
+  /* ── The collection ─────────────────────────────────── */
   on('#collection', 'click', (e) => {
     const slot = e.target.closest('[data-monster]');
-    if (slot) openBook(slot.dataset.monster);
+    if (slot) { openCreaturePage(slot.dataset.monster); return; }
+    // A locked card says what it would take, rather than nothing at all.
+    if (e.target.closest('[data-locked]')) showToast(tr('cre.lockedNote'));
   });
+
+  on('#cre-filters', 'click', (e) => {
+    const chip = e.target.closest('[data-cre-filter]');
+    if (!chip) return;
+    creFilter = chip.dataset.creFilter;
+    renderCollection();
+  });
+
+  on('#cre-search-btn', 'click', () => {
+    const wrap = $('#cre-search-wrap');
+    const input = $('#cre-search');
+    const open = wrap.hidden;
+    wrap.hidden = !open;
+    $('#cre-search-btn').setAttribute('aria-expanded', String(open));
+    if (open) { input.focus(); return; }
+    // Closing it clears it, or the grid would stay filtered by a box nobody
+    // can see.
+    input.value = '';
+    creQuery = '';
+    renderCollection();
+  });
+  on('#cre-search', 'input', (e) => { creQuery = e.target.value; renderCollection(); });
+
+  on('#cmp-banner', 'click', (e) => {
+    if (e.target.closest('#cmp-pick')) { openCompanionPage(); return; }
+    const view = e.target.closest('#cmp-view');
+    if (view) openCreaturePage(view.dataset.monster);
+  });
+
+  /* ── One creature's page ────────────────────────────── */
+  on('#creature-back', 'click', closeCreaturePage);
+  on('#creature-fav', 'click', () => {
+    if (!creatureAt) return;
+    toggleFavourite(creatureAt);
+    renderCreaturePage();
+  });
+  on('#creature-body', 'click', (e) => {
+    if (e.target.closest('#cre-make')) {
+      setCompanion(creatureAt);
+      renderCreaturePage();
+      render();
+      showToast(tr('cmp.swapped', { name: monsterById(creatureAt).name }));
+      return;
+    }
+    if (e.target.closest('#cre-share') && canShare()) {
+      const m = monsterById(creatureAt);
+      // The phone's own sheet, and nothing if it is dismissed.
+      navigator.share({ text: tr('cre.shareText', { name: m.name }) }).catch(() => {});
+    }
+  });
+
+  /* ── Choosing a companion ───────────────────────────── */
+  on('#companion-back', 'click', closeCompanionPage);
+  on('#companion-body', 'click', (e) => {
+    const card = e.target.closest('[data-pick]');
+    if (card) { companionPick = card.dataset.pick; renderCompanionPage(); return; }
+    if (!e.target.closest('#cmp-set') || !companionPick) return;
+    // Only now is it saved.
+    setCompanion(companionPick);
+    closeCompanionPage();
+    render();
+    showToast(tr('cmp.swapped', { name: monsterById(companionPick).name }));
+  });
+
+  on('#pro-companion', 'click', (e) => {
+    if (e.target.closest('#pro-change') || e.target.closest('#pro-pick')) openCompanionPage();
+  });
+
   on('#book-open', 'click', () => openBook());
   on('#book-close', 'click', closeBook);
   on('#book-prev', 'click', () => turnPage(-1));
   on('#book-next', 'click', () => turnPage(1));
   wireBookSwipe();
+  watchStickyBar();
 
   wireLists();
 }
