@@ -1987,7 +1987,14 @@ function eggSvg(m, { split = false } = {}) {
 }
 
 
-const XP_PER_HOMEWORK = 10;
+/* Five pieces of homework to a level, and an egg at every level.
+
+   It is the award per piece that moved, not the size of a level: leaving the
+   level at a hundred means nobody who is already level seven wakes up at
+   level fourteen, and every screen that shows XP reads from these two so it
+   follows on its own. Somebody part-way through on the old rate reaches the
+   next egg a piece or two early, once, which seemed the kinder rounding. */
+const XP_PER_HOMEWORK = 20;
 const XP_PER_LEVEL = 100;
 /* Two of these can sit on one phone, and they are two different weeks of two
    different people. The first keeps the plain key so nobody's homework moves

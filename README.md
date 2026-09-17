@@ -552,7 +552,7 @@ Subject      — not stored: taken from the timetable, keyed by the lesson's own
 Homework     { id, subjectId, title, dueDate, createdAt, completed, completedAt }
 Note         { id, text, note, at, day, lesson, createdAt }  // day 0-4 = Sun-Thu, null = every day
              //  at is "HH:MM" or "" — a label on the note, not an alarm
-UserProgress { xp, level, shownUpTo,    // +10 XP per homework, 100 XP per level, fifty of them
+UserProgress { xp, level, shownUpTo,    // +20 XP per homework, 100 XP per level: five to an egg
                metAt }                  // shownUpTo stops a hatching replaying
 Settings     { dailyReminderEnabled, dailyReminderTime,
                bagReminderEnabled, bagReminderTime }
