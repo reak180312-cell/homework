@@ -722,13 +722,21 @@ book with a creature behind it and read, at 22px, as a second bag.
 
 ### The collection
 
-All fifty at once, three across, in the order they were written — so a creature keeps the same
-number for ever and the gaps are the ones left to find.
+All fifty at once, three across, **in order of rank** — commons #001–013, uncommons #014–024,
+rares #025–037, epics #038–045, legendaries #046–050. The number a creature wears is its place
+in the list, so ordering the list by rank puts each rank in a block, and scrolling down the grid
+goes from the ones you will find first to the five you may never. The ids did not move: a
+collection made before the reorder still counts, and a creature that was #019 yesterday is the
+same creature at #030 today.
 
-**Forty-nine of the fifty are paintings.** They arrived as 1254px squares, most already cut out
-and sixteen painted onto solid black. Keying out “everything dark” would have eaten the dark
+**All fifty are paintings.** They arrived as 1254px squares, most already cut out and seventeen
+with a ground still painted across them. Keying out “everything dark” would have eaten the dark
 creatures — a smoke horse, an ink blob, a lava dragon — so the black is taken by flood filling
-**inwards from the edge of the frame**: only black you can reach from outside is background.
+**inwards from the edge of the frame**: only ground you can reach from outside is background.
+The ground is *measured* from the corners of the frame rather than assumed to be black — a
+candle arrived on cream, and a cream candle on cream is the same problem as a black horse on
+black, so both are one case. Whether a drawing still has its ground on it is decided by whether
+the frame is opaque, not by the file extension: that candle was a PNG.
 Then two passes of erosion, because JPEG blurs its edges and the ring just inside the cut is
 half black — which on a cream page reads as an outline drawn round the drawing.
 
