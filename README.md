@@ -725,13 +725,46 @@ book with a creature behind it and read, at 22px, as a second bag.
 All fifty at once, three across, in the order they were written — so a creature keeps the same
 number for ever and the gaps are the ones left to find.
 
-**Thirty-nine of the fifty are paintings.** They arrived as 1254px squares, twenty-four already
-cut out and fifteen painted onto solid black. Keying out “everything dark” would have eaten the
-dark creatures — a smoke horse, an ink blob, a lava dragon — so the black is taken by flood
-filling **inwards from the edge of the frame**: only black you can reach from outside is
-background, and the dark inside a creature is kept because it is fenced in by the creature’s own
-lighter edge. Then two passes of erosion, because JPEG blurs its edges and the ring just inside
-the cut is half black — which on a cream page reads as an outline drawn round the drawing.
+**Forty-nine of the fifty are paintings.** They arrived as 1254px squares, most already cut out
+and sixteen painted onto solid black. Keying out “everything dark” would have eaten the dark
+creatures — a smoke horse, an ink blob, a lava dragon — so the black is taken by flood filling
+**inwards from the edge of the frame**: only black you can reach from outside is background.
+Then two passes of erosion, because JPEG blurs its edges and the ring just inside the cut is
+half black — which on a cream page reads as an outline drawn round the drawing.
+
+Two things went wrong on the way, and both are worth writing down.
+
+**The fill walked into the creature.** One tolerance for all fifty is wrong for one painted the
+colour of the ground it was painted on: at 60 the fill went out of the background, through a
+black horse’s own shoulder and out the other side, and the erosion then widened every channel it
+had cut. On a cream card that is a set of gashes across the creature — and it does not show up
+in a count of leftover black, because the creature looks *cleaner*. The tolerance is measured
+now: the fill runs at a ladder of tolerances and the area it takes is recorded at each. While it
+is only eating background that area creeps; the step where it breaks in is a jump. The last
+tolerance before the jump is used — 45 for the two that leak, 75 for everybody else.
+
+**The pockets.** Black *shut in* by the creature — between a boar’s spines, under a stag’s belly,
+through the gaps in a tree’s roots — is never reachable from the frame, so it stayed as a hard
+black patch. A second sweep takes those, and the test is not how dark a pocket is on average:
+measured, background trapped in a boar came out at mean 12–15 and an ink creature’s own belly at
+20, far too close to call. The test is whether a pocket has a **pitch-black core**. Background is
+the frame’s own nothing, dirtied at the rim by compression, so its middle is still exactly
+(0,0,0); a creature’s dark interior is paint — dark, but never nothing. Trapped background runs
+60–93% core, the crease between two of a boar’s back plates runs 49%, and the line goes in the
+gap between them at 55%.
+
+Two details that only turned up by looking. The pocket sweep needs a **tighter tolerance than the
+fill** (30, not 45–75): the fill needs headroom to cross the compression halo round the outside,
+but a pocket has no rim to cross, and at the fill’s tolerance a boar’s leaf-shadows count as dark
+and the shadow comes out from between every plate on its back. And erosion goes on the frame’s
+cut **only** — eroding round a pocket as well widened every crease from a shadow one pixel across
+into a white gash five across.
+
+The errors either side of 55% are deliberately unequal. A sliver of background left on a creature
+is a blemish; a hole cut through one is a broken drawing. The check is automated — pure-black
+pixels painted magenta, so leftover background cannot be confused with a creature that is simply
+dark — and the ten hardest cut-outs have their surviving area pinned in a test, because a
+creature with holes in it has *less* black, not more, and would otherwise read as an improvement.
 
 Each one went to the creature whose page it fits rather than to the next free slot, and then
 **every name and every line was rewritten to belong to the drawing**. The grey owl with a halo

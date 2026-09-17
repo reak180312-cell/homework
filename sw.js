@@ -7,7 +7,7 @@
    fighting the first one for the same names — and only carries its own
    bag pictures. */
 const PROFILE = new URL(self.location).searchParams.get('p') || 'rea';
-const CACHE = 'homework-v52-' + PROFILE;
+const CACHE = 'homework-v53-' + PROFILE;
 
 // Only what the app needs to run. The 512px icon is for the installer and the
 // splash screen, which nobody reaches offline, so it is fetched if it is ever
