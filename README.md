@@ -772,6 +772,11 @@ And the creatures you already own are fetched quietly once the app is up, along 
 inside an egg that is about to open — so the book, the profile and the hatching all work with no
 signal at all.
 
+The roster is 13 common, 11 uncommon, 13 rare, 8 epic and 5 legendary. The weights on the tiers
+moved with it — 38/27/20/11/4, from 55/26/13/5/1 — because a tier is rolled before a creature in
+it, so five legendaries behind a one-in-a-hundred door would take six hundred pieces of homework
+to meet. That is not a collection, it is a wall.
+
 Rarity used to be a word under every name. At three cards across that was a lot of small print,
 so it is the card's border now, and the word moved to the creature's own page and to the card's
 label for a screen reader. Locked cards get no border at all below epic: gold and lavender on
