@@ -7,7 +7,7 @@
    fighting the first one for the same names — and only carries its own
    bag pictures. */
 const PROFILE = new URL(self.location).searchParams.get('p') || 'rea';
-const CACHE = 'homework-v56-' + PROFILE;
+const CACHE = 'homework-v58-' + PROFILE;
 
 // Only what the app needs to run. The 512px icon is for the installer and the
 // splash screen, which nobody reaches offline, so it is fetched if it is ever
@@ -23,6 +23,11 @@ const BAGS = {
         './art/bag2/charger.webp', './art/bag2/tanach.webp', './art/bag2/diplomacy.webp',
         './art/bag2/lit.webp', './art/bag2/eng.webp', './art/bag2/sportkit.webp',
         './art/bag2/deo.webp', './art/bag2/bottle.webp'],
+  /* The third link assembles its bag from a catalogue that spans both
+     folders, and cannot know in advance which of them it will need. It
+     carries none of them up front: the pictures arrive the first time a bag
+     is looked at, and are kept from then on. */
+  own: [],
 };
 
 const SHELL = [

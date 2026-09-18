@@ -4474,3 +4474,156 @@ body {
   filter: grayscale(1) brightness(0) invert(1);
   opacity: .26;
 }
+
+/* ══ Setting the third link up ═════════════════════════════
+   Over everything, including the tab bar: until the questions are answered
+   there is nothing behind it worth tapping. */
+.setup {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--paper);
+  animation: fade-in .3s var(--ease);
+}
+.setup-body {
+  max-width: 540px;
+  margin-inline: auto;
+  padding: calc(var(--safe-t) + 26px) var(--gutter) calc(var(--safe-b) + 32px);
+}
+
+.setup-dots { display: flex; gap: 7px; margin-bottom: 22px; }
+.setup-dot {
+  width: 30px;
+  height: 4px;
+  border-radius: var(--r-pill);
+  background: var(--line);
+  transition: background-color .2s var(--ease);
+}
+.setup-dot.is-done { background: color-mix(in srgb, var(--done) 55%, var(--line)); }
+.setup-dot.is-on { background: var(--done); }
+
+.setup-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 30px;
+  line-height: 1.12;
+  color: var(--ink);
+}
+.setup-note {
+  margin: 8px 0 18px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+.setup-paste {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--r-card);
+  border: 1px solid var(--line);
+  background: var(--card);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  resize: vertical;
+  outline: none;
+}
+.setup-paste:focus { border-color: var(--done); }
+.setup-paste::placeholder { color: var(--ink-3); }
+
+.setup-actions { display: flex; gap: 10px; margin-top: 14px; }
+.setup-actions .btn-primary,
+.setup-actions .btn-second { flex: 1; justify-content: center; font-size: 15px; }
+
+/* One row of everything in the catalogue, per lesson. It wraps rather than
+   scrolls: you are reading all of it, not looking for one. */
+.kit-block { margin-top: 22px; }
+.kit-head {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.kit-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.kit-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 82px;
+  padding: 9px 4px 7px;
+  border: 1.5px solid var(--line-soft);
+  border-radius: 14px;
+  background: var(--card);
+  font: inherit;
+  font-size: 11px;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: border-color .16s var(--ease), background-color .16s var(--ease),
+              transform .16s var(--spring);
+}
+.kit-chip img { width: 42px; height: 42px; object-fit: contain; }
+.kit-chip span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kit-chip:active { transform: scale(.95); }
+/* Not ticked is faded rather than hidden: the whole catalogue stays legible,
+   and what you have chosen is what is in colour. */
+.kit-chip img { opacity: .38; filter: saturate(.25); transition: opacity .16s, filter .16s; }
+.kit-chip.is-on {
+  border-color: var(--done);
+  background: color-mix(in srgb, var(--done) 10%, var(--card));
+  color: var(--ink);
+  font-weight: 600;
+}
+.kit-chip.is-on img { opacity: 1; filter: none; }
+
+.setup-feet {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 28px;
+}
+.setup-feet .btn-second { flex: none; }
+.setup-feet .btn-primary { flex: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .setup { animation: none; }
+  .kit-chip, .setup-dot { transition: none; }
+}
+
+/* The way to the rest of the catalogue, and what a lesson says when it wants
+   nothing at all. */
+.kit-more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 82px;
+  min-height: 86px;
+  padding: 9px 4px 7px;
+  border: 1.5px dashed var(--line);
+  border-radius: 14px;
+  background: none;
+  font: inherit;
+  font-size: 11px;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+.kit-more span:first-child { font-size: 20px; line-height: 1; }
+.kit-more:active { transform: scale(.95); }
+
+.kit-none {
+  align-self: center;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}

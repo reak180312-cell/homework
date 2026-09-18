@@ -277,6 +277,31 @@ const STRINGS = {
     'country.us': 'United States', 'country.ca': 'Canada',
     'country.au': 'Australia', 'country.fr': 'France',
     'country.de': 'Germany', 'country.in': 'India',
+    'setup.weekTitle': 'What does your week look like?',
+    'setup.weekNote': 'Paste your timetable in, and the app will read it. One line per period, the days across. Or start with an empty one and type it.',
+    'setup.pastePh': '8:20  Maths  Biology  Bible',
+    'setup.read': 'Read it',
+    'setup.blank': 'Start empty',
+    'setup.readOk': 'Read {p} periods across {d} days.',
+    'setup.readNo': 'Could not make a week out of that. Try one line per period.',
+    'setup.checkTitle': 'Is this right?',
+    'setup.checkNote': 'Change anything that is wrong. Leave a box empty for a free period.',
+    'setup.kitTitle': 'What do you need?',
+    'setup.kitNote': 'This is the app’s guess for each lesson. Tap anything to add or remove it.',
+    'setup.everyDay': 'Every day',
+    'setup.more': 'More', 'setup.fewer': 'Fewer',
+    'setup.nothing': 'Nothing for this one',
+    'setup.noLessons': 'No lessons yet. Go back and fill in a few.',
+    'setup.next': 'Next', 'setup.back': 'Back', 'setup.finish': 'Finish',
+    'setup.ready': 'All set. Your week is in.',
+
+    'kit.pencil': 'Pencil case', 'kit.pen': 'Pen', 'kit.notebook': 'Notebook',
+    'kit.books': 'Books', 'kit.bottle': 'Water bottle', 'kit.lunch': 'Lunch box',
+    'kit.laptop': 'Laptop', 'kit.ipad': 'Tablet', 'kit.charger': 'Charger',
+    'kit.airpods': 'Earphones', 'kit.case': 'Pencil bag', 'kit.shoes': 'Sports shoes',
+    'kit.sportkit': 'Sports kit', 'kit.deo': 'Deodorant', 'kit.tanach': 'Bible',
+    'kit.lit': 'Literature book', 'kit.eng': 'English book', 'kit.diplomacy': 'Diplomacy book',
+
     'tt.edit': 'Edit timetable',
     'tt.editNote': 'Tap a lesson to change it. Leave it empty for a free period.',
     'tt.addPeriod': 'Add a period',
@@ -509,6 +534,31 @@ const STRINGS = {
     'country.us': 'ארצות הברית', 'country.ca': 'קנדה',
     'country.au': 'אוסטרליה', 'country.fr': 'צרפת',
     'country.de': 'גרמניה', 'country.in': 'הודו',
+    'setup.weekTitle': 'איך נראה השבוע שלכם?',
+    'setup.weekNote': 'הדביקו את המערכת והאפליקציה תקרא אותה. שורה לכל שעה, הימים לרוחב. או התחילו מריק וכתבו אותה.',
+    'setup.pastePh': '8:20  מתמטיקה  ביולוגיה  תנך',
+    'setup.read': 'קראו אותה',
+    'setup.blank': 'להתחיל מריק',
+    'setup.readOk': 'נקראו {p} שעות על פני {d} ימים.',
+    'setup.readNo': 'לא הצלחנו לבנות מזה שבוע. נסו שורה לכל שעה.',
+    'setup.checkTitle': 'זה נכון?',
+    'setup.checkNote': 'תקנו כל מה שלא מדויק. השאירו ריק לשעה חופשית.',
+    'setup.kitTitle': 'מה צריך להביא?',
+    'setup.kitNote': 'זו הניחוש של האפליקציה לכל שיעור. הקישו כדי להוסיף או להסיר.',
+    'setup.everyDay': 'כל יום',
+    'setup.more': 'עוד', 'setup.fewer': 'פחות',
+    'setup.nothing': 'כלום לשיעור הזה',
+    'setup.noLessons': 'עדין אין שיעורים. חזרו ומלאו כמה.',
+    'setup.next': 'הבא', 'setup.back': 'חזרה', 'setup.finish': 'סיום',
+    'setup.ready': 'הכול מוכן. השבוע שלכם בפנים.',
+
+    'kit.pencil': 'קלמר', 'kit.pen': 'עט', 'kit.notebook': 'מחברת',
+    'kit.books': 'ספרים', 'kit.bottle': 'בקבוק מים', 'kit.lunch': 'קופסת אוכל',
+    'kit.laptop': 'מחשב נייד', 'kit.ipad': 'טאבלט', 'kit.charger': 'מטען',
+    'kit.airpods': 'אוזניות', 'kit.case': 'תיק קלמר', 'kit.shoes': 'נעלי ספורט',
+    'kit.sportkit': 'בגדי ספורט', 'kit.deo': 'דאודורנט', 'kit.tanach': 'תנך',
+    'kit.lit': 'ספר ספרות', 'kit.eng': 'ספר אנגלית', 'kit.diplomacy': 'ספר דיפלומטיה',
+
     'tt.edit': 'עריכת מערכת',
     'tt.editNote': 'הקישו על שיעור כדי לשנות אותו. השאירו ריק לשעה חופשית.',
     'tt.addPeriod': 'הוספת שעה',
@@ -610,6 +660,90 @@ function dayShort(i) {
    They live in one file rather than one each because a timetable is a
    couple of kilobytes and a second request before the first paint costs
    more than carrying them all. */
+
+/* ── The kit ───────────────────────────────────────────────
+   The first two links have their bags written into the code, because they
+   were built for one week each and that week was known. The third is built
+   for whoever opens it, so its bag has to be assembled rather than written —
+   and this is everything it can be assembled from.
+
+   Every one of these is a picture that already exists, drawn for one of the
+   other two links. That is the point: a bag you put together for yourself
+   looks exactly like the ones that were put together by hand, rather than
+   like a list of words with a generic icon beside each.
+
+   'ratio' is the shape the picture came out of the cutter as, width over
+   height. The scene needs it to draw a pen and a pencil case at sizes that
+   look like a pen and a pencil case; it is measured, not guessed. */
+const KIT = [
+  { key: 'pencil',    art: 'art/bag/pencil.webp',     ratio: 1.455 },
+  { key: 'pen',       art: 'art/bag2/pen.webp',       ratio: 0.127 },
+  { key: 'notebook',  art: 'art/bag/notebook.webp',   ratio: 0.979 },
+  { key: 'books',     art: 'art/bag/books.webp',      ratio: 1.170 },
+  { key: 'bottle',    art: 'art/bag/bottle.webp',     ratio: 0.469 },
+  { key: 'lunch',     art: 'art/bag/lunch.webp',      ratio: 1.532 },
+  { key: 'laptop',    art: 'art/bag/laptop.webp',     ratio: 1.440 },
+  { key: 'ipad',      art: 'art/bag2/ipad.webp',      ratio: 0.822 },
+  { key: 'charger',   art: 'art/bag2/charger.webp',   ratio: 1.016 },
+  { key: 'airpods',   art: 'art/bag/airpods.webp',    ratio: 0.732 },
+  { key: 'case',      art: 'art/bag2/case.webp',      ratio: 1.908 },
+  { key: 'shoes',     art: 'art/bag/shoes.webp',      ratio: 1.417 },
+  { key: 'sportkit',  art: 'art/bag2/sportkit.webp',  ratio: 1.092 },
+  { key: 'deo',       art: 'art/bag2/deo.webp',       ratio: 0.592 },
+  { key: 'tanach',    art: 'art/bag/tanach.webp',     ratio: 0.863 },
+  { key: 'lit',       art: 'art/bag2/lit.webp',       ratio: 0.754 },
+  { key: 'eng',       art: 'art/bag2/eng.webp',       ratio: 0.767 },
+  { key: 'diplomacy', art: 'art/bag2/diplomacy.webp', ratio: 0.735 },
+];
+
+const kitItem = (key) => KIT.find(k => k.key === key) || null;
+
+/* What the app guesses you need for a lesson, before you tell it otherwise.
+   The rules read the lesson's own name in either language, because the name
+   is the only thing the app knows about a lesson somebody has just typed in.
+
+   Every guess is meant to be wrong sometimes. The point of guessing at all is
+   that correcting a list is quicker than writing one, and the next screen is
+   where you correct it. */
+const KIT_RULES = [
+  { want: ['sport', 'gym', 'pe', 'physical', 'ספורט', 'חינוך גופני', 'כושר'],
+    kit: ['sportkit', 'shoes', 'deo', 'bottle'] },
+  { want: ['swim', 'שחייה', 'שחיה'], kit: ['sportkit', 'bottle', 'deo'] },
+  { want: ['comput', 'cod', 'program', 'software', 'tech', 'מחשב', 'תכנות', 'מדמ'],
+    kit: ['laptop', 'charger'] },
+  { want: ['bible', 'tanach', 'תנך', 'תנ״ך', 'תנ"ך', 'torah', 'תורה'], kit: ['tanach'] },
+  { want: ['english', 'אנגלית'], kit: ['eng'] },
+  { want: ['literat', 'ספרות'], kit: ['lit'] },
+  { want: ['diplom', 'דיפלומטיה'], kit: ['diplomacy'] },
+  { want: ['art', 'draw', 'paint', 'אומנות', 'אמנות', 'ציור'], kit: ['case'] },
+  { want: ['math', 'algebra', 'geometr', 'מתמטיקה', 'הנדסה', 'חשבון'], kit: ['books'] },
+  { want: ['lab', 'chem', 'physic', 'biolog', 'science', 'מעבדה', 'כימיה', 'פיסיקה', 'ביולוגיה', 'מדעים'],
+    kit: ['books'] },
+  { want: ['homeroom', 'tutor', 'assembly', 'חינוך'], kit: [] },
+];
+
+/** The app's first guess at what a lesson needs. */
+function guessKit(lesson) {
+  const name = String(lesson || '').toLowerCase();
+  for (const rule of KIT_RULES) {
+    if (rule.want.some(w => name.includes(w))) return rule.kit.slice();
+  }
+  // Nothing recognised: a notebook, which is the safe answer for a lesson.
+  return ['notebook'];
+}
+
+/** What you have said a lesson needs, or the guess until you say otherwise. */
+function kitFor(lesson) {
+  const saved = (state.kit || {})[lesson];
+  return Array.isArray(saved) ? saved : guessKit(lesson);
+}
+
+/* The things that go in every day whatever the lessons are. Guessed once, and
+   then yours. */
+const KIT_EVERY_DAY = ['pencil', 'bottle'];
+const everyDayKit = () =>
+  Array.isArray(state.kitEveryDay) ? state.kitEveryDay : KIT_EVERY_DAY.slice();
+
 
 const PROFILES = {};
 
@@ -778,6 +912,53 @@ PROFILES.yb = {
 
 /* Which one this copy is. The name in ?p= is the only thing that differs
    between the links, and anything it does not recognise is the first. */
+/* ── One you set up yourself ───────────────────────────────
+   The other two links each carry a week and a bag written into the code,
+   because each was built for one person whose week was known. This one is
+   built for whoever opens it: it starts with no week at all, asks for one,
+   guesses what every lesson needs, and lets you correct both. After that it
+   is the same app — same board, same creatures, same everything — running on
+   a timetable it was given rather than one it was born with.
+
+   It has no schedule and no periods here on purpose. An empty week is what
+   sends you to the setup the first time you open it. */
+PROFILES.own = {
+  id: 'own',
+  appName: 'Homework · Mine',
+  periods: [],
+  schedule: [],
+  look: {},
+  bagStyle: 'ring',
+  bagArt: 'art/bag',
+  // Every picture in the catalogue, so anything you tick can be drawn.
+  pics: Object.fromEntries(KIT.map(k => [k.key, { ratio: k.ratio }])),
+  // A picture lives wherever it was drawn for, which is two folders.
+  artOf: (key) => (kitItem(key) || { art: 'art/bag/pack.webp' }).art,
+
+  /* The bag is not written here, because it is not known here. It is the
+     every-day things, plus whatever each of today's lessons was said to
+     need — said by you, or guessed until you say. */
+  bag(names, lessonLabel) {
+    const things = [];
+    const add = (key, detail) => {
+      if (!kitItem(key)) return;
+      const already = things.find(t => t.key === key);
+      // Two lessons wanting the same book is one book, and it says so once.
+      if (already) {
+        if (detail && already.detail && !already.detail.includes(detail)) {
+          already.detail += ' · ' + detail;
+        } else if (detail && !already.detail) already.detail = detail;
+        return;
+      }
+      things.push({ key, label: tr('kit.' + key), detail: detail || '' });
+    };
+
+    for (const key of everyDayKit()) add(key);
+    for (const name of names) for (const key of kitFor(name)) add(key, lessonLabel(name));
+    return things;
+  },
+};
+
 const PROFILE = (() => {
   try {
     const want = new URLSearchParams(location.search).get('p');
@@ -954,7 +1135,7 @@ const BAG_TINT = {
 function bagPic(key, place, extra, H) {
   const art = BAG_PICS[key];
   const w = Math.round(art.w * BAG_SCENE.w);
-  return `<img class="bag-pic ${extra}" src="${PROFILE.bagArt}/${key}.webp" alt="" aria-hidden="true"
+  return `<img class="bag-pic ${extra}" src="${bagArtFor(key)}" alt="" aria-hidden="true"
        width="${w}" height="${Math.round(w / art.ratio)}" decoding="async"
        style="left:${(place.x / BAG_SCENE.w) * 100}%; top:${(place.y / H) * 100}%;
               width:${art.w * 100}%" />`;
@@ -977,6 +1158,13 @@ function bagPic(key, place, extra, H) {
    case being a plank. Then each side is stacked by the heights that come
    out of that, so a label always has the room it needs and never lands on
    the thing below it. */
+/* Where a bag picture lives. Two of the links keep all of theirs in one
+   folder and say so; the third assembles its bag out of both, so it answers
+   per item instead. */
+function bagArtFor(key) {
+  return PROFILE.artOf ? PROFILE.artOf(key) : `${PROFILE.bagArt}/${key}.webp`;
+}
+
 const BAG_CELL = 92;
 
 function bagRing(dayIndex) {
@@ -1006,7 +1194,7 @@ function bagRing(dayIndex) {
   const H = Math.max(260, ...bottoms);
 
   const pics = placed.map(t => `
-    <img class="bag-pic bag-thing" src="${PROFILE.bagArt}/${t.key}.webp" alt=""
+    <img class="bag-pic bag-thing" src="${bagArtFor(t.key)}" alt=""
          aria-hidden="true" decoding="async"
          style="left:${t.side ? 82 : 18}%; top:${(t.top / H) * 100}%;
                 width:${(t.w / BAG_SCENE.w) * 100}%;
@@ -2210,6 +2398,12 @@ const blank = () => ({
   },
   // null until the week is edited; then { periods, schedule } of your own.
   timetable: null,
+  /* The third link only. kit is what each lesson needs, by lesson name;
+     kitEveryDay is what goes in whatever the lessons are; setupDone says the
+     questions have been answered and the app proper can open. */
+  kit: {},
+  kitEveryDay: null,
+  setupDone: false,
   lastSubjectId: null,
 });
 
@@ -2288,6 +2482,9 @@ function hydrate(saved) {
       || next.timetable.schedule.some(r => !Array.isArray(r))) {
     next.timetable = null;
   }
+  if (!next.kit || typeof next.kit !== 'object') next.kit = {};
+  if (next.kitEveryDay != null && !Array.isArray(next.kitEveryDay)) next.kitEveryDay = null;
+  next.setupDone = !!next.setupDone;
   // Anyone already part way through should not be shown a burst of arrivals.
   if (typeof next.progress.shownUpTo !== 'number') next.progress.shownUpTo = levelFor(next.progress.xp || 0);
   return next;
@@ -2699,8 +2896,13 @@ function renderTtButton() {
   // Not on the reminders page: that corner belongs to the sticky, and the
   // timetable is nothing to do with what is pinned to the board.
   btn.hidden = currentTab === 'reminders';
-  // Redrawn only when the subjects behind its colours change, not every render.
-  if (btn.firstChild) return;                      // the week never changes
+  /* Drawn once and then left alone, which was right while the week was a
+     constant. It is not one any more — the editor changes it, and the third
+     link starts without one at all, so the button was a blank circle until
+     the app was reloaded. It keeps a signature of what it drew instead. */
+  const mark = schedule().map(r => r.join('')).join('');
+  if (btn.dataset.week === mark) return;
+  btn.dataset.week = mark;
   btn.innerHTML = '<span class="tt-mini">' + schoolDays().map((d, i) =>
     '<span class="tt-mini-col">' + (schedule()[i] || []).slice(0, 6).map(name => {
       if (!name) return '<span class="tt-mini-cell is-free"></span>';
@@ -3468,6 +3670,258 @@ function closeDonePage() {
    Lesson names are typed rather than picked from a list, because the list of
    subjects is built *from* the timetable — a subject cannot be offered before
    the lesson that invents it exists. */
+/* ── Setting the third link up ─────────────────────────────
+   Three questions, asked once, on the first launch of the link that has no
+   week of its own.
+
+   1. Your week. Paste it, or fill the grid.
+   2. What it made of that — the same grid, to correct.
+   3. What each lesson needs — guessed, to correct.
+
+   Nothing is written to the store until the last step is finished, so
+   backing out of the middle of it leaves an app that still has no week and
+   will ask again. That is deliberate: a half-answered setup is worse than an
+   unanswered one, because it looks finished.
+*/
+
+const SETUP_STEPS = ['week', 'check', 'kit'];
+let setupAt = 0;
+let setupDraft = null;
+
+/** The third link, before it has been told anything. */
+const needsSetup = () => PROFILE.id === 'own' && !state.setupDone;
+
+/**
+ * Read a pasted timetable.
+ *
+ * People paste what they have, which is a table copied out of a document or
+ * a screenshot's worth of text retyped. Both arrive as lines, and the columns
+ * are separated by tabs, by runs of spaces, by commas or by pipes — so the
+ * separator is whichever of those the line actually uses.
+ *
+ * The first line is treated as a header only if it looks like one: all of its
+ * cells match a weekday name in either language. Otherwise it is a row of
+ * lessons like any other, because plenty of people paste the grid without
+ * its headings.
+ */
+function readPastedWeek(text) {
+  const lines = String(text || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return null;
+
+  const split = (line) => {
+    if (line.includes('\t')) return line.split('\t');
+    if (line.includes('|')) return line.split('|');
+    if (line.includes(',')) return line.split(',');
+    return line.split(/ {2,}/);
+  };
+
+  const DAY_WORDS = /^(sun|mon|tue|wed|thu|fri|sat|ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)/i;
+  let rows = lines.map(split).map(cells => cells.map(c => c.trim()));
+  if (rows[0].length > 1 && rows[0].every(c => !c || DAY_WORDS.test(c))) rows = rows.slice(1);
+  if (!rows.length) return null;
+
+  /* A pasted line is one period across the days, which is how a timetable is
+     written down. The first cell is the time if it looks like one. */
+  const periods = [];
+  const wide = Math.max(...rows.map(r => r.length));
+  const hasTimes = rows.every(r => /\d{1,2}[:.]\d{2}/.test(r[0] || ''));
+  const days = Math.max(1, (hasTimes ? wide - 1 : wide));
+
+  const schedule = Array.from({ length: days }, () => []);
+  rows.forEach((cells, p) => {
+    const lessons = hasTimes ? cells.slice(1) : cells;
+    periods.push(hasTimes ? cells[0] : tr('tt.period', { n: p + 1 }));
+    for (let d = 0; d < days; d++) schedule[d].push((lessons[d] || '').trim() || null);
+  });
+  return { periods, schedule };
+}
+
+/** An empty week of the right shape, for anyone who would rather just type. */
+function blankWeek(rows = 6) {
+  const days = schoolDays().length;
+  return {
+    periods: Array.from({ length: rows }, (_, i) => tr('tt.period', { n: i + 1 })),
+    schedule: Array.from({ length: days }, () => Array(rows).fill(null)),
+  };
+}
+
+function openSetup() {
+  setupAt = 0;
+  setupDraft = { week: blankWeek(), kit: {}, everyDay: KIT_EVERY_DAY.slice(), open: {} };
+  const page = $('#setup');
+  page.hidden = false;
+  renderSetup();
+}
+
+/** Every lesson the draft week mentions, in the order it first appears. */
+function draftLessons() {
+  const seen = [];
+  for (const row of setupDraft.week.schedule) {
+    for (const name of row) if (name && !seen.includes(name)) seen.push(name);
+  }
+  return seen;
+}
+
+function renderSetup() {
+  const box = $('#setup-body');
+  if (!box || !setupDraft) return;
+  const step = SETUP_STEPS[setupAt];
+
+  const dots = SETUP_STEPS.map((_, i) =>
+    `<span class="setup-dot ${i === setupAt ? 'is-on' : ''} ${i < setupAt ? 'is-done' : ''}"></span>`).join('');
+
+  let inner = '';
+  if (step === 'week') {
+    inner = `
+      <h2 class="setup-title">${esc(tr('setup.weekTitle'))}</h2>
+      <p class="setup-note">${esc(tr('setup.weekNote'))}</p>
+      <textarea id="setup-paste" class="setup-paste" rows="7"
+                placeholder="${esc(tr('setup.pastePh'))}"></textarea>
+      <div class="setup-actions">
+        <button id="setup-read" class="btn-primary">${esc(tr('setup.read'))}</button>
+        <button id="setup-blank" class="btn-second">${esc(tr('setup.blank'))}</button>
+      </div>
+      <p id="setup-read-note" class="foot-note"></p>`;
+  }
+
+  if (step === 'check') {
+    inner = `
+      <h2 class="setup-title">${esc(tr('setup.checkTitle'))}</h2>
+      <p class="setup-note">${esc(tr('setup.checkNote'))}</p>
+      ${weekGrid(setupDraft.week, 'setup')}
+      <div class="tt-edit-actions">
+        <button id="setup-add-period" class="btn-second">${esc(tr('tt.addPeriod'))}</button>
+        <button id="setup-drop-period" class="btn-second"
+                ${setupDraft.week.periods.length <= 1 ? 'disabled' : ''}>${esc(tr('tt.removePeriod'))}</button>
+      </div>`;
+  }
+
+  if (step === 'kit') {
+    const lessons = draftLessons();
+    inner = `
+      <h2 class="setup-title">${esc(tr('setup.kitTitle'))}</h2>
+      <p class="setup-note">${esc(tr('setup.kitNote'))}</p>
+
+      <div class="kit-block">
+        <h3 class="kit-head">${esc(tr('setup.everyDay'))}</h3>
+        ${kitChips(setupDraft.everyDay, '', setupDraft.open[''])}
+      </div>
+
+      ${lessons.length ? lessons.map(name => `
+        <div class="kit-block">
+          <h3 class="kit-head">${esc(name)}</h3>
+          ${kitChips(setupDraft.kit[name] || guessKit(name), name, setupDraft.open[name])}
+        </div>`).join('')
+        : `<p class="foot-note is-big">${esc(tr('setup.noLessons'))}</p>`}`;
+  }
+
+  box.innerHTML = `
+    <div class="setup-dots" aria-hidden="true">${dots}</div>
+    ${inner}
+    <div class="setup-feet">
+      ${setupAt > 0 ? `<button id="setup-back" class="btn-second">${esc(tr('setup.back'))}</button>` : ''}
+      <button id="setup-next" class="btn-primary is-wide">
+        ${esc(setupAt === SETUP_STEPS.length - 1 ? tr('setup.finish') : tr('setup.next'))}
+      </button>
+    </div>`;
+}
+
+/** The week as a grid of fields. The editor and the setup draw the same one. */
+function weekGrid(week, scope) {
+  const days = schoolDays();
+  return `
+    <div class="tt-edit-scroll">
+      <table class="tt-edit-grid">
+        <thead>
+          <tr>
+            <th class="tt-edit-corner">${esc(tr('tt.time'))}</th>
+            ${days.map((d, i) => `<th>${esc(dayShort(i))}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${week.periods.map((time, p) => `
+            <tr>
+              <th class="tt-edit-time">
+                <input class="tt-edit-when" type="text" value="${esc(time)}"
+                       data-scope="${scope}" data-period="${p}"
+                       aria-label="${esc(tr('tt.period', { n: p + 1 }))}" />
+              </th>
+              ${days.map((d, i) => `
+                <td>
+                  <input class="tt-edit-cell" type="text"
+                         value="${esc((week.schedule[i] || [])[p] || '')}"
+                         data-scope="${scope}" data-day="${i}" data-period="${p}"
+                         placeholder="${esc(tr('tt.free'))}"
+                         aria-label="${esc(dayShort(i))} ${esc(tr('tt.period', { n: p + 1 }))}" />
+                </td>`).join('')}
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+/**
+ * What a lesson needs: the things chosen for it, and a way to the rest.
+ *
+ * Showing the whole catalogue against every lesson made a page fourteen
+ * lessons long with two hundred and fifty pictures on it, which is not a
+ * question anybody reads to the end of. A row is the answer instead — what
+ * the app picked, or what you have picked since — and the rest of the
+ * catalogue is one tap away, for that lesson only.
+ */
+function kitChips(on, lesson, open) {
+  const chip = (k) => `
+    <button class="kit-chip ${on.includes(k.key) ? 'is-on' : ''}"
+            data-kit="${k.key}" aria-pressed="${on.includes(k.key)}">
+      <img src="${k.art}" alt="" aria-hidden="true" width="64" height="64"
+           loading="lazy" decoding="async" />
+      <span>${esc(tr('kit.' + k.key))}</span>
+    </button>`;
+
+  const chosen = KIT.filter(k => on.includes(k.key));
+  const rest = KIT.filter(k => !on.includes(k.key));
+
+  return `<div class="kit-row ${open ? 'is-open' : ''}" data-lesson="${esc(lesson)}">
+    ${chosen.map(chip).join('')}
+    ${open ? rest.map(chip).join('') : ''}
+    ${chosen.length ? '' : `<span class="kit-none">${esc(tr('setup.nothing'))}</span>`}
+    <button class="kit-more" data-more="${esc(lesson)}" aria-expanded="${!!open}">
+      <span aria-hidden="true">${open ? '−' : '+'}</span>
+      <span>${esc(open ? tr('setup.fewer') : tr('setup.more'))}</span>
+    </button>
+  </div>`;
+}
+
+/** The step the setup is on, answered. */
+function setupForward() {
+  if (setupAt < SETUP_STEPS.length - 1) {
+    setupAt++;
+    renderSetup();
+    $('#setup').scrollTop = 0;
+    return;
+  }
+
+  // The last step: everything the setup collected goes into the store at once.
+  const week = squareUp({
+    periods: setupDraft.week.periods.map((t, i) => String(t).trim() || tr('tt.period', { n: i + 1 })),
+    schedule: setupDraft.week.schedule.map(r => r.slice()),
+  });
+  state.timetable = week;
+  state.kitEveryDay = setupDraft.everyDay.slice();
+  state.kit = {};
+  for (const name of draftLessons()) {
+    state.kit[name] = (setupDraft.kit[name] || guessKit(name)).slice();
+  }
+  state.setupDone = true;
+  save();
+
+  setupDraft = null;
+  $('#setup').hidden = true;
+  render();
+  showToast(tr('setup.ready'));
+}
+
+
 let ttDraft = null;
 function renderTtEdit() {
   const box = $('#tt-edit-body');
@@ -3475,34 +3929,7 @@ function renderTtEdit() {
   const week = schoolDays();
   box.innerHTML = `
     <p class="tt-edit-note">${esc(tr('tt.editNote'))}</p>
-    <div class="tt-edit-scroll">
-      <table class="tt-edit-grid">
-        <thead>
-          <tr>
-            <th class="tt-edit-corner">${esc(tr('tt.time'))}</th>
-            ${week.map((d, i) => `<th>${esc(dayShort(i))}</th>`).join('')}
-          </tr>
-        </thead>
-        <tbody>
-          ${ttDraft.periods.map((time, p) => `
-            <tr>
-              <th class="tt-edit-time">
-                <input class="tt-edit-when" type="text" value="${esc(time)}"
-                       data-period="${p}" inputmode="text"
-                       aria-label="${esc(tr('tt.period', { n: p + 1 }))}" />
-              </th>
-              ${week.map((d, i) => `
-                <td>
-                  <input class="tt-edit-cell" type="text"
-                         value="${esc((ttDraft.schedule[i] || [])[p] || '')}"
-                         data-day="${i}" data-period="${p}"
-                         placeholder="${esc(tr('tt.free'))}"
-                         aria-label="${esc(dayShort(i))} ${esc(tr('tt.period', { n: p + 1 }))}" />
-                </td>`).join('')}
-            </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>
+    ${weekGrid(ttDraft, 'edit')}
     <div class="tt-edit-actions">
       <button id="tt-add-period" class="btn-second">${esc(tr('tt.addPeriod'))}</button>
       <button id="tt-drop-period" class="btn-second"
@@ -4787,20 +5214,96 @@ function wireApp() {
   /* The week, editable. The grid is redrawn on every structural change but
      not on every keystroke: typing into a cell writes straight into the
      draft, so the field keeps the caret and nothing flickers. */
+  on('#setup-body', 'click', (e) => {
+    if (!setupDraft) return;
+
+    if (e.target.closest('#setup-read')) {
+      const week = readPastedWeek($('#setup-paste').value);
+      const note = $('#setup-read-note');
+      if (!week) { note.textContent = tr('setup.readNo'); return; }
+      setupDraft.week = squareUp(week);
+      note.textContent = tr('setup.readOk',
+        { p: week.periods.length, d: schoolDays().length });
+      // Straight on to checking it: reading it is not the point, having it is.
+      setupAt = 1;
+      renderSetup();
+      $('#setup').scrollTop = 0;
+      return;
+    }
+    if (e.target.closest('#setup-blank')) {
+      setupDraft.week = squareUp(blankWeek());
+      setupAt = 1;
+      renderSetup();
+      return;
+    }
+    if (e.target.closest('#setup-add-period')) {
+      setupDraft.week.periods.push('');
+      renderSetup();
+      return;
+    }
+    if (e.target.closest('#setup-drop-period')) {
+      if (setupDraft.week.periods.length > 1) setupDraft.week.periods.pop();
+      renderSetup();
+      return;
+    }
+
+    const more = e.target.closest('[data-more]');
+    if (more) {
+      const lesson = more.dataset.more;
+      setupDraft.open[lesson] = !setupDraft.open[lesson];
+      renderSetup();
+      // Back to the row that was opened, rather than to the top of the page.
+      const row = $(`.kit-row[data-lesson="${CSS.escape(lesson)}"]`);
+      if (row) row.scrollIntoView({ block: 'center' });
+      return;
+    }
+
+    const chip = e.target.closest('[data-kit]');
+    if (chip) {
+      const row = chip.closest('.kit-row');
+      const lesson = row.dataset.lesson;
+      const list = lesson
+        ? (setupDraft.kit[lesson] || (setupDraft.kit[lesson] = guessKit(lesson)))
+        : setupDraft.everyDay;
+      const at = list.indexOf(chip.dataset.kit);
+      if (at < 0) list.push(chip.dataset.kit); else list.splice(at, 1);
+      chip.classList.toggle('is-on', at < 0);
+      chip.setAttribute('aria-pressed', String(at < 0));
+      return;
+    }
+
+    if (e.target.closest('#setup-back')) {
+      setupAt = Math.max(0, setupAt - 1);
+      renderSetup();
+      $('#setup').scrollTop = 0;
+      return;
+    }
+    if (e.target.closest('#setup-next')) setupForward();
+  });
+
   on('#tt-edit-open', 'click', openTtEdit);
   on('#tt-edit-cancel', 'click', closeTtEdit);
   on('#tt-edit-save', 'click', saveTtEdit);
-  on('#tt-edit-body', 'input', (e) => {
-    if (!ttDraft) return;
+  /* The editor and the setup draw the same grid, so one handler reads it.
+     Typing writes straight into whichever draft drew it, which is why the
+     field keeps the caret and nothing is redrawn on a keystroke. */
+  const weekTyping = (e) => {
     const cell = e.target.closest('.tt-edit-cell');
+    const when = e.target.closest('.tt-edit-when');
+    const field = cell || when;
+    if (!field) return;
+    const week = field.dataset.scope === 'setup'
+      ? (setupDraft && setupDraft.week) : ttDraft;
+    if (!week) return;
     if (cell) {
       const day = +cell.dataset.day, p = +cell.dataset.period;
-      (ttDraft.schedule[day] || (ttDraft.schedule[day] = []))[p] = cell.value.trim() || null;
+      (week.schedule[day] || (week.schedule[day] = []))[p] = cell.value.trim() || null;
       return;
     }
-    const when = e.target.closest('.tt-edit-when');
-    if (when) ttDraft.periods[+when.dataset.period] = when.value;
-  });
+    week.periods[+when.dataset.period] = when.value;
+  };
+  on('#tt-edit-body', 'input', weekTyping);
+  on('#setup-body', 'input', weekTyping);
   on('#tt-edit-body', 'click', (e) => {
     if (!ttDraft) return;
     if (e.target.closest('#tt-add-period')) {
@@ -4996,6 +5499,9 @@ function boot() {
   $('#main').hidden = false;
   // The page asked for, unless something else is being opened on purpose.
   showTab('home');
+  // The third link has no week of its own. It asks for one before it shows
+  // anything, because a homework app with no timetable is a blank page.
+  if (needsSetup()) openSetup();
   scheduleReminder();
 
   // Opened from the notification or the home-screen shortcut.

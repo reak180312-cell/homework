@@ -684,6 +684,47 @@ is kept beside it.
 which bag to keep. 150KB of somebody else's school things is not worth downloading to never
 look at.
 
+### The third link, which has no week at all
+
+The first two each carry a week and a bag written into the code, because each was built for one
+person whose week was known. `?p=own` is built for whoever opens it. It starts with nothing, asks
+three questions once, and is the same app afterwards.
+
+**Paste your timetable and it reads it.** People paste what they have — a table copied out of a
+document, or a screenshot’s worth retyped — and both arrive as lines. The columns are separated
+by tabs, by runs of spaces, by commas or by pipes, so the separator is whichever of those the
+line actually uses. A first line is treated as a heading only if every cell of it is a weekday
+name in either language; plenty of people paste the grid without its headings, and throwing away
+their first period would be worse than keeping a row of day names. If the first column looks like
+times, it is the times.
+
+**Then it shows what it made, to be corrected.** That is the same grid the timetable editor
+draws — written once, used by both — so a period can be added or taken out here too.
+
+**Then it guesses what every lesson needs.** The rules read the lesson’s own name in either
+language, because the name is the only thing the app knows about a lesson somebody has just
+typed in: anything with *sport* or ספורט in it wants a kit and shoes, anything with *cod* wants a
+laptop, a lesson nobody recognises gets a notebook. Every guess is meant to be wrong sometimes.
+The point of guessing at all is that correcting a list is quicker than writing one, and the
+screen it is guessed on is the screen you correct it on.
+
+A first pass showed the whole catalogue against every lesson, which on a real timetable is a page
+fourteen lessons long with two hundred and fifty pictures on it — not a question anybody reads to
+the end of. A row is the answer instead, with the rest one tap away, per lesson.
+
+Nothing is written to the store until the last step. A half-answered setup is worse than an
+unanswered one, because it looks finished.
+
+The eighteen things it can put in a bag are the pictures already drawn for the other two links,
+which is the point: a bag you assembled yourself looks like the ones assembled by hand, not like
+a list of words with a generic icon beside each. They live in two folders, so a picture is asked
+for per item rather than assumed to sit under one prefix.
+
+Two things stopped being constants for this to work. The timetable already had (`periods()`,
+`schedule()`), and the button in the corner that draws the week in miniature was still drawn once
+and never again — which on a link that starts with no week meant a blank circle until the app was
+reloaded. It keeps a signature of what it drew now.
+
 ### The second week
 
 It is ragged in a way the first is not: a seminar, an art major, two evenings, and a Monday
