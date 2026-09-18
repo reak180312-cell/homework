@@ -278,20 +278,15 @@ const STRINGS = {
     'country.au': 'Australia', 'country.fr': 'France',
     'country.de': 'Germany', 'country.in': 'India',
     'setup.weekTitle': 'What does your week look like?',
-    'setup.weekNote': 'Paste your timetable in, and the app will read it. One line per period, the days across. Or start with an empty one and type it.',
-    'setup.pastePh': '8:20  Maths  Biology  Bible',
-    'setup.read': 'Read it',
-    'setup.blank': 'Start empty',
-    'setup.readOk': 'Read {p} periods across {d} days.',
-    'setup.readNo': 'Could not make a week out of that. Try one line per period.',
+    'photo.take': 'Take a photo',
+    'photo.pick': 'From your photos',
+    'setup.weekNote': 'Photograph your timetable and it will sit above the grid on the next screen, so you can copy it across without looking away. You can skip this and fill the grid in from memory.',
     'setup.checkTitle': 'Is this right?',
     'setup.checkNote': 'Change anything that is wrong. Leave a box empty for a free period.',
     'setup.kitTitle': 'What do you need?',
     'setup.kitNote': 'This is the app’s guess for each lesson. Tap anything to add or remove it.',
     'setup.everyDay': 'Every day',
     'setup.more': 'More', 'setup.fewer': 'Fewer',
-    'setup.or': 'or',
-    'photo.add': 'Add a photo of it',
     'photo.note': 'Take a picture of your timetable and it will sit above the grid while you fill it in. It stays on your phone.',
     'photo.alt': 'Your timetable',
     'photo.caption': 'Tap to see it bigger',
@@ -544,20 +539,15 @@ const STRINGS = {
     'country.au': 'אוסטרליה', 'country.fr': 'צרפת',
     'country.de': 'גרמניה', 'country.in': 'הודו',
     'setup.weekTitle': 'איך נראה השבוע שלכם?',
-    'setup.weekNote': 'הדביקו את המערכת והאפליקציה תקרא אותה. שורה לכל שעה, הימים לרוחב. או התחילו מריק וכתבו אותה.',
-    'setup.pastePh': '8:20  מתמטיקה  ביולוגיה  תנך',
-    'setup.read': 'קראו אותה',
-    'setup.blank': 'להתחיל מריק',
-    'setup.readOk': 'נקראו {p} שעות על פני {d} ימים.',
-    'setup.readNo': 'לא הצלחנו לבנות מזה שבוע. נסו שורה לכל שעה.',
+    'photo.take': 'צילום תמונה',
+    'photo.pick': 'מהתמונות שלכם',
+    'setup.weekNote': 'צלמו את המערכת והיא תופיע מעל הטבלה במסך הבא, כך שתוכלו להעתיק בלי להסיט מבט. אפשר לדלג ולמלא את הטבלה מהזיכרון.',
     'setup.checkTitle': 'זה נכון?',
     'setup.checkNote': 'תקנו כל מה שלא מדויק. השאירו ריק לשעה חופשית.',
     'setup.kitTitle': 'מה צריך להביא?',
     'setup.kitNote': 'זו הניחוש של האפליקציה לכל שיעור. הקישו כדי להוסיף או להסיר.',
     'setup.everyDay': 'כל יום',
     'setup.more': 'עוד', 'setup.fewer': 'פחות',
-    'setup.or': 'או',
-    'photo.add': 'הוספת תמונה',
     'photo.note': 'צלמו את המערכת והיא תופיע מעל הטבלה בזמן המילוי. היא נשארת בטלפון שלכם.',
     'photo.alt': 'המערכת שלכם',
     'photo.caption': 'הקישו להגדלה',
@@ -3779,12 +3769,19 @@ function readPhotoFile(file) {
    and a phone that would rather show the photo roll still may. */
 function photoAdd(scope) {
   return `
-    <label class="tt-photo-add">
-      <svg class="ico" aria-hidden="true"><use href="#i-camera" /></svg>
-      <span>${esc(tr('photo.add'))}</span>
-      <input type="file" accept="image/*" capture="environment"
-             data-photo="${scope}" hidden />
-    </label>`;
+    <div class="tt-photo-ways">
+      <label class="tt-photo-add">
+        <svg class="ico" aria-hidden="true"><use href="#i-camera" /></svg>
+        <span>${esc(tr('photo.take'))}</span>
+        <input type="file" accept="image/*" capture="environment"
+               data-photo="${scope}" hidden />
+      </label>
+      <label class="tt-photo-add">
+        <svg class="ico" aria-hidden="true"><use href="#i-pictures" /></svg>
+        <span>${esc(tr('photo.pick'))}</span>
+        <input type="file" accept="image/*" data-photo="${scope}" hidden />
+      </label>
+    </div>`;
 }
 
 /** The photo above whichever grid is being filled in, or nothing. */
@@ -3846,51 +3843,6 @@ let setupDraft = null;
 /** The third link, before it has been told anything. */
 const needsSetup = () => PROFILE.id === 'own' && !state.setupDone;
 
-/**
- * Read a pasted timetable.
- *
- * People paste what they have, which is a table copied out of a document or
- * a screenshot's worth of text retyped. Both arrive as lines, and the columns
- * are separated by tabs, by runs of spaces, by commas or by pipes — so the
- * separator is whichever of those the line actually uses.
- *
- * The first line is treated as a header only if it looks like one: all of its
- * cells match a weekday name in either language. Otherwise it is a row of
- * lessons like any other, because plenty of people paste the grid without
- * its headings.
- */
-function readPastedWeek(text) {
-  const lines = String(text || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  if (!lines.length) return null;
-
-  const split = (line) => {
-    if (line.includes('\t')) return line.split('\t');
-    if (line.includes('|')) return line.split('|');
-    if (line.includes(',')) return line.split(',');
-    return line.split(/ {2,}/);
-  };
-
-  const DAY_WORDS = /^(sun|mon|tue|wed|thu|fri|sat|ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)/i;
-  let rows = lines.map(split).map(cells => cells.map(c => c.trim()));
-  if (rows[0].length > 1 && rows[0].every(c => !c || DAY_WORDS.test(c))) rows = rows.slice(1);
-  if (!rows.length) return null;
-
-  /* A pasted line is one period across the days, which is how a timetable is
-     written down. The first cell is the time if it looks like one. */
-  const periods = [];
-  const wide = Math.max(...rows.map(r => r.length));
-  const hasTimes = rows.every(r => /\d{1,2}[:.]\d{2}/.test(r[0] || ''));
-  const days = Math.max(1, (hasTimes ? wide - 1 : wide));
-
-  const schedule = Array.from({ length: days }, () => []);
-  rows.forEach((cells, p) => {
-    const lessons = hasTimes ? cells.slice(1) : cells;
-    periods.push(hasTimes ? cells[0] : tr('tt.period', { n: p + 1 }));
-    for (let d = 0; d < days; d++) schedule[d].push((lessons[d] || '').trim() || null);
-  });
-  return { periods, schedule };
-}
-
 /** An empty week of the right shape, for anyone who would rather just type. */
 function blankWeek(rows = 6) {
   const days = schoolDays().length;
@@ -3930,16 +3882,6 @@ function renderSetup() {
     inner = `
       <h2 class="setup-title">${esc(tr('setup.weekTitle'))}</h2>
       <p class="setup-note">${esc(tr('setup.weekNote'))}</p>
-      <textarea id="setup-paste" class="setup-paste" rows="7"
-                placeholder="${esc(tr('setup.pastePh'))}"></textarea>
-      <div class="setup-actions">
-        <button id="setup-read" class="btn-primary">${esc(tr('setup.read'))}</button>
-        <button id="setup-blank" class="btn-second">${esc(tr('setup.blank'))}</button>
-      </div>
-      <p id="setup-read-note" class="foot-note"></p>
-
-      <div class="setup-or"><span>${esc(tr('setup.or'))}</span></div>
-      <p class="setup-note">${esc(tr('photo.note'))}</p>
       ${photoStrip() || photoAdd('setup')}`;
   }
 
@@ -5378,25 +5320,6 @@ function wireApp() {
   on('#setup-body', 'click', (e) => {
     if (!setupDraft) return;
 
-    if (e.target.closest('#setup-read')) {
-      const week = readPastedWeek($('#setup-paste').value);
-      const note = $('#setup-read-note');
-      if (!week) { note.textContent = tr('setup.readNo'); return; }
-      setupDraft.week = squareUp(week);
-      note.textContent = tr('setup.readOk',
-        { p: week.periods.length, d: schoolDays().length });
-      // Straight on to checking it: reading it is not the point, having it is.
-      setupAt = 1;
-      renderSetup();
-      $('#setup').scrollTop = 0;
-      return;
-    }
-    if (e.target.closest('#setup-blank')) {
-      setupDraft.week = squareUp(blankWeek());
-      setupAt = 1;
-      renderSetup();
-      return;
-    }
     if (e.target.closest('#setup-add-period')) {
       setupDraft.week.periods.push('');
       renderSetup();
