@@ -279,17 +279,23 @@ const STRINGS = {
     'country.de': 'Germany', 'country.in': 'India',
     'setup.weekTitle': 'What does your week look like?',
     'photo.take': 'Take a photo',
+    'photo.read': 'Read it',
+    'photo.reading': 'Reading it… {n}%',
+    'photo.readOk': 'Read {n} periods. Check them.',
+    'photo.readNone': 'Could not find a grid in that. Fill it in below, or try a straighter photo.',
+    'photo.readFail': 'Could not read it this time. Fill it in below.',
+    'photo.readOffline': 'Reading a photo needs a connection the first time. Fill it in below, or try again later.',
     'photo.pick': 'From your photos',
-    'setup.weekNote': 'Photograph your timetable and it will sit above the grid on the next screen, so you can copy it across without looking away. You can skip this and fill the grid in from memory.',
+    'setup.weekNote': 'Photograph your timetable and tap Read it, and the app will fill the grid in for you to check. You can also skip this and fill it in yourself.',
     'setup.checkTitle': 'Is this right?',
     'setup.checkNote': 'Change anything that is wrong. Leave a box empty for a free period.',
     'setup.kitTitle': 'What do you need?',
     'setup.kitNote': 'This is the app’s guess for each lesson. Tap anything to add or remove it.',
     'setup.everyDay': 'Every day',
     'setup.more': 'More', 'setup.fewer': 'Fewer',
-    'photo.note': 'Take a picture of your timetable and it will sit above the grid while you fill it in. It stays on your phone.',
+    'photo.note': 'Take a picture of your timetable and the app will read it for you. You check what it read before anything is saved, and the photo stays on your phone.',
     'photo.alt': 'Your timetable',
-    'photo.caption': 'Tap to see it bigger',
+    'photo.caption': 'Tap it to see it bigger.',
     'photo.open': 'See the photo bigger',
     'photo.remove': 'Remove',
     'photo.bad': 'That did not look like a picture.',
@@ -540,17 +546,23 @@ const STRINGS = {
     'country.de': 'גרמניה', 'country.in': 'הודו',
     'setup.weekTitle': 'איך נראה השבוע שלכם?',
     'photo.take': 'צילום תמונה',
+    'photo.read': 'קראו אותה',
+    'photo.reading': 'קוראים… {n}%',
+    'photo.readOk': 'נקראו {n} שעות. בדקו אותן.',
+    'photo.readNone': 'לא נמצאה טבלה בתמונה. מלאו למטה, או נסו תמונה ישרה יותר.',
+    'photo.readFail': 'לא הצלחנו לקרוא הפעם. מלאו למטה.',
+    'photo.readOffline': 'קריאת תמונה דורשת חיבור בפעם הראשונה. מלאו למטה, או נסו שוב מאוחר יותר.',
     'photo.pick': 'מהתמונות שלכם',
-    'setup.weekNote': 'צלמו את המערכת והיא תופיע מעל הטבלה במסך הבא, כך שתוכלו להעתיק בלי להסיט מבט. אפשר לדלג ולמלא את הטבלה מהזיכרון.',
+    'setup.weekNote': 'צלמו את המערכת והקישו קראו אותה, והאפליקציה תמלא את הטבלה כדי שתבדקו. אפשר גם לדלג ולמלא בעצמכם.',
     'setup.checkTitle': 'זה נכון?',
     'setup.checkNote': 'תקנו כל מה שלא מדויק. השאירו ריק לשעה חופשית.',
     'setup.kitTitle': 'מה צריך להביא?',
     'setup.kitNote': 'זו הניחוש של האפליקציה לכל שיעור. הקישו כדי להוסיף או להסיר.',
     'setup.everyDay': 'כל יום',
     'setup.more': 'עוד', 'setup.fewer': 'פחות',
-    'photo.note': 'צלמו את המערכת והיא תופיע מעל הטבלה בזמן המילוי. היא נשארת בטלפון שלכם.',
+    'photo.note': 'צלמו את המערכת והאפליקציה תקרא אותה. אתם בודקים מה נקרא לפני שנשמר, והתמונה נשארת בטלפון שלכם.',
     'photo.alt': 'המערכת שלכם',
-    'photo.caption': 'הקישו להגדלה',
+    'photo.caption': 'הקישו כדי לראות בגדול.',
     'photo.open': 'לראות את התמונה בגדול',
     'photo.remove': 'הסרה',
     'photo.bad': 'זה לא נראה כמו תמונה.',
@@ -3693,13 +3705,11 @@ function closeDonePage() {
 */
 
 /* ── A photo of your timetable ─────────────────────────────
-   You have a timetable on paper, or on a noticeboard, or in a message. The
-   app cannot read it — there is no reliable way to get a photographed grid,
-   in two languages, off a phone camera and into rows and columns, and
-   pretending otherwise would waste your time and then be wrong. What it can
-   do is put the photo where you need it: on the screen, above the grid, while
-   you fill the grid in. That turns looking-at-paper-then-looking-at-phone
-   into reading one screen.
+   You have a timetable on paper, or on a noticeboard, or in a message. This
+   part gets it onto the phone and keeps it there; reading it is the next
+   section's job. Either way the photo earns its place, because it sits above
+   the grid while the grid is filled in or checked, and that turns
+   looking-at-paper-then-looking-at-phone into reading one screen.
 
    It is kept under a key of its own rather than inside the saved state. The
    state is written out again every time you tick a piece of homework, and
@@ -3794,8 +3804,14 @@ function photoStrip() {
         <img src="${src}" alt="${esc(tr('photo.alt'))}" />
       </button>
       <figcaption>
-        <span>${esc(tr('photo.caption'))}</span>
-        <button class="tt-photo-drop" data-photo-drop>${esc(tr('photo.remove'))}</button>
+        <div class="tt-photo-acts">
+          <button class="tt-photo-read" data-photo-read>
+            <svg class="ico" aria-hidden="true"><use href="#i-search" /></svg>
+            <span>${esc(tr('photo.read'))}</span>
+          </button>
+          <button class="tt-photo-drop" data-photo-drop>${esc(tr('photo.remove'))}</button>
+        </div>
+        <p class="tt-photo-say" data-photo-say>${esc(tr('photo.caption'))}</p>
       </figcaption>
     </figure>`;
 }
@@ -3842,6 +3858,348 @@ let setupDraft = null;
 
 /** The third link, before it has been told anything. */
 const needsSetup = () => PROFILE.id === 'own' && !state.setupDone;
+
+/* ── Reading the photograph ────────────────────────────────
+   Recognising the words is the easy half and not the useful half. An OCR
+   engine hands back text in reading order, and a timetable read in reading
+   order is a heap of lesson names with no idea which day or which period any
+   of them belongs to. What makes it a timetable again is *where* each word
+   was on the page — so everything below works on the boxes, not the text.
+
+   The engine is fetched only when this is actually asked for. It is several
+   megabytes and most people will never tap the button; making everybody
+   download it on the off-chance would be the wrong way round.
+*/
+
+const OCR_LIB = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+const OCR_CORE = 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1';
+const OCR_LANGS = 'https://tessdata.projectnaptha.com/4.0.0_fast';
+
+let ocrLoading = null;
+
+function loadOcr() {
+  if (window.Tesseract) return Promise.resolve(window.Tesseract);
+  if (ocrLoading) return ocrLoading;
+  ocrLoading = new Promise((resolve, reject) => {
+    const tag = document.createElement('script');
+    tag.src = OCR_LIB;
+    tag.onload = () => resolve(window.Tesseract);
+    tag.onerror = () => { ocrLoading = null; reject(new Error('no engine')); };
+    document.head.appendChild(tag);
+  });
+  return ocrLoading;
+}
+
+/* Handed the photo as it was saved, the engine reads gibberish: a printed
+   timetable photographed at sixteen hundred pixels has letters about fifteen
+   pixels tall, and the engine wants roughly twice that. It also reads in
+   grey, so the colour is only in the way — and on a cream page with black
+   ink, throwing the colour away and pulling the contrast apart is the whole
+   difference between "ime nen we ate" and "Time Sun Mon Tue Wed Thu". Both
+   were measured; neither was guessed. */
+const OCR_EDGE = 3200;
+const OCR_CONTRAST = 1.8;
+
+function prepPhoto(img) {
+  const scale = Math.min(2, OCR_EDGE / Math.max(img.width, img.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(img.width * scale);
+  c.height = Math.round(img.height * scale);
+  const x = c.getContext('2d', { willReadFrequently: true });
+  x.imageSmoothingQuality = 'high';
+  x.drawImage(img, 0, 0, c.width, c.height);
+
+  const frame = x.getImageData(0, 0, c.width, c.height);
+  const px = frame.data;
+  for (let i = 0; i < px.length; i += 4) {
+    const grey = px[i] * 0.299 + px[i + 1] * 0.587 + px[i + 2] * 0.114;
+    const v = (grey - 128) * OCR_CONTRAST + 128;
+    px[i] = px[i + 1] = px[i + 2] = v < 0 ? 0 : v > 255 ? 255 : v;
+  }
+  x.putImageData(frame, 0, 0);
+  // PNG, not JPEG: a second round of block artefacts on text already read
+  // once through a phone camera is not worth the kilobytes saved.
+  return { url: c.toDataURL('image/png'), width: c.width };
+}
+
+/* One worker, kept for the length of a read: creating it downloads the
+   language data, and a second attempt at a different page mode should not pay
+   for that twice. It is let go afterwards, because it is tens of megabytes of
+   engine sitting in a phone's memory for a job that is over — and the language
+   data it downloaded stays in the browser's own store, so asking again is
+   quick. */
+let ocrWorker = null;
+
+async function dropOcrWorker() {
+  const w = ocrWorker;
+  ocrWorker = null;
+  if (w) { try { await w.terminate(); } catch { /* already gone */ } }
+}
+
+async function getOcrWorker(onProgress) {
+  if (ocrWorker) return ocrWorker;
+  const T = await loadOcr();
+  ocrWorker = await T.createWorker('heb+eng', 1, {
+    corePath: OCR_CORE,
+    langPath: OCR_LANGS,
+    logger: (m) => { if (m.progress != null) onProgress(m.progress * 0.5); },
+  });
+  return ocrWorker;
+}
+
+/** Every word the engine found, with the box it found it in. */
+async function wordsInPhoto(url, mode, onProgress) {
+  const worker = await getOcrWorker(onProgress);
+  await worker.setParameters({ tessedit_pageseg_mode: String(mode) });
+  const { data } = await worker.recognize(url);
+  onProgress(1);
+
+  // v5 hands back a tree and a flat list; take whichever has anything in it.
+  const out = [];
+  const eat = (w) => {
+    const text = (w.text || '').trim();
+    if (!text || (w.confidence != null && w.confidence < 40)) return;
+    const b = w.bbox || {};
+    if (b.x1 - b.x0 <= 0 || b.y1 - b.y0 <= 0) return;
+    out.push({ text, x0: b.x0, y0: b.y0, x1: b.x1, y1: b.y1 });
+  };
+  if (Array.isArray(data.words) && data.words.length) data.words.forEach(eat);
+  else {
+    for (const block of data.blocks || []) {
+      for (const para of block.paragraphs || []) {
+        for (const line of para.lines || []) (line.words || []).forEach(eat);
+      }
+    }
+  }
+  return out;
+}
+
+/* Words on the same line of a table share a horizontal band, and the bands
+   are separated by whitespace. Sorting by the middle of each word and cutting
+   wherever the gap is bigger than a word is tall finds the rows without
+   needing to see the ruled lines — which in a photograph are often the first
+   thing to go. */
+function bandRows(words) {
+  const tall = median(words.map(w => w.y1 - w.y0)) || 10;
+  const sorted = words.slice().sort((a, b) => mid(a.y0, a.y1) - mid(b.y0, b.y1));
+  const rows = [];
+  let row = [];
+  let last = null;
+  for (const w of sorted) {
+    const c = mid(w.y0, w.y1);
+    if (last !== null && c - last > tall * 0.85) { rows.push(row); row = []; }
+    row.push(w);
+    last = c;
+  }
+  if (row.length) rows.push(row);
+  return rows.filter(r => r.length);
+}
+
+/* Columns are found by looking down the page rather than across it: mark
+   every horizontal position some word covers, and the gutters are the runs
+   nothing covers. A gutter has to be wider than a space to count, or the gaps
+   between words become columns. */
+function bandColumns(words, pageWidth) {
+  const covered = new Uint8Array(pageWidth + 2);
+  for (const w of words) {
+    for (let x = Math.max(0, w.x0 | 0); x <= Math.min(pageWidth, w.x1 | 0); x++) covered[x] = 1;
+  }
+  const wide = median(words.map(w => (w.x1 - w.x0) / Math.max(1, w.text.length))) || 8;
+  const gutter = Math.max(8, wide * 1.6);
+
+  const cuts = [];
+  let run = 0;
+  for (let x = 0; x <= pageWidth; x++) {
+    if (!covered[x]) { run++; continue; }
+    if (run >= gutter) cuts.push(x - run / 2);
+    run = 0;
+  }
+  // The edges are not columns.
+  const edges = [0, ...cuts.filter(c => c > 4 && c < pageWidth - 4), pageWidth + 1];
+  const cols = [];
+  for (let i = 0; i < edges.length - 1; i++) cols.push([edges[i], edges[i + 1]]);
+  return cols;
+}
+
+const mid = (a, b) => (a + b) / 2;
+function median(list) {
+  const v = list.filter(Number.isFinite).sort((a, b) => a - b);
+  return v.length ? v[v.length >> 1] : 0;
+}
+
+/* Which day a heading names, if it names one. Matching by name rather than by
+   position is what makes a right-to-left timetable come out right: if the
+   rightmost column says ראשון it is Sunday, wherever it sits on the page. */
+const DAY_WORDS = [
+  [0, ['sunday', 'sun', 'ראשון', 'א']],
+  [1, ['monday', 'mon', 'שני', 'ב']],
+  [2, ['tuesday', 'tue', 'tues', 'שלישי', 'ג']],
+  [3, ['wednesday', 'wed', 'רביעי', 'ד']],
+  [4, ['thursday', 'thu', 'thur', 'thurs', 'חמישי', 'ה']],
+  [5, ['friday', 'fri', 'שישי', 'ו']],
+  [6, ['saturday', 'sat', 'שבת', 'ש']],
+];
+
+function dayFromHeading(text) {
+  const t = String(text).toLowerCase().replace(/[^a-zא-ת]/g, '');
+  if (!t) return -1;
+  for (const [js, words] of DAY_WORDS) {
+    if (words.some(w => t === w || (w.length > 2 && t.startsWith(w)))) return js;
+  }
+  return -1;
+}
+
+const looksLikeTime = (t) => /\d{1,2}\s*[:.]\s*\d{2}/.test(t);
+
+/**
+ * The words, turned back into a week.
+ *
+ * Returns null rather than a bad guess. A timetable that came out wrong in a
+ * way nobody notices is worse than one that admits it could not be read: the
+ * first quietly packs the wrong bag every morning.
+ */
+function weekFromWords(words, pageWidth) {
+  if (words.length < 8) return null;
+
+  const rows = bandRows(words);
+  if (rows.length < 2) return null;
+
+  /* The day names anchor the whole thing, and they can be found before the
+     columns are: a row holding two or more of them is the heading. Everything
+     above it is a title, a school crest or a date, and goes — which also stops
+     a wide heading like "Class 10B — Timetable" from bridging the gap between
+     two columns and gluing them into one. */
+  let headAt = -1;
+  for (let r = 0; r < Math.min(6, rows.length); r++) {
+    const named = new Set(rows[r].map(w => dayFromHeading(w.text)).filter(d => d >= 0));
+    if (named.size >= 2) { headAt = r; break; }
+  }
+
+  const kept = headAt >= 0 ? rows.slice(headAt) : rows;
+  const head = headAt >= 0 ? 0 : -1;
+
+  const cols = bandColumns(kept.flat(), pageWidth);
+  if (cols.length < 2) return null;
+
+  const cellAt = (row, col) => row
+    .filter(w => mid(w.x0, w.x1) >= col[0] && mid(w.x0, w.x1) < col[1])
+    .sort((a, b) => a.x0 - b.x0)
+    .map(w => w.text)
+    .join(' ')
+    .trim();
+
+  const table = kept.map(row => cols.map(col => cellAt(row, col)));
+
+  /* A column of times is a column where most cells look like a time. It is
+     the periods, not a day. */
+  let timeCol = -1;
+  for (let c = 0; c < cols.length; c++) {
+    const body = table.filter((_, r) => r !== head);
+    const times = body.filter(row => looksLikeTime(row[c] || '')).length;
+    if (times >= Math.max(2, body.length * 0.6)) { timeCol = c; break; }
+  }
+
+  const dayCols = [];
+  for (let c = 0; c < cols.length; c++) {
+    if (c === timeCol) continue;
+    const js = head >= 0 ? dayFromHeading(table[head][c]) : -1;
+    dayCols.push({ c, js });
+  }
+  if (!dayCols.length) return null;
+
+  const body = table.filter((_, r) => r !== head);
+  // A row with nothing in any of its day columns is a rule or a stray mark.
+  const useful = body.filter(row => dayCols.some(d => row[d.c]));
+  if (!useful.length) return null;
+
+  const week = schoolDays();
+  const periods = useful.map((row, i) => {
+    const t = timeCol >= 0 ? row[timeCol] : '';
+    return looksLikeTime(t) ? t.replace(/\s+/g, '') : tr('tt.period', { n: i + 1 });
+  });
+
+  const schedule = week.map(() => Array(useful.length).fill(null));
+  dayCols.forEach((d, order) => {
+    // By name where the heading gave one, by position where it did not.
+    let at = d.js >= 0 ? week.findIndex(w => w.js === d.js) : order;
+    if (at < 0 || at >= week.length) return;
+    useful.forEach((row, p) => { schedule[at][p] = row[d.c] || null; });
+  });
+
+  const filled = schedule.reduce((n, row) => n + row.filter(Boolean).length, 0);
+  if (filled < 3) return null;
+  return { periods, schedule };
+}
+
+/* What the button does on the screen: says what is happening, because
+   several megabytes of engine and a page of recognition take long enough
+   that a button which simply sat there would look broken. */
+async function readTheWeek(button) {
+  const say = $('[data-photo-say]');
+  if (button.disabled) return;
+  button.disabled = true;
+  say.textContent = tr('photo.reading', { n: 0 });
+
+  try {
+    const week = await readPhotoIntoWeek((p) => {
+      say.textContent = tr('photo.reading', { n: Math.round(p * 100) });
+    });
+    if (!week) {
+      say.textContent = tr('photo.readNone');
+      button.disabled = false;
+      return;
+    }
+    // Straight on to checking it. What it read is a first draft of the week,
+    // not the week — the screen it lands on is the one that says so.
+    const squared = squareUp(week);
+    if (button.closest('#setup') && setupDraft) {
+      setupDraft.week = squared;
+      setupAt = 1;                          // the checking step
+      renderSetup();
+      $('#setup').scrollTop = 0;
+    } else if (ttDraft) {
+      ttDraft = squared;
+      renderTtEdit();
+    }
+    showToast(tr('photo.readOk', { n: week.periods.length }));
+  } catch {
+    say.textContent = navigator.onLine ? tr('photo.readFail') : tr('photo.readOffline');
+    button.disabled = false;
+  }
+}
+
+/** The button's whole job: read the photo, or say plainly that it could not. */
+async function readPhotoIntoWeek(onProgress) {
+  const src = loadPhoto();
+  if (!src) return null;
+
+  const img = await new Promise((resolve, reject) => {
+    const i = new Image();
+    i.onload = () => resolve(i);
+    i.onerror = () => reject(new Error('unreadable'));
+    i.src = src;
+  });
+  const shot = prepPhoto(img);
+
+  /* Two ways of looking at the page, in the order that works most often. A
+     timetable is a block of text laid out in a grid, so 6 reads it; where the
+     cells are far apart, or the photo caught only part of the grid, 6 gives
+     up and 11 — sparse text, find whatever is there — picks it up instead.
+     Whichever produces a week first wins, and neither is asked to guess. */
+  const modes = [6, 11];
+  try {
+    for (let i = 0; i < modes.length; i++) {
+      const words = await wordsInPhoto(shot.url, modes[i],
+        (p) => onProgress((i + p) / modes.length));
+      const week = weekFromWords(words, shot.width);
+      if (week) return week;
+    }
+    return null;
+  } finally {
+    dropOcrWorker();
+  }
+}
+
 
 /** An empty week of the right shape, for anyone who would rather just type. */
 function blankWeek(rows = 6) {
@@ -5374,6 +5732,9 @@ function wireApp() {
   });
   document.addEventListener('click', (e) => {
     if (e.target.closest('[data-photo-open]')) { openPhoto(); return; }
+
+    const read = e.target.closest('[data-photo-read]');
+    if (read) { readTheWeek(read); return; }
     const drop = e.target.closest('[data-photo-drop]');
     if (!drop) return;
     clearPhoto();

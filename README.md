@@ -695,12 +695,46 @@ it depends whether the timetable is on the wall in front of you or already in yo
 a photo** asks the back camera, **From your photos** opens the roll. Either is optional; you can
 skip straight to the grid.
 
-The app does not read the photograph, and says so. There is no reliable way to get a grid off a
-phone camera, in two languages, at whatever angle a phone is held, into rows and columns — and
-bolting on an OCR engine would be megabytes of download to produce answers you would then correct
-line by line, which is slower than typing them while looking at the picture. So the photo goes
-where it is useful instead: above the grid, on the next screen, while you fill the grid in. That
-turns looking-at-paper-then-looking-at-phone into reading one screen.
+**Read it.** The photo sits above the grid with a button on it, and the button fills the grid in.
+
+Recognising the words is the easy half and not the useful half. An OCR engine hands back text in
+reading order, and a timetable read in reading order is a heap of lesson names with no idea which
+day or which period any of them belongs to. What makes it a timetable again is *where* each word
+was on the page, so everything after the engine works on the boxes and not the text: words whose
+middles share a horizontal band are a row; the runs of page no word covers, wider than a space,
+are the gutters between columns; a column where most cells look like a time is the periods rather
+than a day.
+
+The day names are found before the columns are, and that ordering matters twice. A row holding two
+or more of them is the heading, and everything above it — a title, a school name, a date — is
+dropped, which stops a wide heading like *Class 10B — Timetable* from bridging the gap between two
+columns and gluing them into one. And because each column is then known **by the name written over
+it** rather than by where it sits, a Hebrew timetable that runs right to left comes out the right
+way round: if the rightmost column says ראשון it is Sunday, wherever it is on the page.
+
+Two things had to be measured rather than assumed. Handed the photo as saved, the engine read
+`ime nen we ate` — a printed timetable photographed at 1600px has letters about fifteen pixels
+tall and the engine wants roughly twice that, and a cream page has most of its contrast in a
+channel the engine throws away. Doubling the size, converting to grey and pulling the contrast
+apart turns that into `Time Sun Mon Tue Wed Thu`, every word above 40% confidence, in under a
+second — and it still reads the grid correctly with the photo tilted five degrees. The page is then
+read twice over if it needs to be: segmentation mode 6 treats the page as one block of text and
+gets a ruled grid; mode 11 looks for sparse text anywhere and picks up a grid whose cells are far
+apart. Whichever produces a week first wins.
+
+**It returns nothing rather than a guess.** Fewer than three filled cells, no columns, no rows that
+look like a table — it says it could not find a grid and leaves you the empty one. A timetable that
+came out wrong in a way nobody notices is worse than one that admits it could not be read: the
+first quietly packs the wrong bag every morning. And what it does read lands on the *Is this right?*
+screen, not in the saved week, so every cell is one tap from being corrected.
+
+The engine is fetched only when the button is pressed — several megabytes that most people will
+never need, so nobody downloads it on the off-chance. That means the first read needs a connection,
+and the app says exactly that when there isn't one instead of blaming the photo. Afterwards the
+language data stays in the browser's own store and later reads work offline. The worker is let go
+when the read ends rather than left sitting in a phone's memory for a job that is over.
+
+The photo stays either way: above the grid, on the next screen, while you check what it read.
 
 It is contained rather than cropped in the strip — a timetable photographed at arm’s length has
 its corners at the corners, and cropping to fill removes exactly the part you needed. Tapping it

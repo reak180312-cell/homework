@@ -4703,3 +4703,41 @@ body {
 .tt-photo-ways { display: flex; gap: 10px; margin-bottom: 14px; }
 .tt-photo-ways .tt-photo-add { flex: 1; margin-bottom: 0; padding: 0 10px; font-size: 14px; }
 .tt-photo-ways .tt-photo-add span { text-align: center; }
+
+/* Reading the photo: the thing that turns it into a week. */
+/* The caption now carries two buttons and a line of news, so it stacks. */
+.tt-photo figcaption {
+  display: block;
+  padding-top: 10px;
+}
+.tt-photo-acts {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.tt-photo-read {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--done);
+  color: var(--on-ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tt-photo-read .ico { width: 15px; height: 15px; }
+.tt-photo-read:active { transform: scale(.96); }
+.tt-photo-read[disabled] { opacity: .55; cursor: default; }
+
+.tt-photo-say {
+  margin: 8px 0 0;
+  padding: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
