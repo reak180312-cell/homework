@@ -698,6 +698,21 @@ name in either language; plenty of people paste the grid without its headings, a
 their first period would be worse than keeping a row of day names. If the first column looks like
 times, it is the times.
 
+**Or photograph it.** The app does not read the photograph, and says so: there is no reliable
+way to get a grid off a phone camera, in two languages, into rows and columns, and pretending
+otherwise would waste your time and then be wrong. What it does instead is put the photo where
+you need it — above the grid, while you fill the grid in. That turns looking-at-paper-then-
+looking-at-phone into reading one screen. It is contained rather than cropped, because a
+timetable photographed at arm’s length has its corners at the corners and cropping to fill the
+strip removes exactly the part you needed; tapping it opens it full size.
+
+The photo is downscaled to 1600px on its long edge and kept under a key of its own rather than
+inside the saved state — the state is written out again every time you tick a piece of homework,
+and dragging a couple of hundred kilobytes of photograph through that on every tap would be
+felt. It also means a full storage quota loses the photo and not the homework. It never leaves
+the phone; there is nowhere for it to go, because the app has no server. The same option is in
+the timetable editor, so all three links can keep one.
+
 **Then it shows what it made, to be corrected.** That is the same grid the timetable editor
 draws — written once, used by both — so a period can be added or taken out here too.
 

@@ -290,6 +290,15 @@ const STRINGS = {
     'setup.kitNote': 'This is the app’s guess for each lesson. Tap anything to add or remove it.',
     'setup.everyDay': 'Every day',
     'setup.more': 'More', 'setup.fewer': 'Fewer',
+    'setup.or': 'or',
+    'photo.add': 'Add a photo of it',
+    'photo.note': 'Take a picture of your timetable and it will sit above the grid while you fill it in. It stays on your phone.',
+    'photo.alt': 'Your timetable',
+    'photo.caption': 'Tap to see it bigger',
+    'photo.open': 'See the photo bigger',
+    'photo.remove': 'Remove',
+    'photo.bad': 'That did not look like a picture.',
+    'photo.noRoom': 'No room to keep that photo. Try a smaller one.',
     'setup.nothing': 'Nothing for this one',
     'setup.noLessons': 'No lessons yet. Go back and fill in a few.',
     'setup.next': 'Next', 'setup.back': 'Back', 'setup.finish': 'Finish',
@@ -547,6 +556,15 @@ const STRINGS = {
     'setup.kitNote': 'זו הניחוש של האפליקציה לכל שיעור. הקישו כדי להוסיף או להסיר.',
     'setup.everyDay': 'כל יום',
     'setup.more': 'עוד', 'setup.fewer': 'פחות',
+    'setup.or': 'או',
+    'photo.add': 'הוספת תמונה',
+    'photo.note': 'צלמו את המערכת והיא תופיע מעל הטבלה בזמן המילוי. היא נשארת בטלפון שלכם.',
+    'photo.alt': 'המערכת שלכם',
+    'photo.caption': 'הקישו להגדלה',
+    'photo.open': 'לראות את התמונה בגדול',
+    'photo.remove': 'הסרה',
+    'photo.bad': 'זה לא נראה כמו תמונה.',
+    'photo.noRoom': 'אין מקום לשמור את התמונה. נסו אחת קטנה יותר.',
     'setup.nothing': 'כלום לשיעור הזה',
     'setup.noLessons': 'עדין אין שיעורים. חזרו ומלאו כמה.',
     'setup.next': 'הבא', 'setup.back': 'חזרה', 'setup.finish': 'סיום',
@@ -3684,6 +3702,143 @@ function closeDonePage() {
    unanswered one, because it looks finished.
 */
 
+/* ── A photo of your timetable ─────────────────────────────
+   You have a timetable on paper, or on a noticeboard, or in a message. The
+   app cannot read it — there is no reliable way to get a photographed grid,
+   in two languages, off a phone camera and into rows and columns, and
+   pretending otherwise would waste your time and then be wrong. What it can
+   do is put the photo where you need it: on the screen, above the grid, while
+   you fill the grid in. That turns looking-at-paper-then-looking-at-phone
+   into reading one screen.
+
+   It is kept under a key of its own rather than inside the saved state. The
+   state is written out again every time you tick a piece of homework, and
+   dragging a couple of hundred kilobytes of photograph through that on every
+   tap would be felt. It also means a full storage quota loses the photo and
+   not the homework.
+
+   The photo never leaves the phone. There is nowhere for it to go: the app
+   has no server. */
+
+const photoKey = () => STORAGE_KEY + '.photo';
+
+function loadPhoto() {
+  try { return localStorage.getItem(photoKey()); } catch { return null; }
+}
+
+function savePhoto(dataUrl) {
+  try {
+    localStorage.setItem(photoKey(), dataUrl);
+    return true;
+  } catch {
+    // A photo is worth less than the homework; if there is no room, say so
+    // rather than taking the room from something that matters more.
+    return false;
+  }
+}
+
+function clearPhoto() {
+  try { localStorage.removeItem(photoKey()); } catch { /* nothing to do */ }
+}
+
+/* Straight off a phone camera a photo is four thousand pixels wide and three
+   megabytes, and localStorage is measured in five. Shrunk to sixteen hundred
+   on its long edge it is still sharp enough to read a timetable off, and it
+   fits. The shrink happens here rather than on the way out, so it is paid for
+   once. */
+const PHOTO_EDGE = 1600;
+const PHOTO_QUALITY = 0.72;
+
+function readPhotoFile(file) {
+  return new Promise((resolve, reject) => {
+    if (!file || !/^image\//.test(file.type)) { reject(new Error('not a picture')); return; }
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('unreadable'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('not a picture'));
+      img.onload = () => {
+        const scale = Math.min(1, PHOTO_EDGE / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * scale);
+        c.height = Math.round(img.height * scale);
+        const x = c.getContext('2d');
+        x.imageSmoothingQuality = 'high';
+        x.drawImage(img, 0, 0, c.width, c.height);
+        resolve(c.toDataURL('image/jpeg', PHOTO_QUALITY));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* The way to add one. A file input rather than a button that opens one,
+   because a label pointed at an input is the only thing a phone reliably
+   offers the camera for — capture="environment" asks for the back camera,
+   and a phone that would rather show the photo roll still may. */
+function photoAdd(scope) {
+  return `
+    <label class="tt-photo-add">
+      <svg class="ico" aria-hidden="true"><use href="#i-camera" /></svg>
+      <span>${esc(tr('photo.add'))}</span>
+      <input type="file" accept="image/*" capture="environment"
+             data-photo="${scope}" hidden />
+    </label>`;
+}
+
+/** The photo above whichever grid is being filled in, or nothing. */
+function photoStrip() {
+  const src = loadPhoto();
+  if (!src) return '';
+  return `
+    <figure class="tt-photo">
+      <button class="tt-photo-open" data-photo-open aria-label="${esc(tr('photo.open'))}">
+        <img src="${src}" alt="${esc(tr('photo.alt'))}" />
+      </button>
+      <figcaption>
+        <span>${esc(tr('photo.caption'))}</span>
+        <button class="tt-photo-drop" data-photo-drop>${esc(tr('photo.remove'))}</button>
+      </figcaption>
+    </figure>`;
+}
+
+/** The whole photo, as big as the screen will allow. */
+function openPhoto() {
+  const src = loadPhoto();
+  if (!src) return;
+  const box = $('#photo-view');
+  box.innerHTML = `<img src="${src}" alt="${esc(tr('photo.alt'))}" />`;
+  box.hidden = false;
+}
+
+function closePhoto() {
+  const box = $('#photo-view');
+  if (!box || box.hidden) return;
+  box.hidden = true;
+  box.innerHTML = '';
+}
+
+/**
+ * A file chosen, from the camera or the roll.
+ *
+ * `redraw` is passed in rather than assumed, because the same button appears
+ * in the setup and in the timetable editor and they redraw different things.
+ */
+async function takePhoto(input, redraw) {
+  const file = input.files && input.files[0];
+  input.value = '';                       // so choosing the same file twice works
+  if (!file) return;
+  try {
+    const small = await readPhotoFile(file);
+    if (!savePhoto(small)) { showToast(tr('photo.noRoom')); return; }
+    redraw();
+  } catch {
+    showToast(tr('photo.bad'));
+  }
+}
+
+
 const SETUP_STEPS = ['week', 'check', 'kit'];
 let setupAt = 0;
 let setupDraft = null;
@@ -3781,13 +3936,18 @@ function renderSetup() {
         <button id="setup-read" class="btn-primary">${esc(tr('setup.read'))}</button>
         <button id="setup-blank" class="btn-second">${esc(tr('setup.blank'))}</button>
       </div>
-      <p id="setup-read-note" class="foot-note"></p>`;
+      <p id="setup-read-note" class="foot-note"></p>
+
+      <div class="setup-or"><span>${esc(tr('setup.or'))}</span></div>
+      <p class="setup-note">${esc(tr('photo.note'))}</p>
+      ${photoStrip() || photoAdd('setup')}`;
   }
 
   if (step === 'check') {
     inner = `
       <h2 class="setup-title">${esc(tr('setup.checkTitle'))}</h2>
       <p class="setup-note">${esc(tr('setup.checkNote'))}</p>
+      ${photoStrip()}
       ${weekGrid(setupDraft.week, 'setup')}
       <div class="tt-edit-actions">
         <button id="setup-add-period" class="btn-second">${esc(tr('tt.addPeriod'))}</button>
@@ -3929,6 +4089,7 @@ function renderTtEdit() {
   const week = schoolDays();
   box.innerHTML = `
     <p class="tt-edit-note">${esc(tr('tt.editNote'))}</p>
+    ${photoStrip() || photoAdd('edit')}
     ${weekGrid(ttDraft, 'edit')}
     <div class="tt-edit-actions">
       <button id="tt-add-period" class="btn-second">${esc(tr('tt.addPeriod'))}</button>
@@ -5281,6 +5442,23 @@ function wireApp() {
     if (e.target.closest('#setup-next')) setupForward();
   });
 
+  /* The photo. The same three controls turn up in the setup and in the
+     editor, so they are handled once and each says which to redraw. */
+  const redrawFor = (scope) => (scope === 'setup' ? renderSetup : renderTtEdit);
+  document.addEventListener('change', (e) => {
+    const input = e.target.closest('[data-photo]');
+    if (input) takePhoto(input, redrawFor(input.dataset.photo));
+  });
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-photo-open]')) { openPhoto(); return; }
+    const drop = e.target.closest('[data-photo-drop]');
+    if (!drop) return;
+    clearPhoto();
+    // Whichever screen the button was on is the one to redraw.
+    if (drop.closest('#setup')) renderSetup(); else renderTtEdit();
+  });
+  on('#photo-view', 'click', closePhoto);
+
   on('#tt-edit-open', 'click', openTtEdit);
   on('#tt-edit-cancel', 'click', closeTtEdit);
   on('#tt-edit-save', 'click', saveTtEdit);
@@ -5378,6 +5556,7 @@ function wireApp() {
   });
 
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !$('#photo-view').hidden) { closePhoto(); return; }
     if (e.key !== 'Escape') return;
     if (!$('#book').hidden) closeBook();
     else if (!$('#timetable').hidden) closeTimetable();

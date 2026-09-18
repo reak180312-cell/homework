@@ -4627,3 +4627,108 @@ body {
   font-size: 12.5px;
   color: var(--ink-3);
 }
+
+/* ══ A photo of your timetable ═════════════════════════════
+   It sits above the grid while the grid is being filled in, which is the
+   whole of the point: reading one screen instead of a screen and a piece of
+   paper. */
+.tt-photo {
+  margin: 0 0 14px;
+  border-radius: var(--r-card);
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow);
+}
+.tt-photo-open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+.tt-photo-open img {
+  display: block;
+  width: 100%;
+  /* Tall enough to read a grid off, short enough to leave the grid on the
+     screen under it. Contained rather than cropped: a timetable photographed
+     at arm's length has its corners at the corners, and cropping to fill the
+     strip is exactly the part you needed. */
+  max-height: 240px;
+  object-fit: contain;
+  background: color-mix(in srgb, var(--ink) 6%, var(--card));
+}
+.tt-photo figcaption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 13px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+.tt-photo-drop {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--stamp);
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.tt-photo-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 54px;
+  margin-bottom: 14px;
+  padding: 0 18px;
+  border: 1.5px dashed var(--line);
+  border-radius: var(--r-card);
+  font-size: 15px;
+  color: var(--ink-2);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.tt-photo-add:active { background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.tt-photo-add .ico { width: 20px; height: 20px; color: var(--done); }
+
+/* A rule with a word sitting in it. */
+.setup-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0 16px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+.setup-or::before,
+.setup-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+/* The whole thing, as big as the screen allows. Any tap closes it. */
+.photo-view {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: max(16px, var(--safe-t)) 12px max(16px, var(--safe-b));
+  background: rgba(20, 16, 12, .92);
+  cursor: zoom-out;
+  animation: fade-in .18s var(--ease);
+}
+.photo-view img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 10px;
+  object-fit: contain;
+}
+@media (prefers-reduced-motion: reduce) { .photo-view { animation: none; } }
