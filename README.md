@@ -865,91 +865,73 @@ checking the screenshots. It is one flash, half a second, no bigger than the egg
 `prefers-reduced-motion` drops the burst entirely and simply fades the creature in.
 
 
-## Settings
+## The Profile page
 
-The last tab is **Profile**, and it leads with who you are: the companion as the picture, the
-level as the heading, a stats row of tasks, creatures and day streak, and a card for the
-companion with a Change button. Everything underneath is the settings, behind the same small
-capitals: the book, profile and progress, reminders, language, appearance, about.
+Four sections and nothing else: **Reminders**, **General**, **Appearance**, **History**. Above
+them is who you are — the companion as the picture, the level, how close the next egg is, a
+stats row, and a card for the companion. Below them, About.
 
-There is no name on it because the app has never asked for one, and a text field for a name
-would be a field that does not help anybody write down or finish homework. The level is what
-the app actually knows about you, and it is the thing that goes up.
+**Three reminders**, each a switch and a time: write today’s homework down, pack the bag for
+tomorrow, and finish what is still open. The third checks at the moment it fires rather than
+when it is armed — a reminder to finish what you have already finished is worse than no
+reminder, and whether you have finished it is only knowable now. The timer re-arms either way,
+so tomorrow still gets its chance.
 
-The **book** moved here when the creatures page became the collection — cover, lean, peeking
-faces and all.
+**Country** is not decoration. Three things follow from it and nothing else does: which days are
+school days, whether the clock runs to 24 hours or to am/pm, and which locale writes the dates.
+Israel’s week opens on Sunday and ends on Thursday; most of the rest open on Monday. The week is
+*built* from `start` and `days` rather than listed, and the weekday names come from the browser,
+which knows them in every language the app might be set to. Adding a country is a row in a list.
 
-Nine pictures carry it: a **room** behind the whole screen, a **seedling** beside the level, a
-**book** leaning on the creature card with *Collect them all!* beside it, a **creature** looking
-over the row of **eggs**, another **waving** on the About page, and a small **tile** beside each
-of the three settings — a bell for the daily nudge, a bag for the packing one, a globe for the
-language. They started as SVG stand-ins drawn by hand; the drawings arrived and the stand-ins
-went.
+Language and country are not the same question. The language picks the script — Hebrew writes
+its months in Hebrew wherever you are. The country picks the conventions. So a Hebrew speaker in
+London gets Hebrew months in British order, and an English speaker in Israel gets a 24-hour
+clock, which the app used to get wrong: it was showing 01:27 PM for a country that has never
+written a time that way.
 
-The book is a *sibling* of the card rather than a child of it: the card clips its own overflow,
-and a book that leans has to lean past an edge. The same is true of the creature over the eggs.
+**Edit timetable** opens the week as a grid of fields — one row per period, one column per school
+day, add or remove a period, or put it all back the way it came. That needed the timetable to
+stop being a constant: `periods()` and `schedule()` answer from the store the moment anything
+has been edited there, and `lessons()` and `subjects()` follow, so a lesson typed into the
+editor becomes a subject you can file homework under without reloading. A copy is made when the
+editor opens and nothing is written until Save, so backing out costs nothing.
 
-**Cutting them out.** Eight arrived as squares on a near-white cream ground, and cutting a
-subject off that ground by colour alone would have punched holes straight through the egg, the
-book's pages and anything else that is itself cream. The ground is not *everything cream*, it is
-*the cream you can reach from the edge of the frame* — so the cut is a flood fill inwards from
-the border, and a cream belly inside a green outline survives it. The edge is then feathered by
-how far each border pixel sits from the ground, so the cut is not a staircase, and the result is
-trimmed to what is left. `scratchpad/set-art.js`.
+**Appearance** is Light, Dark or System — the four desk swatches it replaced were really two
+themes wearing four hats.
 
-The three tiles could not be cut at all — they are cream tiles on a cream page, and there is no
-edge to find. They are *found* instead: a tile differs from the very corner of its page by a
-hair and its shadow by more, so the bounding box of everything more than a hair from that corner
-is the tile and nothing else. A first pass cropped them at a fixed fraction of the frame and
-left a different ring of empty page round each one, because the tiles are not all the same size
-in their frames — 83%, 87% and 96%. `scratchpad/set-art2.js`.
+### Dark is not the light palette with the lights off
 
-All nine come to **83KB** as WebP.
+The old dark was slate: `#13171C` paper, `#1B2027` cards, blue-grey throughout, which is what
+you get when you reach for “dark” and take the first neutral you find. This app is cream paper
+on a wooden desk and the warmth is the whole of its character, so the dark is now **a desk lamp
+in a dark room** rather than a screen in a void. Every ground is a brown with red still in it
+(hue 28, not 220). The cards sit *above* the paper rather than below it. The ink is warm
+off-white, never `#FFF`. The sage and the soft blue are lifted and desaturated, because the same
+colours at daylight strength go muddy on a dark ground and at full saturation they glare.
 
-**The room is a wash, not a photograph.** At full strength the desk ran straight through the
-sections further down, which are plain words on paper with no card under them. It sits at 40%
-and is masked out by 88% of its own height, so it is gone before the page gets there — and at
-18% after dark, where it is a memory of itself.
+Shadow needed rethinking rather than darkening: nothing is darker than the ground, so a card is
+separated by its own faint light along the top edge instead of by a shadow underneath.
 
-The level card used to say the same thing twice — the line under the bar and the note under
-the row of egg slots were both *finish some homework and an egg turns up*. It says it once now.
-The row itself is five eggs rather than four empty boxes, which is what is actually waiting.
+Three things do not simply follow the tokens and had to be handled:
 
-### Desk theme
+- The **book cover** is painted with the ink colour, which flipped it into the brightest slab on
+  a dark screen — and the least important thing on it. It has two colours of its own now, so it
+  stays a dark object in both palettes.
+- A **locked creature** is its painting with `brightness(0)` applied, which is black whatever the
+  card is doing. At night it is inverted instead: the same silhouette in light rather than in
+  shadow.
+- The **colour behind the phone’s clock** was written down a second time, and was still naming
+  the old dark ground after the palette changed. It reads `--paper` now.
 
-**Four desks, shown as the four colours themselves.** There is nothing to read: the row of
-swatches *is* the four looks, and the one you tap is the colour the app then stands on.
+**Completed homework** is a row with an arrow rather than a list halfway down the page — a
+term’s work used to push the settings off the bottom of the screen. It opens as its own page,
+grouped by the day each thing was finished.
 
-Three are daylight — cream, sage, sky — and differ only in `--paper`, `--card`, `--line` and
-`--line-soft`. Nothing else moves. The ink stays ink and every subject keeps its own colour,
-or choosing a desk would quietly restyle the whole app rather than the surface it stands on.
-The fourth is **Night**, which is the dark theme that was already in here given a face: before
-this it only ever followed the phone and there was no way to ask for it.
+**The creature book moved to Creatures**, where everything about the creatures should have been.
 
-Asking for it exposed one thing that had been hiding. `syncTopColour()` decided the colour
-behind the clock from `prefers-color-scheme` alone, so choosing Night on a phone set to
-daylight left the app dark inside a bright frame. A desk that has been chosen outranks what
-the phone is set to. The tab bar's hairline needed the same thought: it is a catch of daylight
-on a cream page, and at 55% white on a dark one it is a wire strung across the foot of the
-screen. It dims to 9% after dark.
-
-### Two more settings
-
-**Open on** — the page the app launches into, for anyone whose first move is always the bag or
-the board rather than the list. Three chips, because those are the three pages you read; the
-other two you go to on purpose.
-
-**Ask before removing** — the board takes a note down with one tap, which is quick and undoable
-and is the bargain that page makes. For anyone who would rather be asked, this puts the
-question in the way instead. Off by default: the undo is still the better answer for most
-people.
-
-### Help & About
-
-A row that says which version this is, opening a page with three short answers: what the app
-is, how to get it onto a phone properly, and where the work lives — on the phone, sent nowhere,
-nothing to sign in to.
-
+Four settings were taken out, because the page was asked to hold exactly the list above: which
+page to open on (it opens on the homework), whether taking a note down asks first (it does not;
+the toast puts it back), and the desk theme (Appearance replaced it).
 
 ## The icon on the Home Screen
 

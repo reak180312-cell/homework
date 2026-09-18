@@ -138,6 +138,23 @@
 
     <div id="cmp-banner" class="cmp-banner"></div>
 
+    <h2 class="section-title" data-t="cre.book">The book</h2>
+    <div class="book-wrap">
+      <button id="book-open" class="book-cover">
+        <span class="bc-spine"></span>
+        <span class="bc-text">
+          <span class="bc-title" data-t="pro.creatures">Creatures</span>
+          <span id="book-count" class="bc-count"></span>
+        </span>
+        <span id="book-peek" class="bc-peek-row" aria-hidden="true"></span>
+        <span class="bc-go"><span data-t="pro.open">Open</span><svg class="ico" aria-hidden="true"><use href="#i-chevron" /></svg></span>
+      </button>
+      <span class="bc-pic" aria-hidden="true">
+        <i class="bc-shout" data-t="set.collect">Collect them all!</i>
+        <img src="art/set/book.webp" alt="" width="440" height="555" decoding="async" />
+      </span>
+    </div>
+
     <!-- Title, count and chips travel together, and stick to the top once the
          banner has scrolled away. -->
     <div class="cre-bar">
@@ -161,44 +178,23 @@
     <div id="pro-stats" class="pro-stats"></div>
     <div id="pro-companion" class="pro-companion"></div>
 
-    <h2 class="section-title" data-t="cre.book">The book</h2>
-    <div class="book-wrap">
-      <button id="book-open" class="book-cover">
-        <span class="bc-spine"></span>
-        <span class="bc-text">
-          <span class="bc-title" data-t="pro.creatures">Creatures</span>
-          <span id="book-count" class="bc-count"></span>
-        </span>
-        <span id="book-peek" class="bc-peek-row" aria-hidden="true"></span>
-        <span class="bc-go"><span data-t="pro.open">Open</span><svg class="ico" aria-hidden="true"><use href="#i-chevron" /></svg></span>
-      </button>
-      <span class="bc-pic" aria-hidden="true">
-        <i class="bc-shout" data-t="set.collect">Collect them all!</i>
-        <img src="art/set/book.webp" alt="" width="440" height="555" decoding="async" />
-      </span>
-    </div>
-
-    <h2 class="section-title" data-t="set.progress">Profile &amp; progress</h2>
-    <div id="level-card" class="level-card"></div>
-
-    <h2 class="section-title" data-t="pro.completed">Completed</h2>
-    <div id="history-list" class="list"></div>
-
     <h2 class="section-title" data-t="set.reminders">Reminders</h2>
     <div id="reminder-card" class="card settings">
       <div id="reminder-blocked" class="blocked" hidden></div>
+
       <label class="setting">
         <img class="set-tile" src="art/set/bell.webp" alt="" width="168" height="168" decoding="async" />
         <span class="setting-label">
-          <span data-t="pro.daily">Daily reminder</span>
-          <em data-t="pro.dailyNote">A nudge to write down today's homework.</em>
+          <span data-t="pro.add">Add homework</span>
+          <em data-t="pro.addNote">A nudge to write today's homework down.</em>
         </span>
         <input id="reminder-toggle" type="checkbox" class="switch" />
       </label>
-      <div id="reminder-time-row" class="setting" hidden>
+      <div id="reminder-time-row" class="setting is-time" hidden>
         <span class="setting-label" data-t="pro.time">Time</span>
         <input id="reminder-time" type="time" class="time-input" value="15:00" />
       </div>
+
       <label class="setting">
         <img class="set-tile" src="art/set/bag.webp" alt="" width="168" height="168" decoding="async" />
         <span class="setting-label">
@@ -207,49 +203,79 @@
         </span>
         <input id="bag-toggle" type="checkbox" class="switch" />
       </label>
-      <div id="bag-time-row" class="setting" hidden>
+      <div id="bag-time-row" class="setting is-time" hidden>
         <span class="setting-label" data-t="pro.time">Time</span>
         <input id="bag-time" type="time" class="time-input" value="20:00" />
+      </div>
+
+      <label class="setting">
+        <span class="set-tile set-tile-ico" aria-hidden="true">
+          <svg class="ico" aria-hidden="true"><use href="#i-check" /></svg>
+        </span>
+        <span class="setting-label">
+          <span data-t="pro.finish">Finish homework</span>
+          <em data-t="pro.finishNote">Only when something is still unfinished.</em>
+        </span>
+        <input id="finish-toggle" type="checkbox" class="switch" />
+      </label>
+      <div id="finish-time-row" class="setting is-time" hidden>
+        <span class="setting-label" data-t="pro.time">Time</span>
+        <input id="finish-time" type="time" class="time-input" value="18:00" />
       </div>
     </div>
     <p id="reminder-note" class="foot-note"></p>
 
-    <h2 class="section-title" data-t="pro.language">Language</h2>
+    <h2 class="section-title" data-t="set.general">General</h2>
     <div class="card settings">
+      <div class="setting is-stacked">
+        <span class="setting-label">
+          <span data-t="pro.country">Country</span>
+          <em data-t="pro.countryNote">Sets the school week, the dates and the clock.</em>
+        </span>
+        <div id="country-pick" class="paper-chips"></div>
+      </div>
+
       <div class="setting">
         <img class="set-tile" src="art/set/globe.webp" alt="" width="168" height="168" decoding="async" />
         <span class="setting-label" data-t="pro.language">Language</span>
         <div id="lang-pick" class="lang-pick"></div>
       </div>
+
+      <button id="tt-edit-open" class="setting is-row">
+        <span class="set-tile set-tile-ico" aria-hidden="true">
+          <svg class="ico" aria-hidden="true"><use href="#i-table" /></svg>
+        </span>
+        <span class="setting-label">
+          <span data-t="pro.editTt">Edit timetable</span>
+          <em data-t="pro.editTtNote">Add, change or take out a lesson.</em>
+        </span>
+        <svg class="ico ico-go" aria-hidden="true"><use href="#i-chevron" /></svg>
+      </button>
     </div>
 
-    <h2 class="section-title" data-t="set.homework">Homework</h2>
+    <h2 class="section-title" data-t="set.theme">Appearance</h2>
     <div class="card settings">
       <div class="setting is-stacked">
         <span class="setting-label">
-          <span data-t="set.startOn">Open on</span>
-          <em data-t="set.startOnNote">The page the app opens when you launch it.</em>
+          <span data-t="set.theme">Appearance</span>
+          <em data-t="set.themeNote">Light, dark, or whatever your phone is set to.</em>
         </span>
-        <div id="start-pick" class="paper-chips"></div>
+        <div id="theme-pick" class="paper-chips"></div>
       </div>
-      <label class="setting">
-        <span class="setting-label">
-          <span data-t="set.ask">Ask before removing</span>
-          <em data-t="set.askNote">A note comes off the board with one tap. This puts a question in the way.</em>
-        </span>
-        <input id="ask-toggle" type="checkbox" class="switch" />
-      </label>
     </div>
 
-    <h2 class="section-title" data-t="set.appearance">Appearance</h2>
+    <h2 class="section-title" data-t="set.history">History</h2>
     <div class="card settings">
-      <div class="setting">
-        <span class="setting-label">
-          <span data-t="set.desk">Desk theme</span>
-          <em data-t="set.deskNote">Choose a look for your study space.</em>
+      <button id="done-open" class="setting is-row">
+        <span class="set-tile set-tile-ico" aria-hidden="true">
+          <svg class="ico" aria-hidden="true"><use href="#i-bookmark" /></svg>
         </span>
-        <div id="desk-pick" class="desk-pick"></div>
-      </div>
+        <span class="setting-label">
+          <span data-t="pro.done">Completed homework</span>
+          <em id="done-count"></em>
+        </span>
+        <svg class="ico ico-go" aria-hidden="true"><use href="#i-chevron" /></svg>
+      </button>
     </div>
 
     <h2 class="section-title" data-t="set.about">About</h2>
@@ -258,7 +284,7 @@
         <span data-t="set.help">Help &amp; About</span>
         <em id="about-version"></em>
       </span>
-      <svg class="ico ico-chevron" aria-hidden="true"><use href="#i-chevron" /></svg>
+      <svg class="ico ico-go" aria-hidden="true"><use href="#i-chevron" /></svg>
     </button>
   </section>
 
@@ -286,6 +312,31 @@
       <svg class="ico" aria-hidden="true"><use href="#i-tab-profile" /></svg><span data-t="tab.profile">Profile</span>
     </button>
   </nav>
+
+<!-- Everything finished, newest first. -->
+  <section id="done-page" class="subject-page done-page" hidden>
+    <div class="cre-top">
+      <button id="done-back" class="back-btn is-inline" data-t-aria="sub.back" aria-label="Back">
+        <svg class="ico" aria-hidden="true"><use href="#i-back" /></svg>
+      </button>
+      <h2 class="cre-num" data-t="done.title">Completed homework</h2>
+      <span class="cre-top-gap" aria-hidden="true"></span>
+    </div>
+    <div id="done-body"></div>
+  </section>
+
+  <!-- The week, editable. -->
+  <section id="tt-edit" class="subject-page tt-edit" hidden>
+    <div class="cre-top">
+      <button id="tt-edit-cancel" class="back-btn is-inline" data-t-aria="tt.cancel" aria-label="Cancel">
+        <svg class="ico" aria-hidden="true"><use href="#i-close" /></svg>
+      </button>
+      <h2 class="cre-num" data-t="tt.edit">Edit timetable</h2>
+      <button id="tt-edit-save" class="tt-save" data-t="tt.save">Save</button>
+    </div>
+    <div id="tt-edit-body"></div>
+  </section>
+
 
   <!-- One creature, and what you have done together. -->
   <section id="creature-page" class="subject-page creature-page" hidden>

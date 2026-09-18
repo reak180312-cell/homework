@@ -108,58 +108,106 @@
    overridden it, or they've explicitly asked for dark. Same values, both gates. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper:     #13171C;
-    --card:      #1B2027;
-    --ink:       #EFE7D7;
-    --ink-2:     #9AA3AE;
-    --ink-3:     #6B7480;
-    --line:      #2A313A;
-    --line-soft: #232931;
-    --done:      #5FA87F;
-    --late:      #C99150;
-    --stamp:     #C4705A;
-    --tint:      24%;
-    --on-ink:    #12161B;
-    --on-sc:     #FFFFFF;
-    --leaf:      #1A1F26;
-    --leaf-rule: #2C3440;
-    --leaf-red:  #7A4F4C;
-    --leaf-hole: #11151A;
-    --leaf-pencil:#6C7A90;
-    --cork:      #6E5136;
-    --cork-frame:#7C5D3E;
-    --board-ink: #8FBFA3;
-    --shadow:    0 1px 2px rgba(0,0,0,.45), 0 10px 28px -16px rgba(0,0,0,.75);
-    --shadow-lift:0 2px 6px rgba(0,0,0,.55), 0 18px 40px -18px rgba(0,0,0,.85);
-    color-scheme: dark;
+    /* Dark is not the light palette with the lights off.
+   *
+   * The old one was slate: #13171C paper on #1B2027 cards, blue-grey through
+   * and through, which is what you get when you reach for "dark" and take
+   * whatever the first neutral is. This app is cream paper on a wooden desk,
+   * and the warmth is the whole of its character — so the dark is a desk
+   * lamp in a dark room rather than a screen in a void. Every ground is a
+   * brown with red still in it (hue 28, not 220), the cards sit *above* the
+   * paper rather than below it, and the ink is warm off-white, never #FFF.
+   *
+   * The sage green and the soft blue are lifted and desaturated so they hold
+   * their identity against a dark ground: the same colours at daylight
+   * strength go muddy, and at full saturation they glare.
+   */
+  --paper:      #191512;   /* the room */
+  --card:       #241E1A;   /* paper on the desk, lit from above */
+  --ink:        #F2E9DA;   /* warm off-white, never pure */
+  --ink-2:      #B6A795;
+  --ink-3:      #8A7C6C;
+  --line:       #3A312A;
+  --line-soft:  #2E2721;
+  --done:       #7FB894;   /* sage, lifted off the dark */
+  --late:       #D9A05F;
+  --stamp:      #C9705C;
+  --tint:       26%;
+  --on-ink:     #191512;
+  --on-sc:      #FFFFFF;
+
+  /* The notebook a reminder is written on: still paper, still warm. */
+  --leaf:       #262019;
+  --leaf-rule:  #3B3A45;
+  --leaf-red:   #8A5450;
+  --leaf-hole:  #15110E;
+  --leaf-pencil:#9A8C7C;
+
+  /* The cork board keeps its colour; it is cork in any light. */
+  --cork:       #6B4E33;
+  --cork-frame: #7D5C3C;
+  --board-ink:  #9CCBAF;
+
+  /* Shadow in a dark room is not a darker dark — nothing is darker than the
+     ground. It is the *absence* of the lamp, so a card is separated by its
+     own faint light at the top rather than by a shadow underneath. */
+  --shadow:      0 1px 1px rgba(0,0,0,.5), 0 8px 22px -14px rgba(0,0,0,.9),
+                 inset 0 1px 0 rgba(255,236,208,.045);
+  --shadow-lift: 0 2px 4px rgba(0,0,0,.55), 0 16px 34px -16px rgba(0,0,0,.95),
+                 inset 0 1px 0 rgba(255,236,208,.07);
+  color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --paper:     #13171C;
-  --card:      #1B2027;
-  --ink:       #EFE7D7;
-  --ink-2:     #9AA3AE;
-  --ink-3:     #6B7480;
-  --line:      #2A313A;
-  --line-soft: #232931;
-  --done:      #5FA87F;
-  --late:      #C99150;
-  --stamp:     #C4705A;
-  --tint:      24%;
-  --on-ink:    #12161B;
-  --on-sc:     #FFFFFF;
-  --leaf:      #1A1F26;
-  --leaf-rule: #2C3440;
-  --leaf-red:  #7A4F4C;
-  --leaf-hole: #11151A;
-  --leaf-pencil:#6C7A90;
-  --cork:      #6E5136;
-  --cork-frame:#7C5D3E;
-  --board-ink: #8FBFA3;
-  --shadow:    0 1px 2px rgba(0,0,0,.45), 0 10px 28px -16px rgba(0,0,0,.75);
-  --shadow-lift:0 2px 6px rgba(0,0,0,.55), 0 18px 40px -18px rgba(0,0,0,.85);
-  color-scheme: dark;
+/* Dark is not the light palette with the lights off.
+ *
+ * The old one was slate: #13171C paper on #1B2027 cards, blue-grey through
+ * and through, which is what you get when you reach for "dark" and take
+ * whatever the first neutral is. This app is cream paper on a wooden desk,
+ * and the warmth is the whole of its character — so the dark is a desk
+ * lamp in a dark room rather than a screen in a void. Every ground is a
+ * brown with red still in it (hue 28, not 220), the cards sit *above* the
+ * paper rather than below it, and the ink is warm off-white, never #FFF.
+ *
+ * The sage green and the soft blue are lifted and desaturated so they hold
+ * their identity against a dark ground: the same colours at daylight
+ * strength go muddy, and at full saturation they glare.
+ */
+--paper:      #191512;   /* the room */
+--card:       #241E1A;   /* paper on the desk, lit from above */
+--ink:        #F2E9DA;   /* warm off-white, never pure */
+--ink-2:      #B6A795;
+--ink-3:      #8A7C6C;
+--line:       #3A312A;
+--line-soft:  #2E2721;
+--done:       #7FB894;   /* sage, lifted off the dark */
+--late:       #D9A05F;
+--stamp:      #C9705C;
+--tint:       26%;
+--on-ink:     #191512;
+--on-sc:      #FFFFFF;
+
+/* The notebook a reminder is written on: still paper, still warm. */
+--leaf:       #262019;
+--leaf-rule:  #3B3A45;
+--leaf-red:   #8A5450;
+--leaf-hole:  #15110E;
+--leaf-pencil:#9A8C7C;
+
+/* The cork board keeps its colour; it is cork in any light. */
+--cork:       #6B4E33;
+--cork-frame: #7D5C3C;
+--board-ink:  #9CCBAF;
+
+/* Shadow in a dark room is not a darker dark — nothing is darker than the
+   ground. It is the *absence* of the lamp, so a card is separated by its
+   own faint light at the top rather than by a shadow underneath. */
+--shadow:      0 1px 1px rgba(0,0,0,.5), 0 8px 22px -14px rgba(0,0,0,.9),
+               inset 0 1px 0 rgba(255,236,208,.045);
+--shadow-lift: 0 2px 4px rgba(0,0,0,.55), 0 16px 34px -16px rgba(0,0,0,.95),
+               inset 0 1px 0 rgba(255,236,208,.07);
+color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -2925,8 +2973,12 @@ body {
   padding: 16px 14px 16px 24px;
   margin-bottom: 10px;
   border-radius: 5px 16px 16px 5px;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--ink) 88%, #000), var(--ink) 60%);
-  color: var(--on-ink);
+  /* A book is a dark object on a pale desk, and it should still be a dark
+     object on a dark one — painting it with the ink colour flips it into a
+     bright slab at night, which is the brightest thing on the screen and the
+     least important. */
+  background: linear-gradient(135deg, color-mix(in srgb, var(--book) 88%, #000), var(--book) 60%);
+  color: var(--book-ink);
   box-shadow: var(--shadow-lift);
   text-align: left;
   transition: transform .22s var(--spring);
@@ -4201,4 +4253,224 @@ body {
   font-size: 13.5px;
   line-height: 1.55;
   color: var(--ink-2);
+}
+
+/* ══ The Profile page, as it stands now ════════════════════
+   Four sections and nothing else: three reminders, the general things, the
+   look of the place, and a door to everything you have finished. */
+
+/* A setting that is a way through rather than a switch. It is a button, so
+   it gets the same row shape as the labels beside it and none of a button's
+   own chrome. */
+.setting.is-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.setting.is-row:active { background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.setting.is-row .ico-go { flex: none; color: var(--ink-3); }
+[dir="rtl"] .setting .ico-go { transform: scaleX(-1); }
+
+/* A tile that is an icon rather than a drawing, for the rows the pictures
+   never got made for. */
+.set-tile-ico {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--done) 13%, transparent);
+  color: var(--done);
+}
+.set-tile-ico .ico { width: 20px; height: 20px; }
+
+/* The time under a reminder belongs to it, so it is indented under it rather
+   than sitting as its equal. */
+.setting.is-time { padding-inline-start: 56px; }
+[dir="rtl"] .setting.is-time { padding-inline-start: 56px; }
+
+/* How close the next egg is, under the level it belongs to. */
+.pro-bar {
+  width: min(230px, 62vw);
+  margin-top: 10px;
+  display: grid;
+  gap: 5px;
+  justify-items: center;
+}
+.pro-bar span { font-size: 12px; color: var(--ink-3); }
+
+/* ══ Everything you have finished ══════════════════════════ */
+.done-page { z-index: 23; }
+#done-body { padding: 0 var(--gutter) calc(var(--content-bottom) + 20px); }
+.done-total {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+/* ══ Editing the week ══════════════════════════════════════
+   The same grid the timetable draws, with every cell a field. It scrolls
+   sideways on its own so a week of ten periods does not squeeze the columns
+   into something nobody can tap. */
+.tt-edit { z-index: 23; }
+#tt-edit-body { padding: 0 var(--gutter) calc(var(--content-bottom) + 20px); }
+
+.tt-edit-note {
+  margin: 0 0 14px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.tt-save {
+  flex: none;
+  padding: 9px 16px;
+  min-height: 40px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--done);
+  color: var(--on-ink);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tt-save:active { transform: scale(.96); }
+
+.tt-edit-scroll {
+  overflow-x: auto;
+  border-radius: var(--r-card);
+  background: var(--card);
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow);
+}
+.tt-edit-grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.tt-edit-grid th,
+.tt-edit-grid td {
+  padding: 0;
+  border-bottom: 1px solid var(--line-soft);
+  border-inline-end: 1px solid var(--line-soft);
+}
+.tt-edit-grid tr:last-child th,
+.tt-edit-grid tr:last-child td { border-bottom: 0; }
+.tt-edit-grid th:last-child,
+.tt-edit-grid td:last-child { border-inline-end: 0; }
+
+.tt-edit-grid thead th {
+  padding: 9px 6px;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+  white-space: nowrap;
+}
+.tt-edit-corner { min-width: 88px; }
+
+.tt-edit-when,
+.tt-edit-cell {
+  width: 100%;
+  min-width: 78px;
+  padding: 11px 8px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  text-align: center;
+  outline: none;
+}
+.tt-edit-when {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.tt-edit-cell::placeholder { color: var(--ink-3); opacity: .65; }
+.tt-edit-when:focus,
+.tt-edit-cell:focus {
+  background: color-mix(in srgb, var(--done) 14%, transparent);
+  box-shadow: inset 0 0 0 2px var(--done);
+  border-radius: 6px;
+}
+
+.tt-edit-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+.tt-edit-actions .btn-second {
+  flex: 1;
+  min-height: 46px;
+  padding: 0 12px;
+  font-family: inherit;
+  font-size: 14px;
+  justify-content: center;
+}
+.tt-edit-actions .btn-second[disabled] { opacity: .45; cursor: default; }
+
+.tt-reset {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+
+/* The bar under the level carries its own width and no top margin: it sits
+   under a heading rather than under a paragraph. */
+.pro-bar .bar { width: 100%; margin-top: 0; height: 7px; }
+
+/* The book's own two colours, so it stays a dark object in both palettes. */
+:root { --book: var(--ink); --book-ink: var(--on-ink); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --book: #2C3A31; --book-ink: #F0E7D7; }
+}
+:root[data-theme="dark"] { --book: #2C3A31; --book-ink: #F0E7D7; }
+
+/* A silhouette has to be readable against whatever it stands on. By day it is
+   darker than the card; by night it has to be lighter, and the question mark
+   flips with it — a card-coloured mark on a card-coloured shadow is nothing
+   at all. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .mon-slot.is-locked {
+    color: color-mix(in srgb, var(--ink) 34%, var(--card));
+  }
+  :root:not([data-theme="light"]) .mon-q { fill: var(--paper); color: var(--paper); }
+}
+:root[data-theme="dark"] .mon-slot.is-locked {
+  color: color-mix(in srgb, var(--ink) 34%, var(--card));
+}
+:root[data-theme="dark"] .mon-q { fill: var(--paper); color: var(--paper); }
+
+/* A locked painting is drawn by taking its colour out — brightness(0), which
+   is black whatever the card underneath is doing. Black on a dark ground is
+   nothing, so at night it is inverted instead: the same silhouette, in light
+   rather than in shadow. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .mon-lock .mon-hidden {
+    filter: grayscale(1) brightness(0) invert(1);
+    opacity: .26;
+  }
+}
+:root[data-theme="dark"] .mon-lock .mon-hidden {
+  filter: grayscale(1) brightness(0) invert(1);
+  opacity: .26;
 }

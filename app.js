@@ -13,46 +13,53 @@
 
    Night is the dark theme that was already here, given a face. Before this
    it followed the phone and there was no way to ask for it. */
-const DESKS = [
-  { key: 'cream', theme: 'light', swatch: '#F4EEE1' },
-  { key: 'sage',  theme: 'light', swatch: '#9DB48A' },
-  { key: 'night', theme: 'dark',  swatch: '#1E2A38' },
-  { key: 'sky',   theme: 'light', swatch: '#A8C0DA' },
+/* ── Where you are ─────────────────────────────────────────
+   The country is not decoration. Three things follow from it and nothing
+   else does: which days are school days, whether the clock runs to 24 hours
+   or to am/pm, and which locale writes the dates. Israel's school week opens
+   on Sunday and ends on Thursday; most of the rest open on Monday.
+   'start' is the weekday the week opens on and 'days' is how many it has, so
+   the week is built rather than listed. A country whose school week is not
+   five days in a row is not here, and adding one is a row in this list
+   rather than a change anywhere else. */
+const COUNTRIES = [
+  { key: 'il', locale: 'he-IL', start: 0, days: 5, clock24: true },
+  { key: 'gb', locale: 'en-GB', start: 1, days: 5, clock24: true },
+  { key: 'us', locale: 'en-US', start: 1, days: 5, clock24: false },
+  { key: 'ca', locale: 'en-CA', start: 1, days: 5, clock24: false },
+  { key: 'au', locale: 'en-AU', start: 1, days: 5, clock24: false },
+  { key: 'fr', locale: 'fr-FR', start: 1, days: 5, clock24: true },
+  { key: 'de', locale: 'de-DE', start: 1, days: 5, clock24: true },
+  { key: 'in', locale: 'en-IN', start: 1, days: 5, clock24: false },
 ];
-
-function applyDesk() {
-  const key = state.settings.desk;
-  const desk = DESKS.find(d => d.key === key);
-  const root = document.documentElement;
-  if (!desk) {
-    // Nothing chosen: the phone decides, the way it always did.
-    root.removeAttribute('data-desk');
-    root.removeAttribute('data-theme');
-    return;
+/** The chosen country, or the one the app was built for. */
+function country() {
+  return COUNTRIES.find(c => c.key === state.settings.country) || COUNTRIES[0];
+}
+/* Weekday names come from the browser rather than from a list here: it knows
+   them in every language the app might be set to, and the app only has to say
+   which day it means. 7 January 2024 was a Sunday, so that week is the ruler. */
+function weekdayName(js, style = 'long') {
+  try {
+    return new Intl.DateTimeFormat(locale(), { weekday: style, timeZone: 'UTC' })
+      .format(new Date(Date.UTC(2024, 0, 7 + js)));
+  } catch {
+    const full = ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
+                  'Thursday', 'Friday', 'Saturday'][js] || '';
+    return style === 'short' ? full.slice(0, 3) : full;
   }
-  root.setAttribute('data-desk', desk.key);
-  root.setAttribute('data-theme', desk.theme);
 }
-
-function renderDeskPick() {
-  const box = $('#desk-pick');
-  if (!box) return;
-  const on = state.settings.desk;
-  box.innerHTML = DESKS.map(d => `
-    <button class="desk-dot ${d.key === on ? 'is-on' : ''}" data-desk="${d.key}"
-            style="--swatch:${d.swatch}"
-            title="${esc(tr('desk.' + d.key))}"
-            aria-label="${esc(tr('desk.' + d.key))}"
-            aria-pressed="${d.key === on}"></button>`).join('');
+/** The school week: which days, in the order the country keeps them. */
+function schoolDays() {
+  const c = country();
+  return Array.from({ length: c.days }, (_, i) => ({ js: (c.start + i) % 7 }));
 }
-
-function setDesk(key) {
-  if (!DESKS.some(d => d.key === key)) return;
-  state.settings.desk = key;
-  save();
-  applyDesk();
-  syncTopColour();
-  renderDeskPick();
+/** A time of day written the way the country writes it. */
+function clockLabel(hhmm) {
+  const [h, m] = String(hhmm).split(':').map(Number);
+  if (country().clock24 || !Number.isFinite(h)) return hhmm;
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`;
 }
 
 /* ── Words ─────────────────────────────────────────────────
@@ -130,7 +137,7 @@ const STRINGS = {
 
     'pro.title': 'Profile', 'pro.book': 'Your creature book',
     'pro.creatures': 'Creatures', 'pro.open': 'Open',
-    'pro.completed': 'Completed', 'pro.reminder': 'Reminder',
+     'pro.reminder': 'Reminder',
     'pro.daily': 'Daily reminder',
     'pro.dailyNote': 'A nudge to write down today’s homework.',
     'pro.pack': 'Pack your bag',
@@ -139,20 +146,15 @@ const STRINGS = {
 
     'set.title': 'Settings',
     'set.sub': 'Personalize your study space and reminders.',
-    'set.progress': 'Profile & progress',
     'set.book': 'Creature book',
     'set.collect': 'Collect them all!',
     'set.reminders': 'Reminders',
     'set.appearance': 'Appearance',
-    'set.desk': 'Desk theme',
     'set.deskNote': 'Choose a look for your study space.',
     'set.about': 'About',
     'set.help': 'Help & About',
     'set.version': 'App version {v}',
     'set.firstCreature': 'Your first creature is on the way.',
-
-    'desk.cream': 'Cream', 'desk.sage': 'Sage',
-    'desk.night': 'Night', 'desk.sky': 'Sky',
 
     'about.what': 'What this is',
     'about.whatNote': 'Everything you have to do, in one place. Write homework down as it is set, tick it off when it is done, and the bag packs itself from the timetable.',
@@ -220,12 +222,6 @@ const STRINGS = {
     'pro.yourStory': 'Your journey, your creatures, your story.',
     'pro.sTasks': 'Tasks', 'pro.sCreatures': 'Creatures', 'pro.sStreak': 'Day streak',
 
-    'set.homework': 'Homework',
-    'set.startOn': 'Open on',
-    'set.startOnNote': 'The page the app opens when you launch it.',
-    'set.ask': 'Ask before removing',
-    'set.askNote': 'A note comes off the board with one tap. This puts a question in the way.',
-    'set.remove': 'Remove?',
     'set.removeCancel': 'Keep it',
     'set.removeOk': 'Remove',
 
@@ -255,6 +251,49 @@ const STRINGS = {
     'notif.turnBack': 'Turn them back on in your phone’s settings, under Notifications.',
     'notif.noSupport': 'This browser can’t show notifications.',
     'notif.anyHomework': 'Any homework today?',
+    'notif.anyBody': 'You have {n} left. Anything new today?',
+    'notif.anyBodyNone': 'Add today’s homework while it’s fresh.',
+    'notif.finish': 'Still {n} to finish',
+    'notif.finishBody': 'There is time. Pick the quickest one.',
+    'set.reminders': 'Reminders',
+    'set.general': 'General',
+    'set.history': 'History',
+    'pro.add': 'Add homework',
+    'pro.addNote': 'A nudge to write today’s homework down.',
+    'pro.pack': 'Pack your bag',
+    'pro.packNote': 'Tomorrow’s lessons and reminders, the evening before.',
+    'pro.finish': 'Finish homework',
+    'pro.finishNote': 'Only when something is still unfinished.',
+    'pro.country': 'Country',
+    'pro.countryNote': 'Sets the school week, the dates and the clock.',
+    'pro.editTt': 'Edit timetable',
+    'pro.editTtNote': 'Add, change or take out a lesson.',
+    'pro.done': 'Completed homework',
+    'pro.doneNote': 'Everything you have finished.',
+    'set.theme': 'Appearance',
+    'set.themeNote': 'Light, dark, or whatever your phone is set to.',
+    'theme.light': 'Light', 'theme.dark': 'Dark', 'theme.system': 'System',
+    'country.il': 'Israel', 'country.gb': 'United Kingdom',
+    'country.us': 'United States', 'country.ca': 'Canada',
+    'country.au': 'Australia', 'country.fr': 'France',
+    'country.de': 'Germany', 'country.in': 'India',
+    'tt.edit': 'Edit timetable',
+    'tt.editNote': 'Tap a lesson to change it. Leave it empty for a free period.',
+    'tt.addPeriod': 'Add a period',
+    'tt.removePeriod': 'Remove the last period',
+    'tt.period': 'Period {n}',
+    'tt.time': 'Time',
+    'tt.lesson': 'Lesson',
+    'tt.free': 'Free',
+    'tt.save': 'Save',
+    'tt.cancel': 'Cancel',
+    'tt.reset': 'Back to the original',
+    'tt.resetAsk': 'Put the timetable back the way it came?',
+    'tt.saved': 'Timetable saved',
+    'tt.tooFew': 'A timetable needs at least one period.',
+    'done.title': 'Completed homework',
+    'done.none': 'Nothing finished yet. It will all be here when it is.',
+    'done.count': '{n} finished',
     'notif.dontForget': 'Don’t forget: ',
 
     'bag.dayToday': '{day} · today',
@@ -330,7 +369,7 @@ const STRINGS = {
 
     'pro.title': 'פרופיל', 'pro.book': 'ספר היצורים שלך',
     'pro.creatures': 'יצורים', 'pro.open': 'פתיחה',
-    'pro.completed': 'הושלמו', 'pro.reminder': 'תזכורת',
+     'pro.reminder': 'תזכורת',
     'pro.daily': 'תזכורת יומית',
     'pro.dailyNote': 'תזכורת קטנה לרשום את שיעורי הבית של היום.',
     'pro.pack': 'לארוז את התיק',
@@ -339,20 +378,15 @@ const STRINGS = {
 
     'set.title': 'הגדרות',
     'set.sub': 'התאימו את סביבת הלמידה והתזכורות שלכם.',
-    'set.progress': 'פרופיל והתקדמות',
     'set.book': 'ספר היצורים',
     'set.collect': 'אספו את כולם!',
     'set.reminders': 'תזכורות',
     'set.appearance': 'מראה',
-    'set.desk': 'ערכת שולחן',
     'set.deskNote': 'בחרו מראה לסביבת הלמידה.',
     'set.about': 'אודות',
     'set.help': 'עזרה ואודות',
     'set.version': 'גרסה {v}',
     'set.firstCreature': 'היצור הראשון שלך בדרך.',
-
-    'desk.cream': 'קרם', 'desk.sage': 'מרווה',
-    'desk.night': 'לילה', 'desk.sky': 'תכלת',
 
     'about.what': 'מה זה',
     'about.whatNote': 'כל מה שצריך לעשות, במקום אחד. רושמים שיעורי בית ברגע שהם ניתנים, מסמנים כשסיימו, והתיק נארז לבד לפי המערכת.',
@@ -420,12 +454,6 @@ const STRINGS = {
     'pro.yourStory': 'המסע שלכם, היצורים שלכם, הסיפור שלכם.',
     'pro.sTasks': 'מטלות', 'pro.sCreatures': 'יצורים', 'pro.sStreak': 'ימים ברצף',
 
-    'set.homework': 'שיעורי בית',
-    'set.startOn': 'פתיחה בעמוד',
-    'set.startOnNote': 'העמוד שייפתח כשמפעילים את האפליקציה.',
-    'set.ask': 'לשאול לפני הסרה',
-    'set.askNote': 'פתק יורד מהלוח בהקשה אחת. זה שם שאלה בדרך.',
-    'set.remove': 'להסיר?',
     'set.removeCancel': 'להשאיר',
     'set.removeOk': 'להסיר',
 
@@ -455,6 +483,49 @@ const STRINGS = {
     'notif.turnBack': 'אפשר להדליק אותן שוב בהגדרות הטלפון, תחת התראות.',
     'notif.noSupport': 'הדפדפן הזה לא יודע להציג התראות.',
     'notif.anyHomework': 'יש שיעורי בית היום?',
+    'notif.anyBody': 'נשארו {n}. יש משהו חדש היום?',
+    'notif.anyBodyNone': 'רשמו את שיעורי הבית של היום כל עוד הם טריים.',
+    'notif.finish': 'נשארו {n} לסיים',
+    'notif.finishBody': 'יש זמן. תתחילו מהקצר ביותר.',
+    'set.reminders': 'תזכורות',
+    'set.general': 'כללי',
+    'set.history': 'היסטוריה',
+    'pro.add': 'הוספת שיעורי בית',
+    'pro.addNote': 'תזכורת לרשום את שיעורי הבית של היום.',
+    'pro.pack': 'אריזת התיק',
+    'pro.packNote': 'השיעורים והתזכורות של מחר, בערב שלפני.',
+    'pro.finish': 'סיום שיעורי בית',
+    'pro.finishNote': 'רק כשנשאר משהו לסיים.',
+    'pro.country': 'מדינה',
+    'pro.countryNote': 'קובעת את שבוע הלימודים, התאריכים והשעון.',
+    'pro.editTt': 'עריכת מערכת',
+    'pro.editTtNote': 'הוספה, שינוי או הסרה של שיעור.',
+    'pro.done': 'שיעורי בית שהושלמו',
+    'pro.doneNote': 'כל מה שסיימתם.',
+    'set.theme': 'מראה',
+    'set.themeNote': 'בהיר, כהה, או לפי הטלפון.',
+    'theme.light': 'בהיר', 'theme.dark': 'כהה', 'theme.system': 'לפי המכשיר',
+    'country.il': 'ישראל', 'country.gb': 'בריטניה',
+    'country.us': 'ארצות הברית', 'country.ca': 'קנדה',
+    'country.au': 'אוסטרליה', 'country.fr': 'צרפת',
+    'country.de': 'גרמניה', 'country.in': 'הודו',
+    'tt.edit': 'עריכת מערכת',
+    'tt.editNote': 'הקישו על שיעור כדי לשנות אותו. השאירו ריק לשעה חופשית.',
+    'tt.addPeriod': 'הוספת שעה',
+    'tt.removePeriod': 'הסרת השעה האחרונה',
+    'tt.period': 'שעה {n}',
+    'tt.time': 'שעה',
+    'tt.lesson': 'שיעור',
+    'tt.free': 'חופשי',
+    'tt.save': 'שמירה',
+    'tt.cancel': 'ביטול',
+    'tt.reset': 'חזרה למקורית',
+    'tt.resetAsk': 'להחזיר את המערכת כפי שהייתה?',
+    'tt.saved': 'המערכת נשמרה',
+    'tt.tooFew': 'למערכת צריכה להיות לפחות שעה אחת.',
+    'done.title': 'שיעורי בית שהושלמו',
+    'done.none': 'עוד לא סיימתם כלום. הכול יופיע כאן כשתסיימו.',
+    'done.count': '{n} הושלמו',
     'notif.dontForget': 'לא לשכוח: ',
 
     'bag.dayToday': 'יום {day} · היום',
@@ -491,9 +562,16 @@ function tr(key, vars) {
   return out;
 }
 
-/* What to ask the browser for when it writes a date we have no word for. */
+/* What to ask the browser for when it writes a date the app has no word for.
+   Two things decide it and they are not the same thing. The language picks
+   the script — Hebrew writes its months in Hebrew wherever you are. The
+   country picks the conventions: which day the week starts on, and whether
+   the third of April is 3/4 or 4/3. So the language names the tongue and the
+   country names the region, and a Hebrew speaker in London gets Hebrew
+   months in British order. */
 function locale() {
-  return lang === 'he' ? 'he-IL' : 'en-GB';
+  const region = (state.settings && state.settings.country) || 'il';
+  return (lang === 'he' ? 'he' : 'en') + '-' + region.toUpperCase();
 }
 
 function langDir(key) {
@@ -501,17 +579,17 @@ function langDir(key) {
   return l ? l.dir : 'ltr';
 }
 
-/* A day's name in whichever language is on. The timetable already carries
-   both, because the school writes one and the app says the other. */
+/* A school day's name, by its place in the week rather than by its weekday
+   number — which is what every screen here means by "day 0". The names used
+   to be written out in two languages; the browser knows them in all of them,
+   and knows which country calls which day what. */
 function dayName(i) {
-  const d = SCHOOL_DAYS[i];
-  if (!d) return '';
-  return lang === 'he' ? d.he : d.en;
+  const d = schoolDays()[i];
+  return d ? weekdayName(d.js) : '';
 }
 function dayShort(i) {
-  const d = SCHOOL_DAYS[i];
-  if (!d) return '';
-  return lang === 'he' ? d.he : d.short;
+  const d = schoolDays()[i];
+  return d ? weekdayName(d.js, 'short') : '';
 }
 
 /* ── Data ──────────────────────────────────────────────────── */
@@ -708,19 +786,22 @@ const PROFILE = (() => {
   return PROFILES.rea;
 })();
 
-const SCHOOL_DAYS = [
-  { js: 0, he: 'ראשון',  en: 'Sunday',    short: 'Sun' },
-  { js: 1, he: 'שני',    en: 'Monday',    short: 'Mon' },
-  { js: 2, he: 'שלישי',  en: 'Tuesday',   short: 'Tue' },
-  { js: 3, he: 'רביעי',  en: 'Wednesday', short: 'Wed' },
-  { js: 4, he: 'חמישי',  en: 'Thursday',  short: 'Thu' },
-];
-
-const PERIODS = PROFILE.periods;
-
+/* The week the app was built with, and the week you have made of it.
+ *
+ * These used to be two constants read straight off the profile, which is why
+ * the timetable could be looked at and not touched. They are functions now,
+ * and they answer from the store the moment anything has been edited there.
+ * Nothing else about them changed: the shape is the same list of periods and
+ * the same grid of day rows, so every screen that reads the week reads it the
+ * same way it always did.
+ */
+const periods = () => (state.timetable && state.timetable.periods) || PROFILE.periods;
+const schedule = () => (state.timetable && state.timetable.schedule) || PROFILE.schedule;
+/** A copy of whichever week is in force, safe to edit and hand back. */
+function weekCopy() {
+  return { periods: periods().slice(), schedule: schedule().map(row => row.slice()) };
+}
 // [day index][period index] — null is a free period.
-const SCHEDULE = PROFILE.schedule;
-
 // Only used to move homework saved before subjects came from the timetable:
 // it matches the name you had picked onto the lesson it clearly meant.
 const OLD_SUBJECT_ALIASES = {
@@ -742,12 +823,11 @@ const OLD_SUBJECT_ALIASES = {
 };
 
 /** Every distinct lesson in the week, in the order it first appears. */
-const LESSONS = (() => {
+function lessons() {
   const seen = [];
-  for (const row of SCHEDULE) for (const name of row) if (name && !seen.includes(name)) seen.push(name);
+  for (const row of schedule()) for (const name of row) if (name && !seen.includes(name)) seen.push(name);
   return seen;
-})();
-
+}
 // Every lesson name is short enough for the week to fit one screen now, but
 // the seam stays: a longer one would go here.
 const SHORT_NAME = {};
@@ -762,21 +842,34 @@ const shortName = (n) => SHORT_NAME[n] || n;
 
 const SUBJECT_LOOK = PROFILE.look;
 
-const SUBJECTS = LESSONS.map((name) => {
-  const look = SUBJECT_LOOK[name] || {};
-  return {
-    id: name,
-    name,
-    icon: 'icon' in look ? look.icon : 'i-bookmark',
-    glyph: look.glyph || null,
-    color: look.color || '#7C7A76',
-  };
-});
+/* A subject is a lesson with a look. A lesson the app has never heard of —
+   one typed into the editor — gets no icon and a plain colour, which is
+   better than refusing to file homework under it. */
+function subjects() {
+  return lessons().map((name) => {
+    const look = SUBJECT_LOOK[name] || {};
+    return {
+      id: name,
+      name,
+      icon: 'icon' in look ? look.icon : 'i-bookmark',
+      glyph: look.glyph || null,
+      color: look.color || tileHue(name),
+    };
+  });
+}
 
-const PALETTE = SUBJECTS.map(s => s.color);
+/* A colour for a lesson nobody drew one for: taken from the name, so the same
+   lesson is the same colour every time and two different ones rarely clash. */
+function tileHue(name) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % 360;
+  return `hsl(${h} 32% 52%)`;
+}
+
+const PALETTE = Object.values(SUBJECT_LOOK).map(l => l.color).filter(Boolean);
 
 /** The timetable's subjects, plus anything older data left behind. */
-const allSubjects = () => SUBJECTS.concat(state.extraSubjects || []);
+const allSubjects = () => subjects().concat(state.extraSubjects || []);
 
 const subjectById = (id) => allSubjects().find(s => s.id === id) || null;
 
@@ -787,7 +880,6 @@ const subjectForLesson = (name) => subjectById(name);
    Worked out from the timetable, not from anything you have to keep up to
    date: every lesson wants a notebook except חינוך, five of them want a book
    as well, and three have something of their own. */
-
 
 
 /** A lesson in the words you picked it in, falling back to the timetable's. */
@@ -965,7 +1057,7 @@ function bagScene(dayIndex) {
 
 /** Lessons that day, in order, collapsed to one entry per subject. */
 function lessonsFor(dayIndex) {
-  const row = SCHEDULE[dayIndex] || [];
+  const row = schedule()[dayIndex] || [];
   const seen = new Map();
   row.forEach((name, period) => {
     if (!name) return;
@@ -976,9 +1068,9 @@ function lessonsFor(dayIndex) {
 }
 
 
-/** Weekday index into SCHOOL_DAYS, or -1 at the weekend. */
+/** Place in the school week, or -1 if today is not one. */
 function schoolDayIndex(d = new Date()) {
-  return SCHOOL_DAYS.findIndex(x => x.js === d.getDay());
+  return schoolDays().findIndex(x => x.js === d.getDay());
 }
 
 /* ── The collection ────────────────────────────────────────
@@ -2077,8 +2169,13 @@ function dayHeading(ts) {
   return d.toLocaleDateString(locale(), opts);
 }
 
+/* A clock face the country would recognise. The browser default follows the
+   language, which gets it wrong the moment the two differ — an English
+   speaker in Israel was being shown 01:27 PM for a country that has never
+   written a time that way. */
 const timeLabel = (ts) =>
-  new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  new Date(ts).toLocaleTimeString(locale(),
+    { hour: '2-digit', minute: '2-digit', hour12: !country().clock24 });
 
 
 /* ── Store ─────────────────────────────────────────────────── */
@@ -2098,16 +2195,21 @@ const blank = () => ({
   progress: { xp: 0, level: 1, shownUpTo: 1, metAt: {},
               companion: null, favourites: [], together: {} },
   settings: {
+    /* Three reminders, each a switch and a time. The first asks you to write
+       today's homework down, the second to pack for tomorrow, and the third
+       only goes out if there is still something unfinished to go out about. */
     dailyReminderEnabled: false, dailyReminderTime: '15:00',
     bagReminderEnabled: false, bagReminderTime: '20:00',
+    finishReminderEnabled: false, finishReminderTime: '18:00',
     // null until somebody chooses; the phone is asked the first time.
     lang: null,
-    // Likewise the look of the place: null means whatever the phone is set to.
-    desk: null,
-    // Which page the app opens on, and whether taking a note down asks first.
-    startOn: 'home',
-    askBeforeRemove: false,
+    // Which country's week and clock to keep. null means the phone's.
+    country: null,
+    // 'light', 'dark', or null for whatever the phone is set to.
+    theme: null,
   },
+  // null until the week is edited; then { periods, schedule } of your own.
+  timetable: null,
   lastSubjectId: null,
 });
 
@@ -2119,7 +2221,7 @@ let state = blank();
 function lessonForOldName(name) {
   const n = String(name || '').toLowerCase();
   if (!n) return null;
-  for (const lesson of LESSONS) {
+  for (const lesson of lessons()) {
     const aliases = OLD_SUBJECT_ALIASES[lesson] || [lesson];
     if (aliases.some(a => n.includes(a.toLowerCase()) || a.toLowerCase().includes(n))) return lesson;
   }
@@ -2175,9 +2277,17 @@ function hydrate(saved) {
   }
   // Anyone who was here before there was a choice gets the phone asked for them.
   if (!LANGS.some(l => l.key === next.settings.lang)) next.settings.lang = null;
-  if (!DESKS.some(d => d.key === next.settings.desk)) next.settings.desk = null;
-  if (!START_PAGES.some(p => p.key === next.settings.startOn)) next.settings.startOn = 'home';
-  next.settings.askBeforeRemove = !!next.settings.askBeforeRemove;
+  if (!['light', 'dark'].includes(next.settings.theme)) next.settings.theme = null;
+  if (!COUNTRIES.some(c => c.key === next.settings.country)) next.settings.country = null;
+  next.settings.finishReminderEnabled = !!next.settings.finishReminderEnabled;
+  if (!/^\d\d:\d\d$/.test(next.settings.finishReminderTime || '')) next.settings.finishReminderTime = '18:00';
+  // A week edited into a shape the app cannot draw is worse than no week.
+  if (!next.timetable
+      || !Array.isArray(next.timetable.periods)
+      || !Array.isArray(next.timetable.schedule)
+      || next.timetable.schedule.some(r => !Array.isArray(r))) {
+    next.timetable = null;
+  }
   // Anyone already part way through should not be shown a burst of arrivals.
   if (typeof next.progress.shownUpTo !== 'number') next.progress.shownUpTo = levelFor(next.progress.xp || 0);
   return next;
@@ -2477,23 +2587,6 @@ function renderAbout() {
   if (foot) foot.textContent = tr('set.version', { v: APP_VERSION });
 }
 
-/* The pages it makes sense to open on: the three you read rather than the
-   two you go to on purpose. */
-const START_PAGES = [
-  { key: 'home', t: 'tab.home' },
-  { key: 'bag', t: 'tab.bag' },
-  { key: 'reminders', t: 'tab.reminders' },
-];
-
-function renderStartPick() {
-  const box = $('#start-pick');
-  if (!box) return;
-  const on = state.settings.startOn;
-  box.innerHTML = START_PAGES.map(p => `
-    <button class="p-chip ${p.key === on ? 'is-on' : ''}" data-start="${p.key}"
-            aria-pressed="${p.key === on}">${esc(tr(p.t))}</button>`).join('');
-}
-
 function renderLangPick() {
   const box = $('#lang-pick');
   if (!box) return;
@@ -2534,8 +2627,7 @@ function render() {
   if (currentTab === 'bag') renderBag();
   if (currentTab === 'reminders') renderReminders();
   if (currentTab === 'profile') {
-    renderProfile(); renderLangPick(); renderDeskPick(); renderAbout(); renderStartPick();
-    $('#ask-toggle').checked = !!state.settings.askBeforeRemove;
+    renderProfile(); renderLangPick(); renderAbout();
     revealRoom('#set-room');
   }
   if (!$('#subject-page').hidden) renderSubjectPage(openSubjectId);
@@ -2564,13 +2656,12 @@ function renderBag() {
     bagDay = today >= 0 ? today : 0;      // weekend: start the week on Sunday
   }
   const today = schoolDayIndex();
-  const day = SCHOOL_DAYS[bagDay];
-
+  const day = schoolDays()[bagDay];
   $('#bag-sub').textContent = bagDay === today
     ? tr('bag.dayToday', { day: dayName(day.js) })
     : dayName(day.js);
 
-  $('#bag-days').innerHTML = SCHOOL_DAYS.map((d, i) => `
+  $('#bag-days').innerHTML = schoolDays().map((d, i) => `
     <button class="chip chip-day ${i === bagDay ? 'is-on' : ''}" data-day="${i}">
       ${esc(dayShort(i))}${i === today ? '<span class="today-dot"></span>' : ''}
     </button>`).join('');
@@ -2610,8 +2701,8 @@ function renderTtButton() {
   btn.hidden = currentTab === 'reminders';
   // Redrawn only when the subjects behind its colours change, not every render.
   if (btn.firstChild) return;                      // the week never changes
-  btn.innerHTML = '<span class="tt-mini">' + SCHOOL_DAYS.map((d, i) =>
-    '<span class="tt-mini-col">' + SCHEDULE[i].slice(0, 6).map(name => {
+  btn.innerHTML = '<span class="tt-mini">' + schoolDays().map((d, i) =>
+    '<span class="tt-mini-col">' + (schedule()[i] || []).slice(0, 6).map(name => {
       if (!name) return '<span class="tt-mini-cell is-free"></span>';
       const sub = subjectForLesson(name);
       return '<span class="tt-mini-cell" style="--sc:' + (sub ? sub.color : 'var(--ink-3)') + '"></span>';
@@ -2778,8 +2869,9 @@ function dayTabs() {
   // The rest of the week, starting from the day after tomorrow and wrapping,
   // so the two the drawing shows are the two that come next.
   const rest = [];
-  for (let n = 1; n <= SCHOOL_DAYS.length; n++) {
-    const i = ((tomorrow < 0 ? 0 : tomorrow) + n) % SCHOOL_DAYS.length;
+  const week = schoolDays();
+  for (let n = 1; n <= week.length; n++) {
+    const i = ((tomorrow < 0 ? 0 : tomorrow) + n) % week.length;
     if (i === today || i === tomorrow) continue;
     rest.push({ key: String(i), label: dayName(i), short: dayShort(i), day: i });
   }
@@ -2900,7 +2992,7 @@ function drawRemSheet() {
   if (!remDraft) return;
 
   $('#rem-sheet-days').innerHTML = `
-    ${SCHOOL_DAYS.map((d, i) => `
+    ${schoolDays().map((d, i) => `
       <button class="p-chip ${remDraft.day === i ? 'is-on' : ''}" data-remday="${i}">${esc(dayShort(i))}</button>`).join('')}
     <button class="p-chip ${remDraft.day === null ? 'is-on' : ''}" data-remday="all">${tr('rem.everyDay')}</button>`;
 
@@ -3033,12 +3125,7 @@ function wireBoard() {
 function takeDown(id) {
   const i = state.notes.findIndex(n => n.id === id);
   if (i < 0) return;
-  // One tap is quick and undoable, which is the bargain the board makes. For
-  // anyone who would rather be asked, the question goes in the way instead.
-  if (state.settings.askBeforeRemove) {
-    const note = state.notes[i];
-    if (!confirm(tr('set.remove') + '\n\n' + note.text)) return;
-  }
+  // One tap is quick and undoable, which is the bargain the board makes.
   const [gone] = state.notes.splice(i, 1);
   save();
   renderReminders();
@@ -3089,7 +3176,7 @@ function saveReminder() {
 
 function renderTimetable() {
   const today = schoolDayIndex();
-  const lastUsed = SCHEDULE.reduce((m, row) => {
+  const lastUsed = schedule().reduce((m, row) => {
     for (let i = row.length - 1; i >= 0; i--) if (row[i]) return Math.max(m, i);
     return m;
   }, 0);
@@ -3100,7 +3187,7 @@ function renderTimetable() {
         <thead>
           <tr>
             <th class="tt-corner"></th>
-            ${SCHOOL_DAYS.map((d, i) => `
+            ${schoolDays().map((d, i) => `
               <th class="${i === today ? 'is-today' : ''}">
                 <span class="tt-day">${esc(dayShort(d.js))}</span>
                 <span class="tt-day-he">${esc(lang === 'he' ? d.en : d.he)}</span>
@@ -3108,11 +3195,11 @@ function renderTimetable() {
           </tr>
         </thead>
         <tbody>
-          ${PERIODS.slice(0, lastUsed + 1).map((time, p) => `
+          ${periods().slice(0, lastUsed + 1).map((time, p) => `
             <tr>
               <th class="tt-time"><span class="tt-num">${p + 1}</span><span>${esc(time)}</span></th>
-              ${SCHOOL_DAYS.map((d, i) => {
-                const name = SCHEDULE[i][p];
+              ${schoolDays().map((d, i) => {
+                const name = (schedule()[i] || [])[p];
                 if (!name) return `<td class="tt-free ${i === today ? 'is-today' : ''}"></td>`;
                 const sub = subjectForLesson(name);
                 return `<td class="${i === today ? 'is-today' : ''}"
@@ -3126,8 +3213,6 @@ function renderTimetable() {
       </table>
     </div>`;
 }
-
-
 
 
 function openTimetable() {
@@ -3198,19 +3283,38 @@ function doneRow(hw, sub, showSubject = true) {
    and are now the whole of their own page. */
 function renderCreatures() {
   renderCompanionBanner();
+  renderBookCover();
   renderCollection();
 }
 
+/* The book sits on the creatures page now rather than on the profile, which
+   is where everything about the creatures should have been all along. Its
+   cover carries the count and the last three faces you found. */
+function renderBookCover() {
+  const found = collectedMonsters();
+  const cover = $('#book-count');
+  if (cover) {
+    cover.textContent = found.length >= MONSTER_COUNT
+      ? tr('book.allFoundOf', { n: MONSTER_COUNT })
+      : tr('book.countFound', { have: found.length, all: MONSTER_COUNT });
+  }
+  const peek = $('#book-peek');
+  if (peek) {
+    peek.innerHTML = found.slice(-3).map(x =>
+      `<span class="bc-peek" style="--mc:${x.colour}">${monsterPic(x)}</span>`).join('');
+  }
+}
 /* ── Who you are, at the top of the profile ────────────────
    The companion is the face of it. There is no name to show — the app never
    asked for one — so the heading is the level, which is the thing the app
    does actually know about you and the thing that goes up. */
-
 function renderProfileTop() {
   const m = companionMonster();
   const found = collectedMonsters();
   const done = state.homework.filter(h => h.completed).length;
 
+  const into = state.progress.xp % XP_PER_LEVEL;
+  const allFound = found.length >= MONSTER_COUNT;
   const you = $('#pro-you');
   if (you) {
     you.innerHTML = `
@@ -3221,6 +3325,10 @@ function renderProfileTop() {
         ${m ? '<span class="pro-badge"><svg class="ico" aria-hidden="true"><use href="#i-leaf" /></svg></span>' : ''}
       </span>
       <h2 class="pro-name">${esc(tr('lvl.level', { n: levelFor(state.progress.xp) }))}</h2>
+      <div class="pro-bar">
+        <div class="bar"><div class="bar-fill" style="width:${allFound ? 100 : (into / XP_PER_LEVEL) * 100}%"></div></div>
+        <span>${esc(allFound ? tr('book.allFifty') : tr('lvl.untilEgg', { n: XP_PER_LEVEL - into }))}</span>
+      </div>
       <p class="pro-role">${esc(m ? tr('book.withYou', { name: m.name }) : tr('set.firstCreature'))}</p>
       ${m ? `<span class="pro-pill">${esc(tr('cmp.pillTag', { name: m.name }))}</span>` : ''}`;
   }
@@ -3265,72 +3373,203 @@ function renderProfileTop() {
     }
   }
 
-  /* The book itself moved here from the creatures page, which is now the
-     collection. Its cover carries the count and the last three faces. */
-  const cover = $('#book-count');
-  if (cover) {
-    cover.textContent = found.length >= MONSTER_COUNT
-      ? tr('book.allFoundOf', { n: MONSTER_COUNT })
-      : tr('book.countFound', { have: found.length, all: MONSTER_COUNT });
-  }
-  const peek = $('#book-peek');
-  if (peek) {
-    peek.innerHTML = found.slice(-3).map(x =>
-      `<span class="bc-peek" style="--mc:${x.colour}">${monsterPic(x)}</span>`).join('');
-  }
 }
-
-function renderProfile() {
-  renderProfileTop();
-
-  const { xp } = state.progress;
-  const level = levelFor(xp);
-  const into = xp % XP_PER_LEVEL;
-  const doneCount = state.homework.filter(h => h.completed).length;
-
-  const found = collectedMonsters();
-  const here = found[found.length - 1] || null;
-  const allFound = found.length >= MONSTER_COUNT;
-
-  $('#level-card').innerHTML = `
-    <span class="level-pic" aria-hidden="true">
-      <img src="art/set/sprout.webp" alt="" width="300" height="266" decoding="async" />
-    </span>
-    <div class="level-main">
-    <div class="level-top">
-      <span class="level-name">${tr('lvl.level', { n: level })}</span>
-      <span class="level-xp">${allFound ? tr('book.allFound') : tr('lvl.xp', { into, of: XP_PER_LEVEL })}</span>
-    </div>
-    <div class="bar"><div class="bar-fill" style="width:${allFound ? 100 : (into / XP_PER_LEVEL) * 100}%"></div></div>
-    <p class="level-chapter">${here ? tr('book.withYou', { name: esc(here.name) }) : tr('set.firstCreature')}</p>
-    ${allFound || xp > 0
-      ? `<p class="level-note">${allFound ? tr('book.allFifty')
-          : tr('lvl.untilEgg', { n: XP_PER_LEVEL - into })}</p>` : ''}
-    </div>`;
-
-  // History, newest first, grouped by the day it was finished.
+/* ── Appearance ────────────────────────────────────────────
+   Light, dark, or whatever the phone says. The stylesheet carries two full
+   palettes and gates them on data-theme, so all this has to do is say which
+   — and say nothing at all when the answer is "ask the phone". */
+const THEMES = ['system', 'light', 'dark'];
+function applyTheme() {
+  const root = document.documentElement;
+  const pick = state.settings.theme;
+  if (pick === 'light' || pick === 'dark') root.setAttribute('data-theme', pick);
+  else root.removeAttribute('data-theme');
+}
+function renderThemePick() {
+  const box = $('#theme-pick');
+  if (!box) return;
+  const on = state.settings.theme || 'system';
+  box.innerHTML = THEMES.map(k => `
+    <button class="p-chip ${k === on ? 'is-on' : ''}" data-theme-pick="${k}"
+            aria-pressed="${k === on}">${esc(tr('theme.' + k))}</button>`).join('');
+}
+function setTheme(key) {
+  state.settings.theme = key === 'system' ? null : key;
+  save();
+  applyTheme();
+  syncTopColour();
+  renderThemePick();
+}
+/* ── Country ───────────────────────────────────────────────
+   Changing it changes the week, so everything that draws a week has to be
+   drawn again — and the bag, which is looked at by day, could be sitting on a
+   day the new week does not have. */
+function renderCountryPick() {
+  const box = $('#country-pick');
+  if (!box) return;
+  const on = country().key;
+  box.innerHTML = COUNTRIES.map(c => `
+    <button class="p-chip ${c.key === on ? 'is-on' : ''}" data-country="${c.key}"
+            aria-pressed="${c.key === on}">${esc(tr('country.' + c.key))}</button>`).join('');
+}
+function setCountry(key) {
+  if (!COUNTRIES.some(c => c.key === key)) return;
+  state.settings.country = key;
+  bagDay = Math.min(bagDay, schoolDays().length - 1);
+  save();
+  renderCountryPick();
+  render();
+}
+/* ── Everything you have finished ──────────────────────────
+   It used to be a list halfway down the Profile, which meant a term's work
+   pushed the settings off the bottom of the screen. It is a page of its own
+   now, behind one row, grouped by the day it was finished. */
+function renderDonePage() {
+  const box = $('#done-body');
+  if (!box) return;
   const done = state.homework
     .filter(h => h.completed && h.completedAt)
-    .sort((a, b) => b.completedAt - a.completedAt)
-    .slice(0, 60);
-
-  const box = $('#history-list');
+    .sort((a, b) => b.completedAt - a.completedAt);
   if (!done.length) {
-    box.innerHTML = `<p class="foot-note">${tr('hw.nothingFinished')}</p>`;
-  } else {
-    let html = '';
-    let lastDay = null;
-    for (const hw of done) {
-      const day = dayKey(new Date(hw.completedAt));
-      if (day !== lastDay) {
-        html += `<h3 class="day-title">${esc(dayHeading(hw.completedAt))}</h3>`;
-        lastDay = day;
-      }
-      html += doneRow(hw, subjectById(hw.subjectId));
-    }
-    box.innerHTML = html;
+    box.innerHTML = `<p class="foot-note is-big">${esc(tr('done.none'))}</p>`;
+    return;
   }
-
+  let html = `<p class="done-total">${esc(tr('done.count', { n: done.length }))}</p>`;
+  let lastDay = null;
+  for (const hw of done) {
+    const day = dayKey(new Date(hw.completedAt));
+    if (day !== lastDay) {
+      html += `<h3 class="day-title">${esc(dayHeading(hw.completedAt))}</h3>`;
+      lastDay = day;
+    }
+    html += doneRow(hw, subjectById(hw.subjectId));
+  }
+  box.innerHTML = html;
+}
+function openDonePage() {
+  const page = $('#done-page');
+  if (!page) return;
+  renderDonePage();
+  page.hidden = false;
+  page.classList.remove('is-leaving');
+  page.scrollTop = 0;
+}
+function closeDonePage() {
+  const page = $('#done-page');
+  if (!page || page.hidden) return;
+  page.classList.add('is-leaving');
+  setTimeout(() => { page.hidden = true; page.classList.remove('is-leaving'); }, 240);
+}
+/* ── Editing the week ──────────────────────────────────────
+   A copy is made when the editor opens and nothing is written to the store
+   until Save, so backing out leaves the week exactly as it was. The grid is
+   the same shape the timetable draws: one row per period, one column per
+   school day, and a cell is a lesson name or nothing at all.
+   Lesson names are typed rather than picked from a list, because the list of
+   subjects is built *from* the timetable — a subject cannot be offered before
+   the lesson that invents it exists. */
+let ttDraft = null;
+function renderTtEdit() {
+  const box = $('#tt-edit-body');
+  if (!box || !ttDraft) return;
+  const week = schoolDays();
+  box.innerHTML = `
+    <p class="tt-edit-note">${esc(tr('tt.editNote'))}</p>
+    <div class="tt-edit-scroll">
+      <table class="tt-edit-grid">
+        <thead>
+          <tr>
+            <th class="tt-edit-corner">${esc(tr('tt.time'))}</th>
+            ${week.map((d, i) => `<th>${esc(dayShort(i))}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${ttDraft.periods.map((time, p) => `
+            <tr>
+              <th class="tt-edit-time">
+                <input class="tt-edit-when" type="text" value="${esc(time)}"
+                       data-period="${p}" inputmode="text"
+                       aria-label="${esc(tr('tt.period', { n: p + 1 }))}" />
+              </th>
+              ${week.map((d, i) => `
+                <td>
+                  <input class="tt-edit-cell" type="text"
+                         value="${esc((ttDraft.schedule[i] || [])[p] || '')}"
+                         data-day="${i}" data-period="${p}"
+                         placeholder="${esc(tr('tt.free'))}"
+                         aria-label="${esc(dayShort(i))} ${esc(tr('tt.period', { n: p + 1 }))}" />
+                </td>`).join('')}
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="tt-edit-actions">
+      <button id="tt-add-period" class="btn-second">${esc(tr('tt.addPeriod'))}</button>
+      <button id="tt-drop-period" class="btn-second"
+              ${ttDraft.periods.length <= 1 ? 'disabled' : ''}>${esc(tr('tt.removePeriod'))}</button>
+    </div>
+    <button id="tt-reset" class="btn-ghost tt-reset">${esc(tr('tt.reset'))}</button>`;
+}
+/** Every row as wide as the week, so a new country cannot leave a hole. */
+function squareUp(draft) {
+  const wide = schoolDays().length;
+  const tall = draft.periods.length;
+  for (let i = 0; i < wide; i++) {
+    const row = draft.schedule[i] || (draft.schedule[i] = []);
+    while (row.length < tall) row.push(null);
+    row.length = tall;
+  }
+  draft.schedule.length = wide;
+  return draft;
+}
+function openTtEdit() {
+  ttDraft = squareUp(weekCopy());
+  const page = $('#tt-edit');
+  page.hidden = false;
+  page.classList.remove('is-leaving');
+  renderTtEdit();
+  page.scrollTop = 0;
+}
+function closeTtEdit() {
+  const page = $('#tt-edit');
+  if (!page || page.hidden) return;
+  page.classList.add('is-leaving');
+  setTimeout(() => {
+    page.hidden = true;
+    page.classList.remove('is-leaving');
+    ttDraft = null;
+  }, 240);
+}
+function saveTtEdit() {
+  if (!ttDraft) return;
+  if (!ttDraft.periods.length) { showToast(tr('tt.tooFew')); return; }
+  // A period with no time still needs one, or the timetable has a blank row.
+  ttDraft.periods = ttDraft.periods.map((t, i) => String(t).trim() || tr('tt.period', { n: i + 1 }));
+  state.timetable = squareUp(ttDraft);
+  ttDraft = null;
+  save();
+  closeTtEdit();
+  render();
+  showToast(tr('tt.saved'));
+}
+function resetTtEdit() {
+  ttDraft = squareUp({
+    periods: PROFILE.periods.slice(),
+    schedule: PROFILE.schedule.map(r => r.slice()),
+  });
+  renderTtEdit();
+}
+function renderProfile() {
+  renderProfileTop();
+  // Everything you have finished is a page of its own now; this row only has
+  // to say how much of it there is.
+  const doneCount = state.homework.filter(h => h.completed).length;
+  const doneNote = $('#done-count');
+  if (doneNote) {
+    doneNote.textContent = doneCount ? tr('done.count', { n: doneCount }) : tr('pro.doneNote');
+  }
+  renderCountryPick();
+  renderThemePick();
   const avail = reminderAvailability();
   const blocked = $('#reminder-blocked');
   if (blocked) {
@@ -3339,15 +3578,20 @@ function renderProfile() {
       : `<strong>${esc(avail.why)}</strong><span>${esc(avail.how)}</span>`;
   }
   $('#reminder-card').classList.toggle('is-unavailable', !avail.ok);
-  $('#reminder-toggle').disabled = !avail.ok;
-  $('#bag-toggle').disabled = !avail.ok;
-
-  $('#reminder-toggle').checked = state.settings.dailyReminderEnabled;
-  $('#reminder-time').value = state.settings.dailyReminderTime;
-  $('#reminder-time-row').hidden = !state.settings.dailyReminderEnabled;
-  $('#bag-toggle').checked = state.settings.bagReminderEnabled;
-  $('#bag-time').value = state.settings.bagReminderTime;
-  $('#bag-time-row').hidden = !state.settings.bagReminderEnabled;
+  /* Three switches, three times, all the same shape. */
+  const REMINDERS = [
+    ['#reminder-toggle', '#reminder-time', '#reminder-time-row', 'dailyReminderEnabled', 'dailyReminderTime'],
+    ['#bag-toggle', '#bag-time', '#bag-time-row', 'bagReminderEnabled', 'bagReminderTime'],
+    ['#finish-toggle', '#finish-time', '#finish-time-row', 'finishReminderEnabled', 'finishReminderTime'],
+  ];
+  for (const [sw, time, row, onKey, atKey] of REMINDERS) {
+    const box = $(sw);
+    if (!box) continue;
+    box.disabled = !avail.ok;
+    box.checked = state.settings[onKey];
+    $(time).value = state.settings[atKey];
+    $(row).hidden = !state.settings[onKey];
+  }
   $('#reminder-note').textContent = reminderNote();
 }
 
@@ -3912,12 +4156,12 @@ function syncFab() {
    the screen being part of the page and being a strip above it. */
 const TOP_PAPER = '#F4EEE1';
 const TOP_WALL  = '#F0E3D6';   // measured off the top of art/wall.jpg
-const TOP_NIGHT = '#13171C';
+const TOP_NIGHT = '#191512';   // only a fallback; the palette is asked first
 
-/* The colour the browser paints around the clock. A desk that has been chosen
-   outranks what the phone is set to — picking Night on a phone in daylight
-   has to darken the top of the screen too, or the app sits in a bright frame. */
-const TOP_DESK = { sage: '#EDEFE3', sky: '#E9EEF4' };
+/* The colour the browser paints around the clock. An appearance that has
+   been chosen outranks what the phone is set to — picking Dark on a phone in
+   daylight has to darken the top of the screen too, or the app sits in a
+   bright frame. */
 
 function syncTopColour() {
   const meta = $('#top-colour');
@@ -3925,9 +4169,16 @@ function syncTopColour() {
   const asked = document.documentElement.getAttribute('data-theme');
   const dark = asked ? asked === 'dark'
                      : matchMedia('(prefers-color-scheme: dark)').matches;
-  if (dark) { meta.setAttribute('content', TOP_NIGHT); return; }
+  // Read off the palette rather than written down twice: the dark ground was
+  // changed once and this was still telling the phone the old colour.
+  if (dark) {
+    const paper = getComputedStyle(document.documentElement)
+      .getPropertyValue('--paper').trim();
+    meta.setAttribute('content', paper || TOP_NIGHT);
+    return;
+  }
   if (currentTab === 'reminders') { meta.setAttribute('content', TOP_WALL); return; }
-  meta.setAttribute('content', TOP_DESK[state.settings.desk] || TOP_PAPER);
+  meta.setAttribute('content', TOP_PAPER);
 }
 
 function showTab(tab) {
@@ -3982,12 +4233,12 @@ function openHwSheet({ id = null, subjectId = null } = {}) {
   draft = {
     id,
     subjectId: editing ? editing.subjectId
-      : (subjectId || state.lastSubjectId || SUBJECTS[0].id),
+      : (subjectId || state.lastSubjectId || (subjects()[0] || {}).id || ''),
     title: editing ? editing.title : '',
     note: editing ? (editing.note || '') : '',
     dueDate: editing ? editing.dueDate : null,
   };
-  if (!subjectById(draft.subjectId)) draft.subjectId = SUBJECTS[0].id;
+  if (!subjectById(draft.subjectId)) draft.subjectId = (subjects()[0] || {}).id || '';
 
   $('#hw-delete').hidden = !editing;
   const input = $('#hw-title');
@@ -4350,8 +4601,8 @@ function scheduleOne(key, enabledKey, timeKey, fire) {
 function scheduleReminder() {
   scheduleOne('daily', 'dailyReminderEnabled', 'dailyReminderTime', fireHomeworkReminder);
   scheduleOne('bag', 'bagReminderEnabled', 'bagReminderTime', fireBagReminder);
+  scheduleOne('finish', 'finishReminderEnabled', 'finishReminderTime', fireFinishReminder);
 }
-
 async function notify(title, body) {
   const opts = { body, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: title };
   try {
@@ -4366,9 +4617,18 @@ async function notify(title, body) {
 function fireHomeworkReminder() {
   const left = activeHw().length;
   notify(tr('notif.anyHomework'),
-    left ? `You have ${left} left. Anything new today?` : 'Add today’s homework while it’s fresh.');
+    left ? tr('notif.anyBody', { n: left }) : tr('notif.anyBodyNone'));
 }
-
+/* The one that only goes out when there is something to go out about. It is
+   armed on a timer like the other two, but it checks at the moment it fires:
+   a reminder to finish what you have already finished is worse than no
+   reminder, and whether you have finished it is only knowable now. The timer
+   re-arms either way, so tomorrow still gets its chance. */
+function fireFinishReminder() {
+  const left = activeHw().length;
+  if (!left) return;
+  notify(tr('notif.finish'), tr('notif.finishBody', { n: left }));
+}
 /** The next day that actually has school, skipping the weekend. */
 function nextSchoolDay() {
   for (let i = 1; i <= 7; i++) {
@@ -4384,7 +4644,7 @@ function nextSchoolDay() {
 function fireBagReminder() {
   const idx = nextSchoolDay();
   if (idx < 0) return;
-  const day = SCHOOL_DAYS[idx];
+  const day = schoolDays()[idx];
   const lessons = lessonsFor(idx).map(l => l.name);
   const notes = state.notes.filter(n => n.day === null || n.day === idx).map(n => n.text);
 
@@ -4502,29 +4762,59 @@ function wireApp() {
     if (btn) showPane(btn.dataset.pane);
   });
 
-  on('#start-pick', 'click', (e) => {
-    const btn = e.target.closest('[data-start]');
-    if (!btn) return;
-    state.settings.startOn = btn.dataset.start;
-    save();
-    renderStartPick();
-  });
-
-  on('#ask-toggle', 'change', (e) => {
-    state.settings.askBeforeRemove = e.target.checked;
-    save();
-  });
-
   on('#lang-pick', 'click', (e) => {
     const btn = e.target.closest('[data-lang]');
     if (btn) setLang(btn.dataset.lang);
   });
 
-  on('#desk-pick', 'click', (e) => {
-    const btn = e.target.closest('[data-desk]');
-    if (btn) setDesk(btn.dataset.desk);
+  on('#theme-pick', 'click', (e) => {
+    const btn = e.target.closest('[data-theme-pick]');
+    if (btn) setTheme(btn.dataset.themePick);
   });
-
+  on('#country-pick', 'click', (e) => {
+    const btn = e.target.closest('[data-country]');
+    if (btn) setCountry(btn.dataset.country);
+  });
+  on('#finish-toggle', 'change', (e) => toggleReminder('finishReminderEnabled', e.target.checked));
+  on('#finish-time', 'change', (e) => {
+    state.settings.finishReminderTime = e.target.value || '18:00';
+    save();
+    scheduleReminder();
+  });
+  /* Everything you have finished, behind one row. */
+  on('#done-open', 'click', openDonePage);
+  on('#done-back', 'click', closeDonePage);
+  /* The week, editable. The grid is redrawn on every structural change but
+     not on every keystroke: typing into a cell writes straight into the
+     draft, so the field keeps the caret and nothing flickers. */
+  on('#tt-edit-open', 'click', openTtEdit);
+  on('#tt-edit-cancel', 'click', closeTtEdit);
+  on('#tt-edit-save', 'click', saveTtEdit);
+  on('#tt-edit-body', 'input', (e) => {
+    if (!ttDraft) return;
+    const cell = e.target.closest('.tt-edit-cell');
+    if (cell) {
+      const day = +cell.dataset.day, p = +cell.dataset.period;
+      (ttDraft.schedule[day] || (ttDraft.schedule[day] = []))[p] = cell.value.trim() || null;
+      return;
+    }
+    const when = e.target.closest('.tt-edit-when');
+    if (when) ttDraft.periods[+when.dataset.period] = when.value;
+  });
+  on('#tt-edit-body', 'click', (e) => {
+    if (!ttDraft) return;
+    if (e.target.closest('#tt-add-period')) {
+      ttDraft.periods.push('');
+      renderTtEdit();
+      return;
+    }
+    if (e.target.closest('#tt-drop-period')) {
+      if (ttDraft.periods.length > 1) ttDraft.periods.pop();
+      renderTtEdit();
+      return;
+    }
+    if (e.target.closest('#tt-reset') && confirm(tr('tt.resetAsk'))) resetTtEdit();
+  });
   on('#about-open', 'click', () => { renderAbout(); showSheet('#sheet-about'); });
   on('#about-done', 'click', closeSheet);
 
@@ -4699,15 +4989,13 @@ function boot() {
   wireArtFallback();
   load();
   saveLocal();      // write the migrated shape back, without bumping the sync clock
-  applyDesk();      // the colour of the place, before it is painted once
+  applyTheme();     // the colour of the place, before it is painted once
   applyLang();      // before anything is drawn, so nothing is drawn twice
   wireApp();
 
   $('#main').hidden = false;
   // The page asked for, unless something else is being opened on purpose.
-  showTab(START_PAGES.some(p => p.key === state.settings.startOn)
-    ? state.settings.startOn : 'home');
-
+  showTab('home');
   scheduleReminder();
 
   // Opened from the notification or the home-screen shortcut.
