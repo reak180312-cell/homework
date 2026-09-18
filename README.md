@@ -700,33 +700,77 @@ skip straight to the grid.
 Recognising the words is the easy half and not the useful half. An OCR engine hands back text in
 reading order, and a timetable read in reading order is a heap of lesson names with no idea which
 day or which period any of them belongs to. What makes it a timetable again is *where* each word
-was on the page, so everything after the engine works on the boxes and not the text: words whose
-middles share a horizontal band are a row; the runs of page no word covers, wider than a space,
-are the gutters between columns; a column where most cells look like a time is the periods rather
-than a day.
+was on the page, so everything after the engine works on the boxes rather than the text.
 
-The day names are found before the columns are, and that ordering matters twice. A row holding two
-or more of them is the heading, and everything above it — a title, a school name, a date — is
-dropped, which stops a wide heading like *Class 10B — Timetable* from bridging the gap between two
-columns and gluing them into one. And because each column is then known **by the name written over
-it** rather than by where it sits, a Hebrew timetable that runs right to left comes out the right
-way round: if the rightmost column says ראשון it is Sunday, wherever it is on the page.
+The first version of this got a clean printed English grid right and a real photograph almost
+entirely wrong, and the ways it was wrong are worth writing down, because none of them were
+obvious and all of them were found by building a test photograph that looked like an actual
+Israeli timetable — Hebrew, right to left, colour-coded, a teacher's name under every lesson, a
+title across the top, photographed at an angle in room light and squeezed through the same JPEG
+the camera roll gets.
 
-Two things had to be measured rather than assumed. Handed the photo as saved, the engine read
-`ime nen we ate` — a printed timetable photographed at 1600px has letters about fifteen pixels
-tall and the engine wants roughly twice that, and a cream page has most of its contrast in a
-channel the engine throws away. Doubling the size, converting to grey and pulling the contrast
-apart turns that into `Time Sun Mon Tue Wed Thu`, every word above 40% confidence, in under a
-second — and it still reads the grid correctly with the photo tilted five degrees. The page is then
-read twice over if it needs to be: segmentation mode 6 treats the page as one block of text and
-gets a ruled grid; mode 11 looks for sparse text anywhere and picks up a grid whose cells are far
-apart. Whichever produces a week first wins.
+*Rows are not lines.* Schools print the teacher, and often the room, under the lesson in smaller
+type. That is one row of the table and two lines of text, and read as two rows it doubles the week
+so that every period after the first is out by one — six periods came back as twelve. The obvious
+test, *is this line set smaller than the one above it*, does not survive Hebrew: a line of five
+words measures whatever its tallest ל and lowest ק happen to be, so a lesson line and a teacher
+line can measure exactly the same. What does survive is the spacing. Small print sits on the very
+next line; a new row starts after a cell border and some padding. On the test page those came out
+at about 38 pixels and about 71, so the gaps are compared with each other rather than against any
+fixed number — where they fall into a close group and a far group, the close ones are inside a
+row, and where they are all much of a muchness there is no small print to fold in.
 
-**It returns nothing rather than a guess.** Fewer than three filled cells, no columns, no rows that
-look like a table — it says it could not find a grid and leaves you the empty one. A timetable that
-came out wrong in a way nobody notices is worse than one that admits it could not be read: the
-first quietly packs the wrong bag every morning. And what it does read lands on the *Is this right?*
-screen, not in the saved week, so every cell is one tap from being corrected.
+*The engine already knew.* Working out which words share a line is the hard part, and Tesseract has
+already done it properly — it deskews, it knows about baselines — and hands back its own grouping.
+The first version threw that away and re-derived it by clustering boxes. It now uses the lines it
+is given and only clusters by hand when it is given none.
+
+*A title is not a period.* Set across the middle of the page, it is wide enough to bridge the
+gutters between two or three columns and glue them into one, and close enough to the table to be
+taken for its first row. A row of the table reaches across most of the page and a title does not,
+so anything at the top falling short of the width the real rows share is dropped.
+
+*The lesson is not the teacher.* The words folded in from the line below are marked as they are
+folded, so the cell can print the lesson and leave "Cohen 204" behind — which matters because a
+subject called *Maths Cohen 204* matches nothing on any other day and gets its own colour, its own
+bag and its own tile.
+
+*Which column is Sunday.* Where the heading row reads, each column is known by the name written
+over it, so a right-to-left timetable comes out the right way round wherever its columns sit. Where
+the heading does not read — grey background, small bold type, the first thing a photograph loses —
+the page's own language decides: a mostly-Hebrew timetable is filled from the right. Without that,
+Thursday's lessons quietly become Sunday's.
+
+*Which column is the clock.* The time column is whichever holds the most times, not one that holds
+enough of them, because on a six-period grid the engine may come back with two. Getting this wrong
+costs a whole day: the times become Sunday and every day after shifts along one.
+
+Two things about the image itself had to be measured rather than assumed. Handed the photo as
+saved, the engine read `ime nen we ate` — a printed timetable photographed at 1600px has letters
+about fifteen pixels tall and the engine wants roughly twice that, and a cream page has most of its
+contrast in a channel the engine throws away. Doubling the size, converting to grey and pulling the
+contrast apart turns that into `Time Sun Mon Tue Wed Thu`, every word above 40% confidence, in
+under a second. And one preparation is not enough: a page lit evenly wants its contrast stretched
+about the middle, while a page held in one hand under a ceiling light is brighter at one corner
+than the other, where a single threshold blows out the bright end and fills in the dark one.
+Comparing each pixel against the average of the patch around it keeps the ink and drops the shadow.
+Two preparations and two segmentation modes make four passes; the most convincing reading wins, and
+a grid that comes back full stops the other three, because chasing a period label through three
+more passes is half a minute of somebody's morning.
+
+**It returns nothing rather than a guess**, and this is the part that earns its keep. A photograph
+taken at an angle does not fail cleanly — the columns stop being vertical, the gutters between them
+smear and close up, and what comes out is not an empty result but a confident one: twenty-nine
+periods, four empty days and one column holding every word on the page. Handing that back would be
+the worst thing this could do, because it looks like an answer. So a reading has to look like a
+week before it is offered: a handful of periods rather than thirty, lessons on most of the days
+rather than two, days of roughly equal length, and cells that read as names or times rather than as
+cell borders and tick marks. On the test photographs the flat one reads every lesson onto the right
+day; the angled one and the badly skewed one say they could not find a grid and leave the empty one
+for you. A timetable that came out wrong in a way nobody notices is worse than one that admits it
+could not be read: the first quietly packs the wrong bag every morning. And what it does read lands
+on the *Is this right?* screen, not in the saved week, so every cell is one tap from being
+corrected.
 
 The engine is fetched only when the button is pressed — several megabytes that most people will
 never need, so nobody downloads it on the off-chance. That means the first read needs a connection,

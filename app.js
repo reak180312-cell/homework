@@ -3892,15 +3892,55 @@ function loadOcr() {
 
 /* Handed the photo as it was saved, the engine reads gibberish: a printed
    timetable photographed at sixteen hundred pixels has letters about fifteen
-   pixels tall, and the engine wants roughly twice that. It also reads in
-   grey, so the colour is only in the way — and on a cream page with black
-   ink, throwing the colour away and pulling the contrast apart is the whole
+   pixels tall, and the engine wants roughly twice that. It also reads in grey,
+   so the colour is only in the way — and on a cream page with black ink,
+   throwing the colour away and pulling the contrast apart is the whole
    difference between "ime nen we ate" and "Time Sun Mon Tue Wed Thu". Both
-   were measured; neither was guessed. */
+   were measured; neither was guessed.
+
+   There are two ways of finishing, because photographs differ. Stretching the
+   contrast about the middle suits a page that was lit evenly. A page held in
+   one hand under a ceiling light is brighter at one corner than the other, and
+   a single threshold for the whole of it then blows out the bright end and
+   fills in the dark end; comparing each pixel against the average of the patch
+   around it instead keeps the ink and drops the shadow. Neither wins every
+   time, so both are tried and the better reading is kept. */
 const OCR_EDGE = 3200;
 const OCR_CONTRAST = 1.8;
+const OCR_INK = 10;
 
-function prepPhoto(img) {
+/* The mean of the patch around every pixel, by two sliding windows — one
+   across and one down. A summed-area table would do the same job, but it wants
+   eight bytes a pixel and this wants one, which on a phone holding a whole OCR
+   engine in memory is the difference worth having. */
+function boxMean(grey, w, h, r) {
+  const across = new Uint8ClampedArray(w * h);
+  for (let y = 0; y < h; y++) {
+    const row = y * w;
+    let sum = 0, n = 0;
+    for (let x = 0; x <= Math.min(r, w - 1); x++) { sum += grey[row + x]; n++; }
+    for (let x = 0; x < w; x++) {
+      across[row + x] = sum / n;
+      const drop = x - r, add = x + r + 1;
+      if (drop >= 0) { sum -= grey[row + drop]; n--; }
+      if (add < w) { sum += grey[row + add]; n++; }
+    }
+  }
+  const down = new Uint8ClampedArray(w * h);
+  for (let x = 0; x < w; x++) {
+    let sum = 0, n = 0;
+    for (let y = 0; y <= Math.min(r, h - 1); y++) { sum += across[y * w + x]; n++; }
+    for (let y = 0; y < h; y++) {
+      down[y * w + x] = sum / n;
+      const drop = y - r, add = y + r + 1;
+      if (drop >= 0) { sum -= across[drop * w + x]; n--; }
+      if (add < h) { sum += across[add * w + x]; n++; }
+    }
+  }
+  return down;
+}
+
+function prepPhoto(img, how) {
   const scale = Math.min(2, OCR_EDGE / Math.max(img.width, img.height));
   const c = document.createElement('canvas');
   c.width = Math.round(img.width * scale);
@@ -3911,10 +3951,21 @@ function prepPhoto(img) {
 
   const frame = x.getImageData(0, 0, c.width, c.height);
   const px = frame.data;
-  for (let i = 0; i < px.length; i += 4) {
-    const grey = px[i] * 0.299 + px[i + 1] * 0.587 + px[i + 2] * 0.114;
-    const v = (grey - 128) * OCR_CONTRAST + 128;
-    px[i] = px[i + 1] = px[i + 2] = v < 0 ? 0 : v > 255 ? 255 : v;
+  const grey = new Uint8ClampedArray(c.width * c.height);
+  for (let i = 0, q = 0; i < px.length; i += 4, q++) {
+    grey[q] = px[i] * 0.299 + px[i + 1] * 0.587 + px[i + 2] * 0.114;
+  }
+
+  if (how === 'ink') {
+    const mean = boxMean(grey, c.width, c.height, Math.max(8, Math.round(c.width / 40)));
+    for (let q = 0, at = 0; q < grey.length; q++, at += 4) {
+      px[at] = px[at + 1] = px[at + 2] = grey[q] < mean[q] - OCR_INK ? 0 : 255;
+    }
+  } else {
+    for (let q = 0, at = 0; q < grey.length; q++, at += 4) {
+      const v = (grey[q] - 128) * OCR_CONTRAST + 128;
+      px[at] = px[at + 1] = px[at + 2] = v < 0 ? 0 : v > 255 ? 255 : v;
+    }
   }
   x.putImageData(frame, 0, 0);
   // PNG, not JPEG: a second round of block artefacts on text already read
@@ -3947,36 +3998,55 @@ async function getOcrWorker(onProgress) {
   return ocrWorker;
 }
 
-/** Every word the engine found, with the box it found it in. */
+/**
+ * Every word the engine found, with the box it found it in — and, kept
+ * separately, the engine's own grouping of those words into lines.
+ *
+ * That grouping is worth having. Working out which words share a line of a
+ * photographed table is the hard part, the engine has already done it properly
+ * (it deskews, it knows about baselines), and rediscovering it by clustering
+ * the boxes afterwards is both extra work and worse. It is kept apart from the
+ * flat list rather than replacing it, because a photo the engine makes nothing
+ * of still has words in it worth clustering by hand.
+ */
 async function wordsInPhoto(url, mode, onProgress) {
   const worker = await getOcrWorker(onProgress);
   await worker.setParameters({ tessedit_pageseg_mode: String(mode) });
   const { data } = await worker.recognize(url);
   onProgress(1);
 
-  // v5 hands back a tree and a flat list; take whichever has anything in it.
-  const out = [];
-  const eat = (w) => {
+  const keep = (w) => {
     const text = (w.text || '').trim();
-    if (!text || (w.confidence != null && w.confidence < 40)) return;
+    if (!text || (w.confidence != null && w.confidence < 40)) return null;
     const b = w.bbox || {};
-    if (b.x1 - b.x0 <= 0 || b.y1 - b.y0 <= 0) return;
-    out.push({ text, x0: b.x0, y0: b.y0, x1: b.x1, y1: b.y1 });
+    if (b.x1 - b.x0 <= 0 || b.y1 - b.y0 <= 0) return null;
+    return { text, x0: b.x0, y0: b.y0, x1: b.x1, y1: b.y1 };
   };
-  if (Array.isArray(data.words) && data.words.length) data.words.forEach(eat);
-  else {
-    for (const block of data.blocks || []) {
-      for (const para of block.paragraphs || []) {
-        for (const line of para.lines || []) (line.words || []).forEach(eat);
+
+  const lines = [];
+  for (const block of data.blocks || []) {
+    for (const para of block.paragraphs || []) {
+      for (const line of para.lines || []) {
+        const words = (line.words || []).map(keep).filter(Boolean);
+        if (words.length) lines.push(words);
       }
     }
   }
-  return out;
+  if (lines.length) {
+    // Down the page, whatever order the engine walked its blocks in.
+    lines.sort((a, b) => median(a.map(w => mid(w.y0, w.y1))) -
+                         median(b.map(w => mid(w.y0, w.y1))));
+    return { words: [].concat(...lines), lines };
+  }
+
+  // Older shapes hand back a flat list and no tree.
+  const words = (data.words || []).map(keep).filter(Boolean);
+  return { words, lines: null };
 }
 
 /* Words on the same line of a table share a horizontal band, and the bands
    are separated by whitespace. Sorting by the middle of each word and cutting
-   wherever the gap is bigger than a word is tall finds the rows without
+   wherever the gap is bigger than a word is tall finds the bands without
    needing to see the ruled lines — which in a photograph are often the first
    thing to go. */
 function bandRows(words) {
@@ -3993,6 +4063,105 @@ function bandRows(words) {
   }
   if (row.length) rows.push(row);
   return rows.filter(r => r.length);
+}
+
+/* But a band is not always a row, and this is the mistake that ruins a real
+   timetable. Schools write the teacher, and often the room, under the lesson in
+   smaller print: one row of the table, two lines of text. Read as two rows it
+   doubles the week, and every period after the first is out by one.
+
+   The obvious test — is this line set smaller than the one above? — does not
+   survive Hebrew, where a line of five words can measure the same as the line
+   under it because ל reaches up and ק reaches down and the median does not
+   care which. What does survive is the spacing. Small print sits on the very
+   next line; the next row starts after a cell border and some padding. Measured
+   on a real page those two come out around 38 pixels and around 71, and they
+   stay that far apart whatever the alphabet. So the gaps are compared with each
+   other: where they fall into a close group and a far group, the close ones are
+   inside a row. Where they are all much of a muchness there is no small print
+   to fold in, and nothing is merged. */
+function mergeSmallPrint(rows) {
+  const out = () => rows.map(r => r.slice());
+  if (rows.length < 4) return out();
+
+  const centre = rows.map(r => median(r.map(w => mid(w.y0, w.y1))));
+  const gaps = [];
+  for (let i = 1; i < centre.length; i++) gaps.push(centre[i] - centre[i - 1]);
+
+  const apart = median(gaps);
+  const close = apart * 0.7;
+  if (!gaps.some(g => g < close)) return out();
+
+  const merged = [rows[0].slice()];
+  for (let i = 1; i < rows.length; i++) {
+    if (gaps[i - 1] < close) {
+      /* Folded in, but marked. Knowing which words came from underneath is
+         what lets the cell print the lesson and not "Biology Cohen 204"
+         later on, without having to guess at type sizes a second time. */
+      merged[merged.length - 1].push(...rows[i].map(w => ({ ...w, small: true })));
+    } else {
+      merged.push(rows[i].slice());
+    }
+  }
+  return merged;
+}
+
+/* A title is not a row either. It is set across the middle of the page, which
+   is the worst place for it: wide enough to bridge the gutters between two or
+   three columns and glue them into one, and close enough to the table to be
+   mistaken for its first period. A row of the table reaches across most of the
+   page. A title, a school name or the date it was issued does not, so anything
+   at the top that falls short of the width the real rows share is not the
+   table and goes. */
+function dropThePreamble(rows) {
+  if (rows.length < 3) return rows;
+  const reach = rows.map(r =>
+    Math.max(...r.map(w => w.x1)) - Math.min(...r.map(w => w.x0)));
+  const full = median(reach);
+  let from = 0;
+  while (from < rows.length - 2 && reach[from] < full * 0.6) from++;
+  return rows.slice(from);
+}
+/* Better than measuring whitespace, though: read the clock. The periods are
+   written down one side of every timetable, and where those times can be found
+   they say exactly where each row starts and stops — including that a lesson
+   and the teacher underneath it are one row, which no amount of measuring gaps
+   can be relied on to work out. */
+function rowAnchors(words, pageWidth) {
+  const times = words.filter(w => looksLikeTime(w.text));
+  if (times.length < 3) return null;
+
+  /* They have to stand in a column. Times scattered across the page are the
+     date it was printed, or a lesson that happens to contain a number. */
+  const xs = times.map(w => mid(w.x0, w.x1));
+  if (Math.max(...xs) - Math.min(...xs) > pageWidth * 0.2) return null;
+
+  const tall = median(words.map(w => w.y1 - w.y0)) || 10;
+  const ys = times.map(w => mid(w.y0, w.y1)).sort((a, b) => a - b);
+  // "08:00 – 08:45" is one period written twice, not two periods.
+  const at = [];
+  for (const y of ys) if (!at.length || y - at[at.length - 1] > tall * 1.2) at.push(y);
+  return at.length >= 3 ? at : null;
+}
+
+/** Every word filed under the period it sits beside. */
+function rowsAtAnchors(words, anchors) {
+  const edge = [];
+  for (let i = 1; i < anchors.length; i++) edge.push(mid(anchors[i - 1], anchors[i]));
+  // The heading stands above the first period by about the distance that
+  // separates one period from the next.
+  const ceiling = anchors[0] - (edge[0] - anchors[0]);
+
+  const rows = anchors.map(() => []);
+  const above = [];
+  for (const w of words) {
+    const y = mid(w.y0, w.y1);
+    if (y < ceiling) { above.push(w); continue; }
+    let at = 0;
+    while (at < edge.length && y > edge[at]) at++;
+    rows[at].push(w);
+  }
+  return { rows, above };
 }
 
 /* Columns are found by looking down the page rather than across it: mark
@@ -4027,6 +4196,58 @@ function median(list) {
   return v.length ? v[v.length >> 1] : 0;
 }
 
+/* What a cell actually says. Rarely one word: under the lesson there is
+   usually a teacher and sometimes a room, and taking the lot gives you a
+   subject called "Maths Cohen 204" which matches nothing on any other day and
+   so gets its own colour, its own bag and its own tile.
+
+   Those extra words were folded into this row when the rows were built, and
+   marked as they were folded, so here they are simply left out. Nothing has to
+   be inferred from how big they look — which in Hebrew tells you very little,
+   because a line of five words measures whatever its tallest ל and lowest ק
+   happen to be. Where a cell holds nothing but small print it is printed
+   anyway: better a teacher's name to correct than an empty box. */
+/** Any letter of the Hebrew block, which is what says a line reads rightwards. */
+const HAS_HEBREW = /[֐-׿]/;
+
+const HAS_LETTER = /\p{L}/u;
+
+function cellText(inCell) {
+  /* Cell borders, tick marks and the edge of the page come back as words made
+     of nothing but punctuation — a bar, a slash, a dash. They are not lessons,
+     and left in they turn an empty cell into a full one, which is how a badly
+     framed photograph ends up looking like a well-read week. */
+  const real = inCell.filter(w => HAS_LETTER.test(w.text) || /\d/.test(w.text));
+  if (!real.length) return '';
+  const main = real.filter(w => !w.small);
+  const use = main.length ? main : real;
+  const tall = median(use.map(w => w.y1 - w.y0)) || 10;
+
+  const lines = [];
+  for (const w of use.slice().sort((a, b) => mid(a.y0, a.y1) - mid(b.y0, b.y1))) {
+    const line = lines[lines.length - 1];
+    if (line && mid(w.y0, w.y1) - line.at <= tall * 0.7) line.words.push(w);
+    else lines.push({ at: mid(w.y0, w.y1), words: [w] });
+  }
+
+  const said = lines
+    .map((line) => {
+      /* Hebrew reads the other way, and the engine hands words back in the
+         order they sit on the page, left to right. */
+      const rtl = line.words.filter(w => HAS_HEBREW.test(w.text)).length * 2 >= line.words.length;
+      return line.words
+        .slice()
+        .sort((a, b) => (rtl ? b.x0 - a.x0 : a.x0 - b.x0))
+        .map(w => w.text)
+        .join(' ');
+    })
+    .join(' ')
+    .trim();
+
+  // Whatever is left has to read as a name or a time to be either.
+  return HAS_LETTER.test(said) || looksLikeTime(said) ? said : '';
+}
+
 /* Which day a heading names, if it names one. Matching by name rather than by
    position is what makes a right-to-left timetable come out right: if the
    rightmost column says ראשון it is Sunday, wherever it sits on the page. */
@@ -4049,7 +4270,14 @@ function dayFromHeading(text) {
   return -1;
 }
 
-const looksLikeTime = (t) => /\d{1,2}\s*[:.]\s*\d{2}/.test(t);
+const CLOCK = /\d{1,2}\s*[:.]\s*\d{2}/;
+const looksLikeTime = (t) => CLOCK.test(t);
+/* The cell says "08:00" or "08:00 ." or "08:00-08:45"; the period wants the
+   first of those. */
+const timeIn = (t) => {
+  const hit = CLOCK.exec(String(t));
+  return hit ? hit[0].replace(/\s+/g, '') : '';
+};
 
 /**
  * The words, turned back into a week.
@@ -4058,77 +4286,133 @@ const looksLikeTime = (t) => /\d{1,2}\s*[:.]\s*\d{2}/.test(t);
  * way nobody notices is worse than one that admits it could not be read: the
  * first quietly packs the wrong bag every morning.
  */
-function weekFromWords(words, pageWidth) {
+function weekFromWords(words, pageWidth, lines) {
   if (words.length < 8) return null;
 
-  const rows = bandRows(words);
-  if (rows.length < 2) return null;
+  /* Rows: the engine's lines where it gave any, and clustering the boxes by
+     hand where it did not. Either way the teacher printed under the lesson has
+     to be folded back into the row above, or the week comes out twice as long
+     as it is and every period after the first is out by one. */
+  let body = dropThePreamble(
+    mergeSmallPrint(lines && lines.length ? lines : bandRows(words)));
+  const above = [];
+  if (body.length < 2) return null;
 
-  /* The day names anchor the whole thing, and they can be found before the
-     columns are: a row holding two or more of them is the heading. Everything
-     above it is a title, a school crest or a date, and goes — which also stops
-     a wide heading like "Class 10B — Timetable" from bridging the gap between
-     two columns and gluing them into one. */
-  let headAt = -1;
-  for (let r = 0; r < Math.min(6, rows.length); r++) {
-    const named = new Set(rows[r].map(w => dayFromHeading(w.text)).filter(d => d >= 0));
-    if (named.size >= 2) { headAt = r; break; }
+  /* The day names say which column is which day, and everything printed above
+     them — a title, a school name, the date it was issued — is not the table.
+     Dropping it also stops a wide title from bridging the gap between two
+     columns and gluing them into one. */
+  let heading = null;
+  const names = (band) => new Set(band.map(w => dayFromHeading(w.text)).filter(d => d >= 0));
+  for (const band of bandRows(above).reverse()) {
+    if (names(band).size >= 2) { heading = band; break; }
+  }
+  if (!heading) {
+    /* No clock to go by, or the heading fell inside the first period's row.
+       Take the day names out of the band they are in, keep whatever else was
+       on that band, and drop the bands above it — with no clock to mark where
+       the table starts, those are the title and the date. */
+    for (let i = 0; i < Math.min(3, body.length); i++) {
+      if (names(body[i]).size < 2) continue;
+      heading = body[i].filter(w => dayFromHeading(w.text) >= 0);
+      const rest = body[i].filter(w => dayFromHeading(w.text) < 0);
+      body = (rest.length ? [rest] : []).concat(body.slice(i + 1));
+      break;
+    }
   }
 
-  const kept = headAt >= 0 ? rows.slice(headAt) : rows;
-  const head = headAt >= 0 ? 0 : -1;
+  /* Hebrew timetables run right to left, and if the heading row could not be
+     read there is nothing naming the columns. Rather than hand back a week
+     with Thursday's lessons filed under Sunday, the page's own language
+     decides which end to start from. */
+  const rtlPage = words.filter(w => HAS_HEBREW.test(w.text)).length * 2 >= words.length;
 
-  const cols = bandColumns(kept.flat(), pageWidth);
+  const cols = bandColumns((heading || []).concat(...body), pageWidth);
   if (cols.length < 2) return null;
 
-  const cellAt = (row, col) => row
-    .filter(w => mid(w.x0, w.x1) >= col[0] && mid(w.x0, w.x1) < col[1])
-    .sort((a, b) => a.x0 - b.x0)
-    .map(w => w.text)
-    .join(' ')
-    .trim();
+  const inside = (list, col) =>
+    list.filter(w => mid(w.x0, w.x1) >= col[0] && mid(w.x0, w.x1) < col[1]);
 
-  const table = kept.map(row => cols.map(col => cellAt(row, col)));
+  const table = body.map(row => cols.map(col => cellText(inside(row, col))));
+  const heads = cols.map(col => cellText(inside(heading || [], col)));
 
-  /* A column of times is a column where most cells look like a time. It is
-     the periods, not a day. */
+  /* A column of times is the periods, not a day. It is whichever column holds
+     the most of them, rather than one that holds enough of them: the small
+     bold print down the side of a photographed timetable is the first thing
+     the engine loses, and on a six-period grid it may come back with two. Two
+     is still plenty to tell a column of clock faces from a column of lessons,
+     and getting this wrong costs a whole day — the times become Sunday, and
+     every day after shifts along one. */
   let timeCol = -1;
+  let mostTimes = 1;
   for (let c = 0; c < cols.length; c++) {
-    const body = table.filter((_, r) => r !== head);
-    const times = body.filter(row => looksLikeTime(row[c] || '')).length;
-    if (times >= Math.max(2, body.length * 0.6)) { timeCol = c; break; }
+    const times = table.filter(row => looksLikeTime(row[c] || '')).length;
+    if (times > mostTimes) { mostTimes = times; timeCol = c; }
   }
 
   const dayCols = [];
   for (let c = 0; c < cols.length; c++) {
     if (c === timeCol) continue;
-    const js = head >= 0 ? dayFromHeading(table[head][c]) : -1;
-    dayCols.push({ c, js });
+    dayCols.push({ c, js: heading ? dayFromHeading(heads[c]) : -1 });
   }
   if (!dayCols.length) return null;
 
-  const body = table.filter((_, r) => r !== head);
   // A row with nothing in any of its day columns is a rule or a stray mark.
-  const useful = body.filter(row => dayCols.some(d => row[d.c]));
+  const useful = table.filter(row => dayCols.some(d => row[d.c]));
   if (!useful.length) return null;
 
   const week = schoolDays();
-  const periods = useful.map((row, i) => {
-    const t = timeCol >= 0 ? row[timeCol] : '';
-    return looksLikeTime(t) ? t.replace(/\s+/g, '') : tr('tt.period', { n: i + 1 });
-  });
+  const periods = useful.map((row, i) =>
+    (timeCol >= 0 && timeIn(row[timeCol])) || tr('tt.period', { n: i + 1 }));
 
   const schedule = week.map(() => Array(useful.length).fill(null));
-  dayCols.forEach((d, order) => {
+  const inOrder = heading || !rtlPage ? dayCols : dayCols.slice().reverse();
+  inOrder.forEach((d, order) => {
     // By name where the heading gave one, by position where it did not.
-    let at = d.js >= 0 ? week.findIndex(w => w.js === d.js) : order;
+    const at = d.js >= 0 ? week.findIndex(w => w.js === d.js) : order;
     if (at < 0 || at >= week.length) return;
     useful.forEach((row, p) => { schedule[at][p] = row[d.c] || null; });
   });
 
   const filled = schedule.reduce((n, row) => n + row.filter(Boolean).length, 0);
   if (filled < 3) return null;
-  return { periods, schedule };
+
+  const week2 = {
+    periods,
+    schedule,
+    filled,
+    timed: timeCol >= 0,
+    named: !!heading,
+    clock: periods.filter(looksLikeTime).length,
+  };
+  return looksLikeAWeek(week2) ? week2 : null;
+}
+
+/* The last gate, and the one that matters most.
+ *
+ * A photograph taken at an angle does not fail cleanly. The columns stop being
+ * vertical, so the gutters between them smear and close up; rows split; and
+ * what comes out the other end is not an empty result but a confident one —
+ * twenty-nine periods, four empty days and one holding every word on the page.
+ * Handing that back would be the worst thing this could do, because it looks
+ * like an answer. Three things a real week is and that one is not:
+ */
+function looksLikeAWeek(w) {
+  // A school day has a handful of periods. Not thirty.
+  if (w.periods.length < 2 || w.periods.length > 14) return false;
+
+  /* Lessons on most of the days. Two columns holding everything while three
+     stand empty is not a light week — it is what a photograph taken at an
+     angle does, where the columns lean into one another until the gutters
+     between them close up and several days become one. */
+  const busy = w.schedule.filter(day => day.some(Boolean));
+  if (busy.length < Math.min(3, w.schedule.length)) return false;
+
+  /* And the days are of roughly the same length, because school weeks are.
+     One column holding everything and the rest holding nothing is the
+     signature of columns that collapsed into each other. */
+  const counts = busy.map(day => day.filter(Boolean).length);
+  return Math.min(...counts) >= Math.max(...counts) * 0.34;
 }
 
 /* What the button does on the screen: says what is happening, because
@@ -4179,27 +4463,51 @@ async function readPhotoIntoWeek(onProgress) {
     i.onerror = () => reject(new Error('unreadable'));
     i.src = src;
   });
-  const shot = prepPhoto(img);
 
-  /* Two ways of looking at the page, in the order that works most often. A
-     timetable is a block of text laid out in a grid, so 6 reads it; where the
-     cells are far apart, or the photo caught only part of the grid, 6 gives
-     up and 11 — sparse text, find whatever is there — picks it up instead.
-     Whichever produces a week first wins, and neither is asked to guess. */
-  const modes = [6, 11];
+  /* Four ways of looking at the same photo. Two preparations, because a page
+     lit evenly and a page lit from one side need different treatment; and two
+     segmentation modes, because 6 treats the page as one block of text and
+     reads a ruled grid, while 11 looks for sparse text anywhere and finds a
+     grid whose cells are far apart. None of them is reliably best, so all of
+     them are tried and the most convincing reading is kept — except that a
+     reading good enough to be obviously right stops the rest, because four
+     passes take four times as long and most photos are read on the first. */
+  const tries = [
+    ['grey', 6], ['ink', 6], ['ink', 11], ['grey', 11],
+  ];
+  const ready = {};
+  let best = null;
+
   try {
-    for (let i = 0; i < modes.length; i++) {
-      const words = await wordsInPhoto(shot.url, modes[i],
-        (p) => onProgress((i + p) / modes.length));
-      const week = weekFromWords(words, shot.width);
-      if (week) return week;
+    for (let i = 0; i < tries.length; i++) {
+      const [how, mode] = tries[i];
+      const shot = ready[how] || (ready[how] = prepPhoto(img, how));
+      const { words, lines } = await wordsInPhoto(shot.url, mode,
+        (p) => onProgress((i + p) / tries.length));
+      const week = weekFromWords(words, shot.width, lines);
+      if (weekScore(week) > weekScore(best)) best = week;
+      if (convincing(best)) break;
     }
-    return null;
+    return best;
   } finally {
     dropOcrWorker();
   }
 }
 
+/* How much of a week a reading is. The clock and the day names count for more
+   than a handful of extra lessons, because those two are what put a lesson on
+   the right day at the right hour; a fuller grid with neither is a list of
+   words in a shape. */
+const weekScore = (w) =>
+  (!w ? -1 : w.filled + w.clock * 2 + (w.timed ? 6 : 0) + (w.named ? 6 : 0));
+
+/* A grid this full has nothing left for another pass to find, so the other
+   three are not run. It is the lessons this asks about and not the clock: a
+   period that came back as "Period 3" instead of "09:45" is one tap to correct
+   on the very next screen, and three more passes over a photo to chase it is
+   half a minute of somebody's morning. */
+const convincing = (w) =>
+  !!w && w.filled >= w.schedule.length * w.periods.length * 0.8;
 
 /** An empty week of the right shape, for anyone who would rather just type. */
 function blankWeek(rows = 6) {
